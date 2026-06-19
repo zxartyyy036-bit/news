@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>妈妈·每日简报</title>
+<style>
+  :root { --fs-ui: 19px; --fs-art: 20px; }
+  * { box-sizing:border-box; -webkit-text-size-adjust:100%; -webkit-print-color-adjust:exact; }
+  body { margin:0; font-family:-apple-system,"PingFang SC","Heiti SC",sans-serif;
+         background:#f2f4f7; color:#1f2937; line-height:1.75; }
+  .wrap { max-width:820px; margin:0 auto; background:#fff; min-height:100vh; }
+  header { background:linear-gradient(135deg,#3aab9a,#2b8fa0); color:#fff; padding:24px 20px 20px; }
+  /* 标题+日期小字: 固定大小, 不随字号滑块变 (David 2026-06-19) */
+  header h1 { margin:0; font-size:28px; font-weight:700; }
+  header .meta { margin-top:6px; font-size:15px; opacity:.92; }
+  header .sub { margin-top:3px; font-size:14px; opacity:.82; }
+
+  /* 字号滑块条 — 静止在顶部, 往下滑就消失 (David 2026-06-19: 不固定/不跟随) */
+  .fsbar { background:#fff; border-bottom:1px solid #eef0f3;
+           display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:14px; color:#888; }
+  .fsbar b { color:#3aab9a; min-width:24px; text-align:center; }
+  /* 中/英/自动 语言切换: 放字号条右边, 不挡滑块 (David 2026-06-19) */
+  .langsw { margin-left:auto; display:inline-flex; gap:4px; flex-shrink:0; }
+  .langbtn { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
+    padding:5px 10px; border-radius:14px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .langbtn.on { background:#3aab9a; color:#fff; }
+  .langbtn:active { transform:scale(.94); }
+  /* 文章里的字号条: 下移到固定返回键之下, 不被挡 (David 2026-06-19) */
+  .fsbar-art { margin-top:46px; }
+  /* 大圆点滑块 — 触摸范围做大, 一点就中 (David 2026-06-19: 之前太小点不准) */
+  .fsbar input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:34px;
+    background:transparent; cursor:pointer; }
+  .fsbar input[type=range]::-webkit-slider-runnable-track { height:8px; border-radius:4px; background:#d8e8e4; }
+  .fsbar input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
+    width:30px; height:30px; margin-top:-11px; border-radius:50%; background:#3aab9a;
+    border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+  .fsbar input[type=range]::-moz-range-track { height:8px; border-radius:4px; background:#d8e8e4; }
+  .fsbar input[type=range]::-moz-range-thumb { width:28px; height:28px; border-radius:50%;
+    background:#3aab9a; border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+
+  /* 列表页 */
+  #list { padding:6px 16px 30px; }
+  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:22px 0 6px; padding-left:10px;
+              border-left:5px solid currentColor; }
+  .card { background:#fff; border-bottom:1px solid #eef0f3; padding:16px 4px; cursor:pointer; }
+  .card:active { background:#f7f9fb; }
+  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; }
+  .card-lead { font-size:var(--fs-ui); color:#555; margin-top:7px; line-height:1.7; }
+  .card-more { font-size:calc(var(--fs-ui) - 4px); margin-top:8px; font-weight:600; }
+
+  /* 详情页 — 正常文档流, 用原生滚动+原生半透明滚动条 (David 2026-06-19 v3: 砍掉自定义手势, iOS最稳) */
+  .article { max-width:820px; margin:0 auto; background:#fff; min-height:100vh;
+    padding:8px 18px 40px; }
+  .article.slidein { animation:slidein .26s cubic-bezier(.4,0,.2,1); }
+  @keyframes slidein { from { transform:translateX(34px); opacity:.35; } to { transform:none; opacity:1; } }
+  .back { background:#eef2f5; border:none; color:#555; font-size:15px; padding:8px 16px;
+          border-radius:20px; cursor:pointer; margin:8px 0; }
+  .back.btm { margin-top:24px; }
+  .atag { display:inline-block; font-size:calc(var(--fs-art) - 4px); font-weight:700;
+          padding:3px 12px; border-radius:6px; margin:10px 0 6px; }
+  .atitle { font-size:calc(var(--fs-art) + 9px); line-height:1.4; color:#1a1a1a; margin:6px 0 14px; }
+  .alead { font-size:calc(var(--fs-art) + 1px); background:#fff8e8; border-left:5px solid #f0c14b;
+           padding:13px 15px; border-radius:8px; color:#444; line-height:1.75; }
+  .abul { padding-left:26px; margin:14px 0; }
+  .abul li { font-size:var(--fs-art); color:#333; margin:7px 0; }
+  .abody p { font-size:calc(var(--fs-art) + 1px); color:#222; margin:13px 0; line-height:1.85; }
+  .sources { margin-top:18px; font-size:14px; color:#999; }
+  .src { display:inline-block; margin:4px 5px 4px 0; padding:4px 11px; background:#eef2f7;
+         border-radius:20px; color:#2b8fa0; text-decoration:none; font-size:14px; }
+  .stance { display:inline-block; margin-left:5px; padding:1px 7px; border-radius:8px; color:#fff; font-size:12px; }
+
+  footer { padding:20px 18px 44px; font-size:13px; color:#888; border-top:1px solid #eef0f3; }
+  footer .glo { background:#f6f8fa; border-radius:10px; padding:13px 15px; line-height:1.85; }
+  @media (min-width:768px) {
+    .wrap { margin:22px auto; border-radius:16px; box-shadow:0 4px 26px rgba(0,0,0,.07); overflow:hidden; }
+  }
+  /* —— 固定返回键: 看文章滚到哪都在左上角 (David 2026-06-19) —— */
+  .backfix { position:fixed; top:12px; left:12px; z-index:200; display:none;
+    background:rgba(255,255,255,.94); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border:1px solid #d8e0e6; color:#2b8fa0; font-size:15px; font-weight:700;
+    padding:9px 17px; border-radius:22px; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.14); }
+  .backfix:active { transform:scale(.96); }
+</style>
+</head>
+<body>
+<button class="backfix" id="backfix" onclick="home()">‹ 返回</button>
+<div class="wrap">
+  <header>
+    <h1>妈妈·每日简报</h1>
+    <div class="meta">2026年6月19日</div>
+    
+  </header>
+  <div class="fsbar" id="fsbar">字号 <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b>px
+    <span class="langsw" id="langsw">
+      <button class="langbtn" data-lang="zh" onclick="setLang('zh')">中</button>
+      <button class="langbtn" data-lang="en" onclick="setLang('en')">ENG</button>
+      <button class="langbtn" data-lang="auto" onclick="setLang('auto')">自动</button>
+    </span>
+  </div>
+
+  <div id="list">
+    <div class="seclabel" data-sec="0" style="color:#4a90d9">国际要闻</div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(0)">
+        <div class="card-hl">美伊签署谅解备忘录正式结束战争，霍尔木兹海峡恢复通航</div>
+        <div class="card-lead">美国与伊朗于2026年6月19日在瑞士日内瓦正式签署谅解备忘录（MOU），标志着自2月28日美以对伊朗发动军事打击以来超过100天战争的结束。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(1)">
+        <div class="card-hl">G7峰会在法国埃维昂闭幕，发表地缘政治及经济联合声明</div>
+        <div class="card-lead">2026年G7领导人峰会于6月16-17日在法国埃维昂举行，法国总统马克龙主持。峰会讨论了国际和平与安全、全球经济、人工智能治理、气候变化等议题。联合声明欢迎6月11日全球融合增长峰会（含中国参与）。加拿大总理卡尼在峰会期间对记者发言。巴基斯坦外长证实巴总理取消瑞士之行。俄方称扎波罗热核电站连遭日均50次以上袭击；俄外交部警告将对欧盟新一轮制裁采取强硬反制。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(2)">
+        <div class="card-hl">2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线</div>
+        <div class="card-lead">2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="1" style="color:#3aab9a">财经</div>
+      <div class="card" data-lang="zh" data-sec="1" onclick="go(3)">
+        <div class="card-hl">加拿大理财与海外生活：卡尼出席G7，加央行利率成关注焦点；中国一线城市楼市释放积极信号</div>
+        <div class="card-lead">加拿大：总理卡尼（前加拿大央行和英国央行行长）出席G7埃维昂峰会。卡尼经济专业背景使市场高度关注加央行货币政策走向。此前加央行跟随美联储路径，但国内房地产压力可能影响后续利率决策。中国楼市：一线城市多重利好释放积极信号（首付比例调整、公积金贷款优化等）。618购物节：绿色家电、智能家居、国潮品牌亮眼。海南自贸港封关半年：累计出入境165.4万人次。成品油价6月18日24时起汽柴油每吨分别下调515/495元。中欧班列统一品牌10年年开行量增长10.8倍。东航开通上海-苏黎世直飞。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="2" style="color:#e6943a">体育</div>
+      <div class="card" data-lang="en" data-sec="2" onclick="go(4)">
+        <div class="card-hl">US Open 2026 Day 1: J. Spaun Leads at -1; Only One Player Under Par at Shinnecock Hills</div>
+        <div class="card-lead">第126届美国公开赛6月18-21日在纽约州南安普敦Shinnecock Hills高尔夫俱乐部举行。首轮领先榜（PGA TOUR官方）：1. J. Spaun(美国) -1 (FedExCup 750分)；2. R. MacIntyre(苏格兰) +1 (500分)；3. V. Hovland(挪威) +2 (350分)；T4. C. Young(美国) +3 (300分)，另有数人并列。仅Spaun一人首轮低于标准杆。此前5月PGA锦标赛Aaron Rai夺冠（3杆优势击败Jon Rahm和Alex Smalley）。</div>
+        <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
+      </div>
+  </div>
+  
+      <div class="article" id="a0" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">美伊签署谅解备忘录正式结束战争，霍尔木兹海峡恢复通航</h1>
+        <p class="alead" >美国与伊朗于2026年6月19日在瑞士日内瓦正式签署谅解备忘录（MOU），标志着自2月28日美以对伊朗发动军事打击以来超过100天战争的结束。
+
+协议要点（新华网、Al Jazeera）：
+- 立即永久停止所有战线军事行动，包括黎巴嫩
+- 美国解除对伊朗海上封锁
+- 伊朗开放霍尔木兹海峡，60天内过境船只免费通行
+- 60天谈判期自6月18日起算
+- 释放240亿美元冻结伊朗资产
+- 暂停石油销售制裁
+- 导弹项目及对抵抗组织支持议题移出谈判议程
+- 核问题最终协议在60天内谈判
+
+欧盟表示解除对伊朗制裁时机未到。以色列总理称以军将继续驻留黎巴嫩南部。黎巴嫩总统称本轮冲突致黎近18%国土受损。</p>
+        <ul class='abul'><li>6月19日在瑞士日内瓦正式签署谅解备忘录（MOU），结束超过100天的战争状态</li><li>协议14点：立即永久停火（含黎巴嫩）、解除对伊朗海上封锁、恢复霍尔木兹海峡自由通航</li><li>60天谈判期即日起算，美副总统万斯领导美方团队；伊朗承诺60天内霍尔木兹海峡过境船只免费通行</li><li>释放240亿美元冻结伊朗资产，暂停石油销售制裁；导弹及抵抗组织议题移出谈判议程</li><li>巴基斯坦和卡塔尔任调解方；哈梅内伊持不同意见但批准了备忘录安排</li></ul>
+        <div class="abody"><p>美国与伊朗于2026年6月19日在瑞士日内瓦正式签署谅解备忘录（MOU），标志着自2月28日美以对伊朗发动军事打击以来超过100天战争的结束。</p><p>协议要点（新华网、Al Jazeera）：</p><p>- 立即永久停止所有战线军事行动，包括黎巴嫩</p><p>- 美国解除对伊朗海上封锁</p><p>- 伊朗开放霍尔木兹海峡，60天内过境船只免费通行</p><p>- 60天谈判期自6月18日起算</p><p>- 释放240亿美元冻结伊朗资产</p><p>- 暂停石油销售制裁</p><p>- 导弹项目及对抵抗组织支持议题移出谈判议程</p><p>- 核问题最终协议在60天内谈判</p><p>欧盟表示解除对伊朗制裁时机未到。以色列总理称以军将继续驻留黎巴嫩南部。黎巴嫩总统称本轮冲突致黎近18%国土受损。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/b6b6f32c959349798fe32fb856dc4b1d/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.aljazeera.com/news/2026/6/15/us-iran-to-sign-a-peace-deal-on-friday-what-we-know-so-far" target="_blank" rel="noopener">Al Jazeera</a> <a class="src" href="https://www.cnn.com/2026/06/17/world/live-news/iran-war-g7-summit" target="_blank" rel="noopener">CNN<span class="stance" style="background:#5b8def">偏左</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a1" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">G7峰会在法国埃维昂闭幕，发表地缘政治及经济联合声明</h1>
+        <p class="alead" >2026年G7领导人峰会于6月16-17日在法国埃维昂举行，法国总统马克龙主持。峰会讨论了国际和平与安全、全球经济、人工智能治理、气候变化等议题。联合声明欢迎6月11日全球融合增长峰会（含中国参与）。加拿大总理卡尼在峰会期间对记者发言。巴基斯坦外长证实巴总理取消瑞士之行。俄方称扎波罗热核电站连遭日均50次以上袭击；俄外交部警告将对欧盟新一轮制裁采取强硬反制。</p>
+        <ul class='abul'><li>2026年G7领导人峰会于6月16-17日在法国埃维昂举行，马克龙主持</li><li>联合声明涉及国际和平安全、全球经济、AI治理；欢迎含中国参与的全球融合增长峰会</li><li>加拿大总理卡尼出席峰会并举行记者会；俄方称扎波罗热核电站连遭日均50次以上袭击</li></ul>
+        <div class="abody"><p>2026年G7领导人峰会于6月16-17日在法国埃维昂举行，法国总统马克龙主持。峰会讨论了国际和平与安全、全球经济、人工智能治理、气候变化等议题。联合声明欢迎6月11日全球融合增长峰会（含中国参与）。加拿大总理卡尼在峰会期间对记者发言。巴基斯坦外长证实巴总理取消瑞士之行。俄方称扎波罗热核电站连遭日均50次以上袭击；俄外交部警告将对欧盟新一轮制裁采取强硬反制。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.consilium.europa.eu/en/press/press-releases/2026/06/17/g7-leaders-joint-statements-evian-france-16-17-june-2026/" target="_blank" rel="noopener">欧盟理事会<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.elysee.fr/en/G7evian/2026/06/17/g7-leaders-statement-on-geopolitical-issues" target="_blank" rel="noopener">爱丽舍宫<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.news.cn/20260619/4412551fe4be46b6b832aa92421c25a4/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a2" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线</h1>
+        <p class="alead" >2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。
+
+6月19日焦点战报（新华网体育、ESPN）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。
+
+新华网小组赛首轮盘点：首次三国合办在组织协调、场馆设施、球迷跨国流动等方面接受检验。中亚「新军」崛起引关注。</p>
+        <ul class='abul'><li>2026 FIFA世界杯小组赛激战中（6月11日开幕，美加墨三国合办，48队参赛创纪录）</li><li>6月19日：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国小组出线</li><li>英格兰4:2克罗地亚；葡萄牙1:1刚果（金）；加纳1:0巴拿马；乌兹别克斯坦1:3哥伦比亚</li><li>新华网发布小组赛首轮盘点：首次三国合办在组织/场馆/球迷跨国流动上验出真章</li></ul>
+        <div class="abody"><p>2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。</p><p>6月19日焦点战报（新华网体育、ESPN）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。</p><p>新华网小组赛首轮盘点：首次三国合办在组织协调、场馆设施、球迷跨国流动等方面接受检验。中亚「新军」崛起引关注。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/sports/20260619/9b614b3b1aa24e5a8b2b706158dbe877/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.espn.com/soccer/story/_/id/48939282/2026-fifa-world-cup-fixtures-results-match-schedule-group-stage-knockout-rounds-bracket" target="_blank" rel="noopener">ESPN</a> <a class="src" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures" target="_blank" rel="noopener">FIFA</a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a3" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">财经</div>
+        <h1 class="atitle">加拿大理财与海外生活：卡尼出席G7，加央行利率成关注焦点；中国一线城市楼市释放积极信号</h1>
+        <p class="alead" >加拿大：总理卡尼（前加拿大央行和英国央行行长）出席G7埃维昂峰会。卡尼经济专业背景使市场高度关注加央行货币政策走向。此前加央行跟随美联储路径，但国内房地产压力可能影响后续利率决策。中国楼市：一线城市多重利好释放积极信号（首付比例调整、公积金贷款优化等）。618购物节：绿色家电、智能家居、国潮品牌亮眼。海南自贸港封关半年：累计出入境165.4万人次。成品油价6月18日24时起汽柴油每吨分别下调515/495元。中欧班列统一品牌10年年开行量增长10.8倍。东航开通上海-苏黎世直飞。</p>
+        <ul class='abul'><li>加拿大总理卡尼（前央行行长）出席G7，市场高度关注加央行后续货币政策</li><li>中国一线城市楼市在多重利好下释放积极信号；618购物节折射新消费活力</li><li>海南自贸港封关半年出入境165.4万人次；成品油价大幅下调利好出行</li><li>中欧班列统一品牌10年：年开行量增长10.8倍；东航开通上海-苏黎世直飞航线</li></ul>
+        <div class="abody"><p>加拿大：总理卡尼（前加拿大央行和英国央行行长）出席G7埃维昂峰会。卡尼经济专业背景使市场高度关注加央行货币政策走向。此前加央行跟随美联储路径，但国内房地产压力可能影响后续利率决策。中国楼市：一线城市多重利好释放积极信号（首付比例调整、公积金贷款优化等）。618购物节：绿色家电、智能家居、国潮品牌亮眼。海南自贸港封关半年：累计出入境165.4万人次。成品油价6月18日24时起汽柴油每吨分别下调515/495元。中欧班列统一品牌10年年开行量增长10.8倍。东航开通上海-苏黎世直飞。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/fortune/20260619/c11a6d4d70ef4bd68e30c0093e5f6d92/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.news.cn/20260619/24e4d841b8784f01a0ec419124fe89eb/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.news.cn/20260619/42f6d57181d84ed695d56eed7a8ad5c1/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="http://www.xinhuanet.com/fortune/20260618/3ed0ee69e05e40bdaf25ad173ba0c640/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.news.cn/fortune/20260619/2c61bebd5eca4cd79b459ce0b54dc15a/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a4" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">体育</div>
+        <h1 class="atitle">US Open 2026 Day 1: J. Spaun Leads at -1; Only One Player Under Par at Shinnecock Hills</h1>
+        <p class="alead" >第126届美国公开赛6月18-21日在纽约州南安普敦Shinnecock Hills高尔夫俱乐部举行。首轮领先榜（PGA TOUR官方）：1. J. Spaun(美国) -1 (FedExCup 750分)；2. R. MacIntyre(苏格兰) +1 (500分)；3. V. Hovland(挪威) +2 (350分)；T4. C. Young(美国) +3 (300分)，另有数人并列。仅Spaun一人首轮低于标准杆。此前5月PGA锦标赛Aaron Rai夺冠（3杆优势击败Jon Rahm和Alex Smalley）。</p>
+        <ul class='abul'><li>第126届美国公开赛6月18-21日在纽约州Shinnecock Hills举行（球场第6次承办大满贯）</li><li>首轮战罢：J. Spaun -1单独领先；R. MacIntyre +1第二；V. Hovland +2第三</li><li>C. Young +3 (T4)；仅Spaun一人打出低于标准杆，Shinnecock难度充分体现</li><li>前一大满贯回顾：5月PGA锦标赛Aaron Rai（英格兰）在Aronimink夺生涯首冠</li></ul>
+        <div class="abody"><p>第126届美国公开赛6月18-21日在纽约州南安普敦Shinnecock Hills高尔夫俱乐部举行。首轮领先榜（PGA TOUR官方）：1. J. Spaun(美国) -1 (FedExCup 750分)；2. R. MacIntyre(苏格兰) +1 (500分)；3. V. Hovland(挪威) +2 (350分)；T4. C. Young(美国) +3 (300分)，另有数人并列。仅Spaun一人首轮低于标准杆。此前5月PGA锦标赛Aaron Rai夺冠（3杆优势击败Jon Rahm和Alex Smalley）。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.pgatour.com/tournaments/2026/u.s-open/R2026026/past-results" target="_blank" rel="noopener">PGA TOUR</a> <a class="src" href="https://www.usopen.com/" target="_blank" rel="noopener">US Open</a> <a class="src" href="https://www.pgachampionship.com/" target="_blank" rel="noopener">PGA Championship</a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+
+  <footer><div class="glo">📖 媒体立场说明：<b>偏左</b>=倾向自由派（如纽约时报、CNN）；<b>偏右</b>=倾向保守派（如福克斯新闻）；<b>中立</b>=力求平衡（如路透社、BBC）。<b>体制内</b>=国有或国家投资媒体（央视、新华社）；<b>体制外</b>=商业媒体（财新、界面）。标注立场是帮您对照多方、自己判断，不代表谁更可信。</div></footer>
+</div>
+<script>
+  // 两套独立字号: 主界面UI (--fs-ui) 和 文章阅读 (--fs-art), 各自记忆 (David 2026-06-19)
+  var savedUi = localStorage.getItem('himi_fs_ui');
+  if(savedUi){ fsUiApply(savedUi); document.getElementById('fsr').value=savedUi; }
+  var savedArt = localStorage.getItem('himi_fs_art');
+  if(savedArt){ fsArtApply(savedArt); }
+  function fs(v){ fsUiApply(v); localStorage.setItem('himi_fs_ui', v); }
+  function fsUiApply(v){ document.documentElement.style.setProperty('--fs-ui', v+'px'); document.getElementById('fsv').textContent=v; }
+  function fsArt(v){ fsArtApply(v); localStorage.setItem('himi_fs_art', v); }
+  function fsArtApply(v){
+    document.documentElement.style.setProperty('--fs-art', v+'px');
+    var sl=document.getElementsByClassName('fsr-art'); for(var i=0;i<sl.length;i++){ sl[i].value=v; }
+    var nb=document.getElementsByClassName('fsv-art'); for(var j=0;j<nb.length;j++){ nb[j].textContent=v; }
+  }
+  // —— 中/英/自动 语言切换 (David 2026-06-19): 中=只看中文原文, ENG=只看英文原文, 自动=各显其原文语言(全显示) ——
+  var savedLang = localStorage.getItem('himi_lang') || 'zh';   // 默认中文
+  function setLang(L){
+    localStorage.setItem('himi_lang', L);
+    // 按钮高亮
+    var btns=document.getElementsByClassName('langbtn');
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i].getAttribute('data-lang')===L); }
+    // 过滤卡片: 自动=全显示; 中/英=只显示对应原文语言
+    var cards=document.querySelectorAll('#list .card');
+    for(var j=0;j<cards.length;j++){
+      var cl=cards[j].getAttribute('data-lang');
+      cards[j].style.display=(L==='auto'||cl===L)?'':'none';
+    }
+    // 板块小标: 本板块过滤后若一条新闻都不剩, 就隐藏该板块标题
+    var labels=document.querySelectorAll('#list .seclabel');
+    for(var k=0;k<labels.length;k++){
+      var si=labels[k].getAttribute('data-sec');
+      var any=document.querySelectorAll('#list .card[data-sec="'+si+'"]');
+      var visible=0;
+      for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') visible++; }
+      labels[k].style.display=visible?'':'none';
+    }
+    // 列表空提示
+    var emptyId='langempty', old=document.getElementById(emptyId);
+    var listVisible=document.querySelectorAll('#list .card:not([style*="display: none"])').length;
+    if(old) old.remove();
+    if(listVisible===0){
+      var tip=document.createElement('div'); tip.id=emptyId;
+      tip.style.cssText='padding:40px 16px;text-align:center;color:#aaa;font-size:15px;';
+      tip.textContent=(L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻';
+      document.getElementById('list').appendChild(tip);
+    }
+  }
+  setLang(savedLang);   // 进页面应用记忆的语言
+  // —— iOS最稳: 用浏览器原生历史导航, 不碰任何自定义触摸手势 (David 2026-06-19 v3) ——
+  // go() 用 history.pushState 进文章; 系统自带的"左边缘右滑返回"=浏览器后退=自动触发home, 原生苹果动画
+  // 文章是正常文档流 → iOS原生半透明滚动条自动出现; 返回键是纯click最顶层 → 永不被吃
+  var listScroll=0;
+  function showArticle(i){
+    var a=document.getElementById('a'+i); if(!a) return;
+    listScroll=window.scrollY||window.pageYOffset||0;
+    document.getElementById('list').style.display='none';
+    document.getElementById('fsbar').style.display='none';
+    document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
+    a.style.display='block';
+    a.classList.remove('slidein'); void a.offsetWidth; a.classList.add('slidein');  // 重触发滑入动画
+    document.getElementById('backfix').style.display='block';
+    window.scrollTo(0,0);
+  }
+  function showList(){
+    document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
+    document.getElementById('list').style.display='block';
+    document.getElementById('fsbar').style.display='';
+    document.getElementById('backfix').style.display='none';
+    window.scrollTo(0,listScroll);   // 返回列表原位置, 不跳顶
+  }
+  function go(i){
+    history.pushState({art:i}, '', '#a'+i);   // 压一条历史 → 边缘滑/后退键都能弹回
+    showArticle(i);
+  }
+  function home(){
+    if(location.hash){ history.back(); }       // 触发popstate → showList; 与边缘滑返回同一条路径
+    else { showList(); }
+  }
+  // 浏览器后退(含iOS边缘右滑返回手势) → 回列表
+  window.addEventListener('popstate', function(e){
+    if(e.state && typeof e.state.art!=='undefined'){ showArticle(e.state.art); }
+    else { showList(); }
+  });
+</script>
+</body>
+</html>
