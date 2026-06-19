@@ -26,11 +26,25 @@
     background:#f6f9fa; border-bottom:1px solid #eef0f3; font-size:14px; color:#667; }
   .datenav .dn-label { font-weight:600; flex-shrink:0; color:#555; }
   .datenav .dn-sel { font-size:14px; color:#333; border:1px solid #d8e0e6; border-radius:9px;
-    padding:5px 9px; background:#fff; max-width:180px; -webkit-appearance:none; appearance:none; }
-  .datenav .dn-all { margin-left:auto; flex-shrink:0; color:#2b8fa0; font-weight:700;
-    text-decoration:none; background:#e7f7f4; padding:5px 13px; border-radius:14px;
-    -webkit-tap-highlight-color:transparent; }
+    padding:5px 9px; background:#fff; max-width:150px; -webkit-appearance:none; appearance:none; }
+  /* 右侧按钮组: 📚全部 + ⭐我的收藏 (David 2026-06-19: 两个独立按钮, 跟搜索框分开) */
+  .datenav .dn-right { margin-left:auto; display:inline-flex; gap:7px; flex-shrink:0; }
+  .datenav .dn-all, .datenav .dn-fav { flex-shrink:0; font-size:13px; font-weight:700;
+    padding:5px 12px; border-radius:14px; cursor:pointer; border:none;
+    -webkit-tap-highlight-color:transparent; white-space:nowrap; }
+  .datenav .dn-all { color:#2b8fa0; text-decoration:none; background:#e7f7f4; }
   .datenav .dn-all:active { background:#cdeee7; }
+  .datenav .dn-fav { color:#b8860b; background:#fff5db; }
+  .datenav .dn-fav.on { color:#fff; background:#f5b301; }
+  .datenav .dn-fav:active { transform:scale(.95); }
+
+  /* 搜索框: 每个profile列表页, 关键词搜本页新闻 (David 2026-06-19) */
+  .searchbar { padding:12px 14px 4px; background:#f2f4f7; border-bottom:none;
+    display:flex; align-items:center; gap:8px; }
+  .searchbox { flex:1; min-width:0; box-sizing:border-box; font-size:15px; height:42px; padding:0 16px;
+    border:1px solid #e2e8ec; border-radius:21px; background:#fff; color:#333;
+    box-shadow:0 1px 2px rgba(0,0,0,.04); -webkit-appearance:none; appearance:none; outline:none; }
+  .searchbox:focus { border-color:#3aab9a; box-shadow:0 0 0 3px rgba(58,171,154,.12); }
 
   /* 字号滑块条 — 静止在顶部, 往下滑就消失 (David 2026-06-19: 不固定/不跟随) */
   .fsbar { background:#fff; border-bottom:1px solid #eef0f3;
@@ -57,11 +71,19 @@
     background:#3aab9a; border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
 
   /* 列表页 */
-  #list { padding:6px 16px 30px; }
-  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:22px 0 6px; padding-left:10px;
+  #list { padding:10px 14px 30px; background:#f2f4f7; }
+  /* 按天分隔线: 最新一天在顶, 往下滚=往回翻 (David 2026-06-19) */
+  .daydivider { display:flex; align-items:center; text-align:center; margin:26px 0 10px;
+    color:#2b8fa0; font-size:15px; font-weight:700; }
+  .daydivider::before, .daydivider::after { content:""; flex:1; height:1px; background:#dde6ea; }
+  .daydivider span { padding:4px 14px; background:#e7f7f4; border-radius:14px; margin:0 10px; }
+  .daydivider:first-child { margin-top:8px; }
+  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:20px 0 8px; padding-left:10px;
               border-left:5px solid currentColor; }
-  .card { background:#fff; border-bottom:1px solid #eef0f3; padding:16px 4px; cursor:pointer; }
-  .card:active { background:#f7f9fb; }
+  /* 独立白卡片 + 留白 + 圆角 + 轻阴影 — Apple式呼吸感 (David 2026-06-19: 弃0间距+1px灰线) */
+  .card { background:#fff; border-radius:14px; padding:16px 16px; margin:0 0 12px; cursor:pointer;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); transition:transform .12s, box-shadow .12s; }
+  .card:active { transform:scale(.985); box-shadow:0 2px 8px rgba(0,0,0,.10); background:#fcfdfe; }
   /* 每条story左上角发布日期小字 (David 2026-06-19) */
   .card-date { font-size:12px; color:#aaa; margin-bottom:4px; font-weight:500; }
   .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; }
@@ -79,6 +101,29 @@
   .atag { display:inline-block; font-size:calc(var(--fs-art) - 4px); font-weight:700;
           padding:3px 12px; border-radius:6px; margin:10px 0 6px; }
   .atitle { font-size:calc(var(--fs-art) + 9px); line-height:1.4; color:#1a1a1a; margin:6px 0 14px; }
+  /* Story详情页: 日期标在主标题下方(新闻惯例: kicker→标题→日期→正文) (David 2026-06-19) */
+  .adate { font-size:14px; color:#999; margin:-8px 0 12px; }
+
+  /* —— 收藏功能 (David 2026-06-19): 卡片右上角空心☆, 点亮金黄实心★; 本地存储 —— */
+  .card { position:relative; }
+  .favstar { position:absolute; top:10px; right:8px; z-index:5; background:none; border:none;
+    font-size:24px; line-height:1; color:#ccc; cursor:pointer; padding:4px 6px;
+    -webkit-tap-highlight-color:transparent; transition:transform .12s; }
+  .favstar:active { transform:scale(1.25); }
+  .favstar.on { color:#f5b301; text-shadow:0 0 8px rgba(245,179,1,.6); }
+  /* 详情页"☆收藏"按钮 */
+  .favbtn { display:inline-flex; align-items:center; gap:5px; background:#fff8e8; border:1px solid #f0d896;
+    color:#b8860b; font-size:14px; font-weight:600; padding:6px 14px; border-radius:18px;
+    cursor:pointer; margin:2px 0 12px; -webkit-tap-highlight-color:transparent; }
+  .favbtn:active { transform:scale(.96); }
+  .favbtn.on { background:#f5b301; border-color:#f5b301; color:#fff; }
+  .favbtn.on .favbtn-ic { }
+  /* 顶部"只看收藏"切换 */
+  .favtoggle { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
+    padding:5px 11px; border-radius:14px; cursor:pointer; flex-shrink:0; margin-left:8px;
+    -webkit-tap-highlight-color:transparent; }
+  .favtoggle.on { background:#f5b301; color:#fff; }
+  .favtoggle:active { transform:scale(.94); }
   .alead { font-size:calc(var(--fs-art) + 1px); background:#fff8e8; border-left:5px solid #f0c14b;
            padding:13px 15px; border-radius:8px; color:#444; line-height:1.75; }
   .abul { padding-left:26px; margin:14px 0; }
@@ -106,14 +151,14 @@
 <body>
 <button class="backfix" id="backfix" onclick="home()">‹ 返回</button>
 <div class="wrap">
-  <header>
-    <a class="homebtn" href="index.html" title="返回家庭简报主页" aria-label="主页">
+  <header id="pagehead">
+    <a class="homebtn" id="homebtn" href="index.html" title="返回家庭简报主页" aria-label="主页">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg>
     </a>
     <h1>小姨·每日简报</h1>
-    
+    <div class="sub">共 25 条 · 最新 6月19日</div>
   </header>
-  <div class="datenav" id="datenav"><span class="dn-label">📅</span><select class="dn-sel" onchange="if(this.value)location.href=this.value"><option value="xiaoyi.html" selected>6月19日</option><option value="xiaoyi_20260618.html">6月18日</option></select><a class="dn-all" href="all.html">📚 全部 ›</a></div>
+  <div class="datenav" id="datenav"><span class="dn-label">📅 跳到</span><select class="dn-sel" onchange="jumpDay(this.value)"><option value="__top__">全部 · 回到最新</option><optgroup label="2026年6月"><option value="20260619" selected>6月19日 周五</option><option value="20260618">6月18日 周四</option></optgroup></select><span class="dn-right"><a class="dn-all" href="all.html">📚 全部</a><button class="dn-fav" id="favtoggle" onclick="toggleFavView()">☆ 我的收藏</button></span></div>
   <div class="fsbar" id="fsbar"><span class="fslabel">字号</span> <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b><span class="fsunit">px</span>
     <span class="langsw" id="langsw">
       <button class="langbtn" data-lang="zh" onclick="setLang('zh')">中</button>
@@ -121,68 +166,318 @@
       <button class="langbtn" data-lang="auto" onclick="setLang('auto')">自动</button>
     </span>
   </div>
+  <div class="searchbar" id="searchbar">
+    <input type="search" id="searchbox" class="searchbox" placeholder="🔍 搜索新闻关键词" oninput="doSearch(this.value)" autocomplete="off">
+  </div>
 
   <div id="list">
-    <div class="seclabel" data-sec="0" style="color:#4a90d9">国际要闻</div>
-      <div class="card" data-lang="zh" data-sec="0" onclick="go(0)">
+    <div class="daydivider" id="day_20260619" data-day="20260619"><span>6月19日 周五</span></div><div class="seclabel" data-sec="0" data-day="20260619" style="color:#4a90d9">国际要闻</div>
+      <div class="card" data-lang="zh" data-sec="0" data-day="20260619" data-fav="feb13623e146f" data-search="2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线；小组赛激战正酣 2026年fifa世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。
+
+6月19日焦点战报（新华网体育、espn）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。
+
+新华网小组赛首轮盘点：首次三国合办在组织协调、场馆设施、球迷跨国流动等方面接受检验。中亚「新军」崛起引关注。 2026年fifa世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。
+
+6月19日焦点战报（新华网体育、espn）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。
+
+新华网小组赛首轮盘点：首次三国合办在组织协调、场馆设施、球迷跨国流动等方面接受检验。中亚「新军」崛起引关注。 2026 fifa世界杯小组赛激战中（6月11日开幕，美加墨三国合办，48队参赛创纪录） 6月19日：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国小组出线 英格兰4:2克罗地亚；葡萄牙1:1刚果（金）；加纳1:0巴拿马；乌兹别克斯坦1:3哥伦比亚 新华网发布小组赛首轮盘点：首次三国合办在组织/场馆/球迷跨国流动上验出真章" onclick="go(0)">
+        <button class="favstar" data-fav="feb13623e146f" onclick="toggleFav(event,'feb13623e146f')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06-19</div>
         <div class="card-hl">2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线；小组赛激战正酣</div>
         <div class="card-lead">2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。</div>
         <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="0" onclick="go(1)">
-        <div class="card-date">2026-06-03</div>
-        <div class="card-hl">美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议</div>
-        <div class="card-lead">美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</div>
-        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
-      </div>
-      <div class="card" data-lang="zh" data-sec="0" onclick="go(2)">
+      <div class="card" data-lang="zh" data-sec="0" data-day="20260619" data-fav="fda368a49fb55" data-search="g7反对单方面改变台海现状；两岸海警在南海普拉塔斯岛附近再次对峙 g7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在x平台表示感谢，台北时报以头条报道。中国外交部尚未就g7台海表述做单独回应（截至6月19日）。
+
+两岸海警对峙（reuters 6月5日）：台湾和中国海警在南海普拉塔斯岛（东沙群岛）附近发生新一轮紧张对峙，延续近期双方在渔业执法、海域管辖权上的摩擦模式。台湾正推动本土无人机产业发展以应对，但面临立法程序挫折（aei 6月12日报告）。 g7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在x平台表示感谢，台北时报以头条报道。中国外交部尚未就g7台海表述做单独回应（截至6月19日）。
+
+两岸海警对峙（reuters 6月5日）：台湾和中国海警在南海普拉塔斯岛（东沙群岛）附近发生新一轮紧张对峙，延续近期双方在渔业执法、海域管辖权上的摩擦模式。台湾正推动本土无人机产业发展以应对，但面临立法程序挫折（aei 6月12日报告）。 g7联合声明（6月17日埃维昂）重申反对任何单方面以武力或胁迫改变台海/东海/南海现状 台湾方面表示欢迎g7声明；中方尚未就g7台海表述单独回应 reuters 6月5日报道：两岸海警在南海普拉塔斯岛（东沙群岛）附近再次紧张对峙 台湾行政院长卓荣泰5月19日称中国军事行动是「台湾面临的主要安全挑战」" onclick="go(1)">
+        <button class="favstar" data-fav="fda368a49fb55" onclick="toggleFav(event,'fda368a49fb55')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06-18</div>
         <div class="card-hl">G7反对单方面改变台海现状；两岸海警在南海普拉塔斯岛附近再次对峙</div>
         <div class="card-lead">G7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在X平台表示感谢，台北时报以头条报道。中国外交部尚未就G7台海表述做单独回应（截至6月19日）。</div>
         <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="1" style="color:#3aab9a">政治</div>
-      <div class="card" data-lang="zh" data-sec="1" onclick="go(3)">
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" data-day="20260619" data-fav="f77f3728ed752" data-search="美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议 美国众议院以215:208通过伊朗战争权力决议(h.con.res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。bbc报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署mou的时间线相交织。pbs newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。 美国众议院以215:208通过伊朗战争权力决议(h.con.res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。bbc报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署mou的时间线相交织。pbs newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。 美国众议院6月3日以215:208表决通过伊朗战争权力决议(h.con.res.38)，4名共和党人倒戈支持 决议要求终止美军对伊朗的敌对行动，系对特朗普的重大象征性谴责（bbc称「delivers rebuke to trump」） 决议在参议院前景不明；美伊6月19日已签mou，但决议反映国会反战声音 walkinshaw众议员2月28日（开战当日）即提出该决议，历经四次尝试终获通过" onclick="go(2)">
+        <button class="favstar" data-fav="f77f3728ed752" onclick="toggleFav(event,'f77f3728ed752')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-03</div>
+        <div class="card-hl">美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议</div>
+        <div class="card-lead">美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="1" data-day="20260619" style="color:#3aab9a">政治</div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="20260619" data-fav="f23eb4c0e16f1" data-search="习近平给新华社老党员张连生回信：传承红色基因在新征程上书写优异答卷 6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。 6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。 习近平6月18日给新华社百岁老党员张连生回信，强调传承红色基因、不忘初心 新华社配发系列报道：学习快评、纪录片《四大队》、时代人物专题 6月19日发布「让红船精神永放光芒」习近平强党兴党故事；端午节推出屈原诗话家国情专题" onclick="go(3)">
+        <button class="favstar" data-fav="f23eb4c0e16f1" onclick="toggleFav(event,'f23eb4c0e16f1')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06-19</div>
         <div class="card-hl">习近平给新华社老党员张连生回信：传承红色基因在新征程上书写优异答卷</div>
         <div class="card-lead">6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。</div>
         <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="1" onclick="go(4)">
+      <div class="card" data-lang="zh" data-sec="1" data-day="20260619" data-fav="ff3b1d14e07f1" data-search="国务院任免：蔡奇兼任国家行政学院院长；外交部就韩官员涉台表述答问 国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。 国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。 6月18日国务院任免：蔡奇兼任国家行政学院院长，陈希卸任 外交部发言人林剑就韩官员重申中韩建交联合公报涉台表述答问 中方6月19日呼吁加沙真正持久停火，敦促推进利比亚包容性政治进程" onclick="go(4)">
+        <button class="favstar" data-fav="ff3b1d14e07f1" onclick="toggleFav(event,'ff3b1d14e07f1')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06-19</div>
         <div class="card-hl">国务院任免：蔡奇兼任国家行政学院院长；外交部就韩官员涉台表述答问</div>
         <div class="card-lead">国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。</div>
         <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="2" style="color:#e6943a">科学健康</div>
-      <div class="card" data-lang="zh" data-sec="2" onclick="go(5)">
+      </div><div class="seclabel" data-sec="2" data-day="20260619" style="color:#e6943a">科学健康</div>
+      <div class="card" data-lang="zh" data-sec="2" data-day="20260619" data-fav="f3c7f8b038aae" data-search="fda戒烟新药cytisinicline审批预计6月20日公布；glp-1持续拓展新适应症 药物审批：cytisinicline有望成为20年来首个获fda批准全新戒烟药物，审批决定预计6月20日公布（goodrx）。rgx-121（regenxbio）一次性基因治疗亨特综合征（hunter syndrome罕见cns遗传病），fda决定已出。glp-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。nature medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、hiv治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。 药物审批：cytisinicline有望成为20年来首个获fda批准全新戒烟药物，审批决定预计6月20日公布（goodrx）。rgx-121（regenxbio）一次性基因治疗亨特综合征（hunter syndrome罕见cns遗传病），fda决定已出。glp-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。nature medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、hiv治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。 cytisinicline有望成为20年来首个全新戒烟药物，fda审批决定预计6月20日公布 rgx-121基因治疗亨特综合征fda决定2026年初已出，为罕见cns疾病基因治疗新模式 glp-1类药物已从糖尿病/肥胖延伸至心血管、肾脏疾病和精神健康领域 2026年nature medicine重点关注：长效结核疫苗、拉沙热-狂犬病联合疫苗、hiv新方案" onclick="go(5)">
+        <button class="favstar" data-fav="f3c7f8b038aae" onclick="toggleFav(event,'f3c7f8b038aae')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06-19</div>
         <div class="card-hl">FDA戒烟新药Cytisinicline审批预计6月20日公布；GLP-1持续拓展新适应症</div>
         <div class="card-lead">药物审批：Cytisinicline有望成为20年来首个获FDA批准全新戒烟药物，审批决定预计6月20日公布（GoodRx）。RGX-121（Regenxbio）一次性基因治疗亨特综合征（Hunter syndrome罕见CNS遗传病），FDA决定已出。GLP-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。Nature Medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。</div>
         <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="3" style="color:#9b78c9">教育</div>
-      <div class="card" data-lang="zh" data-sec="3" onclick="go(6)">
+      </div><div class="seclabel" data-sec="3" data-day="20260619" style="color:#9b78c9">教育</div>
+      <div class="card" data-lang="zh" data-sec="3" data-day="20260619" data-fav="f3ce5ff57a4ad" data-search="第67届imo 7月10-21日上海举办；2026 usamo/usaco结果已公布 数学竞赛：第67届imo将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（maa）。usamo/usajmo 2026：maa已公布获奖名单。据ivy league center：amc 8 19名满分；amc/aime 104名晋级者；8名usamo+7名usajmo获奖者入mop；4名mop入选者。usaco 2025-2026：brian xue(银)、alex chen(铜)、bing-dong liu(银)、rain jiang(金)。us open结果已作为夏季训练营选拔主要依据。mit 2026级录取率约4.6%（历史最低之一），ea阶段11883人申请录655人（5.51%）。 数学竞赛：第67届imo将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（maa）。usamo/usajmo 2026：maa已公布获奖名单。据ivy league center：amc 8 19名满分；amc/aime 104名晋级者；8名usamo+7名usajmo获奖者入mop；4名mop入选者。usaco 2025-2026：brian xue(银)、alex chen(铜)、bing-dong liu(银)、rain jiang(金)。us open结果已作为夏季训练营选拔主要依据。mit 2026级录取率约4.6%（历史最低之一），ea阶段11883人申请录655人（5.51%）。 第67届国际数学奥林匹克（imo）7月10-21日在中国上海举办 2026 usamo: 8名获奖者 + 7名usajmo获奖者进入mop训练营；amc 8 19名满分 usaco 2025-2026公布4名最终入选者：brian xue(银), alex chen(铜), bing-dong liu(银), rain jiang(金) mit 2026级录取率约4.6%，ea阶段11883人申请录取655人（5.51%）" onclick="go(6)">
+        <button class="favstar" data-fav="f3ce5ff57a4ad" onclick="toggleFav(event,'f3ce5ff57a4ad')" aria-label="收藏">☆</button>
         <div class="card-date">2026-02-21</div>
         <div class="card-hl">第67届IMO 7月10-21日上海举办；2026 USAMO/USACO结果已公布</div>
         <div class="card-lead">数学竞赛：第67届IMO将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（MAA）。USAMO/USAJMO 2026：MAA已公布获奖名单。据Ivy League Center：AMC 8 19名满分；AMC/AIME 104名晋级者；8名USAMO+7名USAJMO获奖者入MOP；4名MOP入选者。USACO 2025-2026：Brian Xue(银)、Alex Chen(铜)、Bing-Dong Liu(银)、Rain Jiang(金)。US Open结果已作为夏季训练营选拔主要依据。MIT 2026级录取率约4.6%（历史最低之一），EA阶段11883人申请录655人（5.51%）。</div>
         <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="4" style="color:#5cb56b">体育</div>
-      <div class="card" data-lang="zh" data-sec="4" onclick="go(7)">
+      </div><div class="seclabel" data-sec="4" data-day="20260619" style="color:#5cb56b">体育</div>
+      <div class="card" data-lang="zh" data-sec="4" data-day="20260619" data-fav="ff4b3a02a080d" data-search="纽约尼克斯4-1击败马刺夺得2026年nba总冠军，jalen brunson荣膺fmvp 2026年nba总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。fmvp：jalen brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。game 5：94-90获胜锁定冠军。核心阵容：brunson, towns, anunoby。espn称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。 2026年nba总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。fmvp：jalen brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。game 5：94-90获胜锁定冠军。核心阵容：brunson, towns, anunoby。espn称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。 尼克斯4-1战胜马刺夺队史第3冠（首冠自1973年，时隔53年） jalen brunson获fmvp；尼克斯每场都曾落后10+分逆转，创1971年以来首次 game 5决战：尼克斯94-90胜马刺锁定冠军；karl-anthony towns和og anunoby关键贡献" onclick="go(7)">
+        <button class="favstar" data-fav="ff4b3a02a080d" onclick="toggleFav(event,'ff4b3a02a080d')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06</div>
         <div class="card-hl">纽约尼克斯4-1击败马刺夺得2026年NBA总冠军，Jalen Brunson荣膺FMVP</div>
         <div class="card-lead">2026年NBA总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。FMVP：Jalen Brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。Game 5：94-90获胜锁定冠军。核心阵容：Brunson, Towns, Anunoby。ESPN称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。</div>
         <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="4" onclick="go(8)">
+      <div class="card" data-lang="zh" data-sec="4" data-day="20260619" data-fav="f29b4ff4c2722" data-search="2026 nba选秀6月23-24日举行：奇才获状元签，aj dybantsa(byu)预测第一顺位 2026年nba选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。espn百大新秀前5：1. aj dybantsa(byu, 小前锋, 身高6-9.5, 臂展7-0.25)；2. darryn peterson(kansas, 后卫)；3. cameron boozer(duke, 前锋)；4. caleb wilson(unc, 前锋)；5. keaton wagler(illinois, 后卫)。nba draft room模拟选秀：奇才将在dybantsa和peterson间做艰难选择。 2026年nba选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。espn百大新秀前5：1. aj dybantsa(byu, 小前锋, 身高6-9.5, 臂展7-0.25)；2. darryn peterson(kansas, 后卫)；3. cameron boozer(duke, 前锋)；4. caleb wilson(unc, 前锋)；5. keaton wagler(illinois, 后卫)。nba draft room模拟选秀：奇才将在dybantsa和peterson间做艰难选择。 2026年nba选秀6月23-24日举行，恢复60个选秀签位（自2021年以来首次） 华盛顿奇才赢得乐透抽签获状元签；aj dybantsa(byu小前锋)为espn预测状元 espn百大新秀前5：dybantsa(byu)、d. peterson(kansas)、c. boozer(duke)、c. wilson(unc)、k. wagler(illinois) 选秀与自由市场将重塑新赛季联盟格局，尼克斯夺冠后东部竞争力受关注" onclick="go(8)">
+        <button class="favstar" data-fav="f29b4ff4c2722" onclick="toggleFav(event,'f29b4ff4c2722')" aria-label="收藏">☆</button>
         <div class="card-date">2026-06</div>
         <div class="card-hl">2026 NBA选秀6月23-24日举行：奇才获状元签，AJ Dybantsa(BYU)预测第一顺位</div>
         <div class="card-lead">2026年NBA选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。ESPN百大新秀前5：1. AJ Dybantsa(BYU, 小前锋, 身高6-9.5, 臂展7-0.25)；2. Darryn Peterson(Kansas, 后卫)；3. Cameron Boozer(Duke, 前锋)；4. Caleb Wilson(UNC, 前锋)；5. Keaton Wagler(Illinois, 后卫)。NBA Draft Room模拟选秀：奇才将在Dybantsa和Peterson间做艰难选择。</div>
         <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="4" onclick="go(9)">
+      <div class="card" data-lang="zh" data-sec="4" data-day="20260619" data-fav="f7c783ebf1173" data-search="2026欧冠决赛：psg在布达佩斯卫冕；新赛季7月7日资格赛启动 2026年uefa欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。 2026年uefa欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。 2026年5月30日欧冠决赛：卫冕冠军巴黎圣日耳曼在布达佩斯普斯卡什竞技场成功卫冕 2026-27赛季欧冠资格赛7月7日开打，联赛阶段9月8日启动（延续瑞士轮赛制） 同期2026世界杯小组赛正在美加墨进行中，足球日程空前密集" onclick="go(9)">
+        <button class="favstar" data-fav="f7c783ebf1173" onclick="toggleFav(event,'f7c783ebf1173')" aria-label="收藏">☆</button>
         <div class="card-date">2026-05-30</div>
         <div class="card-hl">2026欧冠决赛：PSG在布达佩斯卫冕；新赛季7月7日资格赛启动</div>
         <div class="card-lead">2026年UEFA欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。</div>
         <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div><div class="daydivider" id="day_20260618" data-day="20260618"><span>6月18日 周四</span></div><div class="seclabel" data-sec="5" data-day="20260618" style="color:#3aab9a">政治</div>
+      <div class="card" data-lang="zh" data-sec="5" data-day="20260618" data-fav="f6833b0af387e" data-search="g7峰会在法国埃维安闭幕：聚焦乌克兰、全球经济与ai治理 2026年g7领导人峰会于6月15日至17日在法国埃维安举行，七国领导人讨论了国际和平与安全、全球经济挑战、人工智能治理、国际团结等广泛议题，并于17日发布联合声明。
+
+在乌克兰问题上，g7领导人同意增加军事支持，包括防空能力、额外武器系统和拦截器。在经济方面，领导人讨论了如何创造平衡、可持续和共享的增长条件。峰会还特别关注对抗癌症的跨国合作，与即将召开的欧盟峰会形成呼应。
+
+此次g7峰会在中东局势可能出现转折、全球经济面临通胀和贸易不确定性的背景下召开。分析人士注意到，峰会联合声明在措辞上较往年更为平衡，在对华政策方面维持了&#x27;去风险而非脱钩&#x27;的基调。 2026年g7领导人峰会于6月15日至17日在法国埃维安举行，七国领导人讨论了国际和平与安全、全球经济挑战、人工智能治理、国际团结等广泛议题，并于17日发布联合声明。
+
+在乌克兰问题上，g7领导人同意增加军事支持，包括防空能力、额外武器系统和拦截器。在经济方面，领导人讨论了如何创造平衡、可持续和共享的增长条件。峰会还特别关注对抗癌症的跨国合作，与即将召开的欧盟峰会形成呼应。
+
+此次g7峰会在中东局势可能出现转折、全球经济面临通胀和贸易不确定性的背景下召开。分析人士注意到，峰会联合声明在措辞上较往年更为平衡，在对华政策方面维持了&#x27;去风险而非脱钩&#x27;的基调。 6月15-17日在法国埃维安（evian）举行，峰会发布联合声明 g7同意加大对乌克兰军事支持，承诺加强抗癌合作与ai治理" onclick="go(10)">
+        <button class="favstar" data-fav="f6833b0af387e" onclick="toggleFav(event,'f6833b0af387e')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">G7峰会在法国埃维安闭幕：聚焦乌克兰、全球经济与AI治理</div>
+        <div class="card-lead">2026年G7领导人峰会于6月15日至17日在法国埃维安举行，七国领导人讨论了国际和平与安全、全球经济挑战、人工智能治理、国际团结等广泛议题，并于17日发布联合声明。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="5" data-day="20260618" data-fav="f42b2c005c7ca" data-search="美伊宣布达成结束冲突框架协议，中东迎来和平曙光 6月14日，美国与伊朗经巴基斯坦斡旋宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎凡尔赛宫确认已签署谅解备忘录。伊朗外交部副部长在国家电视台上证实协议，称&#x27;这是伊朗人民的胜利&#x27;。
+
+协议内容包括逐步恢复霍尔木兹海峡通航、分阶段解除制裁等。国际油价应声大幅回落，布伦特原油跌破80美元/桶，缓解了全球通胀压力。联合国秘书长对此表示欢迎，称协议为中东和平开辟了新路径。
+
+与此同时，联合国粮农组织和世界粮食计划署6月18日发布《饥饿热点报告》警告，2026年6月至11月期间，13个国家数百万人的急性粮食不安全状况将恶化，中东局势缓和有望改善部分地区的粮食供应链。 6月14日，美国与伊朗经巴基斯坦斡旋宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎凡尔赛宫确认已签署谅解备忘录。伊朗外交部副部长在国家电视台上证实协议，称&#x27;这是伊朗人民的胜利&#x27;。
+
+协议内容包括逐步恢复霍尔木兹海峡通航、分阶段解除制裁等。国际油价应声大幅回落，布伦特原油跌破80美元/桶，缓解了全球通胀压力。联合国秘书长对此表示欢迎，称协议为中东和平开辟了新路径。
+
+与此同时，联合国粮农组织和世界粮食计划署6月18日发布《饥饿热点报告》警告，2026年6月至11月期间，13个国家数百万人的急性粮食不安全状况将恶化，中东局势缓和有望改善部分地区的粮食供应链。 特朗普6月17日在巴黎确认签署谅解备忘录，正式mou预计6月19日签署 联合国粮农组织警告13国面临严重粮食不安全，中东局势缓和有助于缓解危机" onclick="go(11)">
+        <button class="favstar" data-fav="f42b2c005c7ca" onclick="toggleFav(event,'f42b2c005c7ca')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">美伊宣布达成结束冲突框架协议，中东迎来和平曙光</div>
+        <div class="card-lead">6月14日，美国与伊朗经巴基斯坦斡旋宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎凡尔赛宫确认已签署谅解备忘录。伊朗外交部副部长在国家电视台上证实协议，称&#x27;这是伊朗人民的胜利&#x27;。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="5" data-day="20260618" data-fav="f54bab0cf03ef" data-search="欧盟峰会6月18-19日召开：27国领导人讨论防务安全与竞争力 欧洲理事会于6月18-19日在布鲁塞尔举行峰会。理事会主席科斯塔（antonio costa）在邀请函中列出议程：竞争力与全球经济挑战、乌克兰、中东局势、欧洲防务与安全架构、以及下一个多年度财政框架（mff）。
+
+据会前分析，此次峰会预计不做具体决定，而是为即将上任的爱尔兰轮值主席国提供战略指导。核心看点在于各国领导人能否在防务融资和储蓄与投资联盟推进上达成共识。
+
+值得注意的是，法国总统马克龙此前已设定6月为欧盟经济重振计划的截止期限，此次峰会能否为停滞的欧盟经济注入新动力备受关注。峰会紧随g7之后，显示欧洲在协调应对地缘政治与经济挑战方面的努力。 欧洲理事会于6月18-19日在布鲁塞尔举行峰会。理事会主席科斯塔（antonio costa）在邀请函中列出议程：竞争力与全球经济挑战、乌克兰、中东局势、欧洲防务与安全架构、以及下一个多年度财政框架（mff）。
+
+据会前分析，此次峰会预计不做具体决定，而是为即将上任的爱尔兰轮值主席国提供战略指导。核心看点在于各国领导人能否在防务融资和储蓄与投资联盟推进上达成共识。
+
+值得注意的是，法国总统马克龙此前已设定6月为欧盟经济重振计划的截止期限，此次峰会能否为停滞的欧盟经济注入新动力备受关注。峰会紧随g7之后，显示欧洲在协调应对地缘政治与经济挑战方面的努力。 峰会在布鲁塞尔举行，议题涵盖乌克兰、中东、防务、竞争力与新财政框架 紧随g7之后，法国总统马克龙设定6月为欧盟经济重振计划截止期" onclick="go(12)">
+        <button class="favstar" data-fav="f54bab0cf03ef" onclick="toggleFav(event,'f54bab0cf03ef')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">欧盟峰会6月18-19日召开：27国领导人讨论防务安全与竞争力</div>
+        <div class="card-lead">欧洲理事会于6月18-19日在布鲁塞尔举行峰会。理事会主席科斯塔（Antonio Costa）在邀请函中列出议程：竞争力与全球经济挑战、乌克兰、中东局势、欧洲防务与安全架构、以及下一个多年度财政框架（MFF）。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="5" data-day="20260618" data-fav="f9f0e4c1fdec6" data-search="缅甸总统敏昂莱访华，中缅加强战略对话与边境合作 应中国国家主席习近平邀请，缅甸总统敏昂莱于6月15日至19日对中国进行国事访问。这是缅甸2021年政局变化以来领导人最重要的外访之一，分析认为此访意在加强中缅经济走廊建设和边境稳定合作。
+
+同期，中国国防部6月中旬举行例行新闻发布会，宣布中国军队将同老挝一道，以建立外交、国防、公安&#x27;3+3&#x27;战略对话机制为契机，加强战略沟通，增进各层级交往，办好边境国防友好交流活动。
+
+中国外交部发言人林剑在6月17日记者会上强调，王毅外长此前提出全球治理倡议，号召各国携手构建更加公正合理的全球治理体系。分析人士认为，中国正通过多边和双边渠道强化在东南亚的影响力布局。 应中国国家主席习近平邀请，缅甸总统敏昂莱于6月15日至19日对中国进行国事访问。这是缅甸2021年政局变化以来领导人最重要的外访之一，分析认为此访意在加强中缅经济走廊建设和边境稳定合作。
+
+同期，中国国防部6月中旬举行例行新闻发布会，宣布中国军队将同老挝一道，以建立外交、国防、公安&#x27;3+3&#x27;战略对话机制为契机，加强战略沟通，增进各层级交往，办好边境国防友好交流活动。
+
+中国外交部发言人林剑在6月17日记者会上强调，王毅外长此前提出全球治理倡议，号召各国携手构建更加公正合理的全球治理体系。分析人士认为，中国正通过多边和双边渠道强化在东南亚的影响力布局。 应习近平主席邀请，缅甸总统敏昂莱6月15日至19日对中国进行国事访问 中老&#x27;3+3&#x27;战略对话机制启动，中国国防部6月中旬举行例行新闻发布" onclick="go(13)">
+        <button class="favstar" data-fav="f9f0e4c1fdec6" onclick="toggleFav(event,'f9f0e4c1fdec6')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">缅甸总统敏昂莱访华，中缅加强战略对话与边境合作</div>
+        <div class="card-lead">应中国国家主席习近平邀请，缅甸总统敏昂莱于6月15日至19日对中国进行国事访问。这是缅甸2021年政局变化以来领导人最重要的外访之一，分析认为此访意在加强中缅经济走廊建设和边境稳定合作。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="6" data-day="20260618" style="color:#5cb56b">体育</div>
+      <div class="card" data-lang="zh" data-sec="6" data-day="20260618" data-fav="fb23188d49620" data-search="2026世界杯小组赛激战正酣：英格兰4-2克罗地亚，葡萄牙1-1刚果(金) 2026年fifa世界杯（美国、加拿大、墨西哥联合举办）小组赛持续进行。6月17日多场焦点对决：l组英格兰在达拉斯4-2击败克罗地亚，k组葡萄牙1-1战平刚果(金)（休斯顿）。同天乌兹别克斯坦1-3不敌哥伦比亚，加纳1-0击败巴拿马。
+
+6月18日赛事继续：a组、g组和j组展开多场较量，包括阿根廷vs阿尔及利亚（堪萨斯城）等强强对话。截至目前，小组赛已进入白热化阶段，多个小组的出线形势尚不明朗。
+
+本届世界杯首次扩军至48支球队，共设16个小组，比赛在美国、加拿大、墨西哥的16座城市举行。赛事自6月11日开幕以来，全球收视人数屡创新高，中国男足虽未晋级，但亚洲球队整体表现引人关注。 2026年fifa世界杯（美国、加拿大、墨西哥联合举办）小组赛持续进行。6月17日多场焦点对决：l组英格兰在达拉斯4-2击败克罗地亚，k组葡萄牙1-1战平刚果(金)（休斯顿）。同天乌兹别克斯坦1-3不敌哥伦比亚，加纳1-0击败巴拿马。
+
+6月18日赛事继续：a组、g组和j组展开多场较量，包括阿根廷vs阿尔及利亚（堪萨斯城）等强强对话。截至目前，小组赛已进入白热化阶段，多个小组的出线形势尚不明朗。
+
+本届世界杯首次扩军至48支球队，共设16个小组，比赛在美国、加拿大、墨西哥的16座城市举行。赛事自6月11日开幕以来，全球收视人数屡创新高，中国男足虽未晋级，但亚洲球队整体表现引人关注。 6月17日焦点战：英格兰4-2克罗地亚（达拉斯），葡萄牙1-1刚果(金)（休斯顿） 6月18日继续小组赛：哥伦比亚等多队登场" onclick="go(14)">
+        <button class="favstar" data-fav="fb23188d49620" onclick="toggleFav(event,'fb23188d49620')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">2026世界杯小组赛激战正酣：英格兰4-2克罗地亚，葡萄牙1-1刚果(金)</div>
+        <div class="card-lead">2026年FIFA世界杯（美国、加拿大、墨西哥联合举办）小组赛持续进行。6月17日多场焦点对决：L组英格兰在达拉斯4-2击败克罗地亚，K组葡萄牙1-1战平刚果(金)（休斯顿）。同天乌兹别克斯坦1-3不敌哥伦比亚，加纳1-0击败巴拿马。</div>
+        <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="6" data-day="20260618" data-fav="f7f4162cb413a" data-search="美国tyr职业游泳系列赛印第安纳波利斯站6月17-20日举行 美国游泳协会（usa swimming）主办的tyr职业游泳系列赛（tyr pro swim series）印第安纳波利斯站于6月17日至20日举行，这是美国国内最高水平的职业游泳赛事之一。多名奥运选手和世界冠军参赛，为即将于12月在北京举行的世界游泳锦标赛（25米池）热身。
+
+同时，美国青少年艺术游泳青年奥运会（junior olympic championship）将于6月27日至7月4日在密歇根州伊普西兰蒂（ypsilanti）的东密歇根大学举行。这是全美青少年艺术游泳最高级别赛事，吸引了众多年轻运动员参与。
+
+中国方面，世界游泳锦标赛（短池）将于2026年12月1-6日在北京举行，这是北京继2026年2月举办世界游泳锦标赛（长池）后再度承办世界级赛事，对中国青少年游泳运动将起到积极推动作用。 美国游泳协会（usa swimming）主办的tyr职业游泳系列赛（tyr pro swim series）印第安纳波利斯站于6月17日至20日举行，这是美国国内最高水平的职业游泳赛事之一。多名奥运选手和世界冠军参赛，为即将于12月在北京举行的世界游泳锦标赛（25米池）热身。
+
+同时，美国青少年艺术游泳青年奥运会（junior olympic championship）将于6月27日至7月4日在密歇根州伊普西兰蒂（ypsilanti）的东密歇根大学举行。这是全美青少年艺术游泳最高级别赛事，吸引了众多年轻运动员参与。
+
+中国方面，世界游泳锦标赛（短池）将于2026年12月1-6日在北京举行，这是北京继2026年2月举办世界游泳锦标赛（长池）后再度承办世界级赛事，对中国青少年游泳运动将起到积极推动作用。 usa swimming顶级职业系列赛在印第安纳波利斯进行，为世锦赛选拔热身 美国青少年艺术游泳青年奥运会（junior olympics）6月27日-7月4日在密歇根州举行" onclick="go(15)">
+        <button class="favstar" data-fav="f7f4162cb413a" onclick="toggleFav(event,'f7f4162cb413a')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">美国TYR职业游泳系列赛印第安纳波利斯站6月17-20日举行</div>
+        <div class="card-lead">美国游泳协会（USA Swimming）主办的TYR职业游泳系列赛（TYR Pro Swim Series）印第安纳波利斯站于6月17日至20日举行，这是美国国内最高水平的职业游泳赛事之一。多名奥运选手和世界冠军参赛，为即将于12月在北京举行的世界游泳锦标赛（25米池）热身。</div>
+        <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="6" data-day="20260618" data-fav="ffc75b91ba773" data-search="美伊和平协议带动全球体育赛事安全形势改善 随着美伊和平协议框架的达成，中东紧张局势显著缓解，对正在北美举行的2026年世界杯产生积极影响。赛事组织者表示，安全威胁级别的下调使得部分安保资源可以向其他环节倾斜。
+
+国际体育旅游也开始回暖——此前因中东冲突导致部分球迷取消赴美行程，随着局势缓和，国际航班预订量已出现反弹。各主办城市的酒店和交通预订量本周增长了约15%。
+
+全球体育产业在疫情后持续复苏，2026年预计将成为体育商业收入创纪录的一年。世界杯、冬奥会（米兰-科尔蒂纳）和多项世锦赛的叠加效应，推动体育赞助、转播权和周边消费全面增长。 随着美伊和平协议框架的达成，中东紧张局势显著缓解，对正在北美举行的2026年世界杯产生积极影响。赛事组织者表示，安全威胁级别的下调使得部分安保资源可以向其他环节倾斜。
+
+国际体育旅游也开始回暖——此前因中东冲突导致部分球迷取消赴美行程，随着局势缓和，国际航班预订量已出现反弹。各主办城市的酒店和交通预订量本周增长了约15%。
+
+全球体育产业在疫情后持续复苏，2026年预计将成为体育商业收入创纪录的一年。世界杯、冬奥会（米兰-科尔蒂纳）和多项世锦赛的叠加效应，推动体育赞助、转播权和周边消费全面增长。 中东局势缓和利好世界杯安保和球迷出行 国际体育赛事逐步恢复疫情前常态，全球体育产业持续复苏" onclick="go(16)">
+        <button class="favstar" data-fav="ffc75b91ba773" onclick="toggleFav(event,'ffc75b91ba773')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">美伊和平协议带动全球体育赛事安全形势改善</div>
+        <div class="card-lead">随着美伊和平协议框架的达成，中东紧张局势显著缓解，对正在北美举行的2026年世界杯产生积极影响。赛事组织者表示，安全威胁级别的下调使得部分安保资源可以向其他环节倾斜。</div>
+        <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="7" data-day="20260618" style="color:#d98aa8">科学健康前沿</div>
+      <div class="card" data-lang="zh" data-sec="7" data-day="20260618" data-fav="f224692a2b5fa" data-search="《自然·医学》刊出2026年11项将改变医学的关键临床试验 《自然·医学》（nature medicine）2025年底推出年度特辑，评选出11项&#x27;将在2026年改变医学的关键临床试验&#x27;。研究人员从众多候选试验中提名了最具突破潜力的项目，涵盖传染病疫苗、癌症治疗、细胞疗法等多个前沿领域。
+
+其中备受关注的项目包括：一款长效结核病疫苗的iii期试验、联合拉沙热-狂犬病双价疫苗的人体试验、以及针对高危无症状多发性骨髓瘤的bcma靶向car-t细胞疗法ii期结果（在aacr 2026年会上报告）。这些试验如果达到主要终点，有望显著改变相应的临床实践。
+
+nature medicine还特别关注了&#x27;食物即药物&#x27;（food is medicine）概念的科学验证——医疗定制饮食在慢性病管理中的随机对照试验正在从概念走向证据，这对于糖尿病、心血管疾病等的非药物干预具有重要公共卫生意义。 《自然·医学》（nature medicine）2025年底推出年度特辑，评选出11项&#x27;将在2026年改变医学的关键临床试验&#x27;。研究人员从众多候选试验中提名了最具突破潜力的项目，涵盖传染病疫苗、癌症治疗、细胞疗法等多个前沿领域。
+
+其中备受关注的项目包括：一款长效结核病疫苗的iii期试验、联合拉沙热-狂犬病双价疫苗的人体试验、以及针对高危无症状多发性骨髓瘤的bcma靶向car-t细胞疗法ii期结果（在aacr 2026年会上报告）。这些试验如果达到主要终点，有望显著改变相应的临床实践。
+
+nature medicine还特别关注了&#x27;食物即药物&#x27;（food is medicine）概念的科学验证——医疗定制饮食在慢性病管理中的随机对照试验正在从概念走向证据，这对于糖尿病、心血管疾病等的非药物干预具有重要公共卫生意义。 nature medicine邀请顶尖研究人员提名2026年最具影响力临床试验 涵盖结核病长效疫苗、联合拉沙热-狂犬病疫苗、hiv治疗、car-t等多领域" onclick="go(17)">
+        <button class="favstar" data-fav="f224692a2b5fa" onclick="toggleFav(event,'f224692a2b5fa')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">《自然·医学》刊出2026年11项将改变医学的关键临床试验</div>
+        <div class="card-lead">《自然·医学》（Nature Medicine）2025年底推出年度特辑，评选出11项&#x27;将在2026年改变医学的关键临床试验&#x27;。研究人员从众多候选试验中提名了最具突破潜力的项目，涵盖传染病疫苗、癌症治疗、细胞疗法等多个前沿领域。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="7" data-day="20260618" data-fav="f570e4085e9b1" data-search="aacr 2026年会展望：癌症早筛、个体化治疗与健康公平为三大焦点 美国癌症研究协会（aacr）在其2026年度展望中指出，癌症研究正经历从晚期治疗向早期检测和预防的战略转移。液体活检技术的成熟使得多癌种早筛（mced）正在大规模临床试验中验证其有效性。
+
+个体化治疗方面，基于基因组学、蛋白质组学和免疫图谱的精准疗法继续扩展适应症。特别是car-t疗法在实体瘤中的应用取得了令人鼓舞的早期结果，多个针对胰腺癌和胶质母细胞瘤的试验进入关键阶段。
+
+aacr还强调了缩小癌症健康差距的紧迫性——不同种族、社会经济地位和地理区域之间的癌症发病率和存活率差距仍然显著。2026年的重点包括扩大临床试验的人口多样性和改善偏远地区的癌症筛查可及性。 美国癌症研究协会（aacr）在其2026年度展望中指出，癌症研究正经历从晚期治疗向早期检测和预防的战略转移。液体活检技术的成熟使得多癌种早筛（mced）正在大规模临床试验中验证其有效性。
+
+个体化治疗方面，基于基因组学、蛋白质组学和免疫图谱的精准疗法继续扩展适应症。特别是car-t疗法在实体瘤中的应用取得了令人鼓舞的早期结果，多个针对胰腺癌和胶质母细胞瘤的试验进入关键阶段。
+
+aacr还强调了缩小癌症健康差距的紧迫性——不同种族、社会经济地位和地理区域之间的癌症发病率和存活率差距仍然显著。2026年的重点包括扩大临床试验的人口多样性和改善偏远地区的癌症筛查可及性。 美国癌症研究协会（aacr）在2026年初发布年度展望 研究重点转向早期检测与预防、精准个体化治疗、缩小癌症健康差距" onclick="go(18)">
+        <button class="favstar" data-fav="f570e4085e9b1" onclick="toggleFav(event,'f570e4085e9b1')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">AACR 2026年会展望：癌症早筛、个体化治疗与健康公平为三大焦点</div>
+        <div class="card-lead">美国癌症研究协会（AACR）在其2026年度展望中指出，癌症研究正经历从晚期治疗向早期检测和预防的战略转移。液体活检技术的成熟使得多癌种早筛（MCED）正在大规模临床试验中验证其有效性。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="7" data-day="20260618" data-fav="f52edff61ed2a" data-search="研究发现两种抗癌药或可逆转阿尔茨海默病脑部改变 一项发表于阿尔茨海默病研究领域期刊的临床前研究发现，两种已获批用于癌症治疗的药物可能能够逆转阿尔茨海默病引起的脑部改变。研究人员通过系统性药物筛选发现了这一意外关联，为神经退行性疾病的治疗提供了药物再利用（drug repurposing）的全新思路。
+
+阿尔茨海默病被称为&#x27;21世纪最大的未解决医学挑战之一&#x27;，全球患者超过5500万人。近年来，抗淀粉样蛋白单克隆抗体药物（如leqembi和kisunla）虽然获得了监管批准，但其疗效有限且价格高昂。
+
+此次发现的抗癌药可能存在的作用机制涉及炎症调节和细胞代谢通路，与阿尔茨海默病的神经炎症假说相符。研究团队正在推动进入临床试验阶段。与此同时，glp-1受体激动剂（如司美格鲁肽）的神经保护作用也正在多个人体试验中评估——这一从糖尿病药物到脑健康的跨越式发现，被视为近年来最引人注目的药物再利用案例。 一项发表于阿尔茨海默病研究领域期刊的临床前研究发现，两种已获批用于癌症治疗的药物可能能够逆转阿尔茨海默病引起的脑部改变。研究人员通过系统性药物筛选发现了这一意外关联，为神经退行性疾病的治疗提供了药物再利用（drug repurposing）的全新思路。
+
+阿尔茨海默病被称为&#x27;21世纪最大的未解决医学挑战之一&#x27;，全球患者超过5500万人。近年来，抗淀粉样蛋白单克隆抗体药物（如leqembi和kisunla）虽然获得了监管批准，但其疗效有限且价格高昂。
+
+此次发现的抗癌药可能存在的作用机制涉及炎症调节和细胞代谢通路，与阿尔茨海默病的神经炎症假说相符。研究团队正在推动进入临床试验阶段。与此同时，glp-1受体激动剂（如司美格鲁肽）的神经保护作用也正在多个人体试验中评估——这一从糖尿病药物到脑健康的跨越式发现，被视为近年来最引人注目的药物再利用案例。 研究者在药物筛选中发现两种已获批抗癌药物可能逆转阿尔茨海默病脑部变化 研究尚处于临床前阶段，但为阿尔茨海默病治疗开辟了药物再利用新途径" onclick="go(19)">
+        <button class="favstar" data-fav="f52edff61ed2a" onclick="toggleFav(event,'f52edff61ed2a')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">研究发现两种抗癌药或可逆转阿尔茨海默病脑部改变</div>
+        <div class="card-lead">一项发表于阿尔茨海默病研究领域期刊的临床前研究发现，两种已获批用于癌症治疗的药物可能能够逆转阿尔茨海默病引起的脑部改变。研究人员通过系统性药物筛选发现了这一意外关联，为神经退行性疾病的治疗提供了药物再利用（drug repurposing）的全新思路。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="7" data-day="20260618" data-fav="f09e1f0240db9" data-search="中国5月cpi同比涨1.2%——&#x27;健康饮食成本&#x27;受关注，&#x27;食物即药物&#x27;概念走向实证 国家统计局6月16日公布的数据显示，5月中国cpi同比上涨1.2%，食品价格变动总体平稳。但营养学界持续关注的一个问题是：健康膳食的成本——富含蔬果、优质蛋白和全谷物的&#x27;理想膳食模式&#x27;在部分地区仍存在经济可及性障碍。
+
+《自然·医学》在近期的评论中聚焦了&#x27;食物即药物&#x27;（food is medicine）的概念——即通过医疗定制膳食干预来管理慢性病，正在从理论走向严格的随机对照试验验证。多个大型临床试验正在评估&#x27;医学定制餐食送货上门&#x27;对2型糖尿病、心力衰竭等患者临床结局的影响。
+
+美国国立卫生研究院（nih）2026年资助了多项相关研究项目，涵盖从基础营养科学到社区干预实施的全链条。研究者和政策制定者普遍认为，将营养干预纳入医疗体系有望成为慢性病管理的&#x27;第四支柱&#x27;，与药物、手术和运动并列。 国家统计局6月16日公布的数据显示，5月中国cpi同比上涨1.2%，食品价格变动总体平稳。但营养学界持续关注的一个问题是：健康膳食的成本——富含蔬果、优质蛋白和全谷物的&#x27;理想膳食模式&#x27;在部分地区仍存在经济可及性障碍。
+
+《自然·医学》在近期的评论中聚焦了&#x27;食物即药物&#x27;（food is medicine）的概念——即通过医疗定制膳食干预来管理慢性病，正在从理论走向严格的随机对照试验验证。多个大型临床试验正在评估&#x27;医学定制餐食送货上门&#x27;对2型糖尿病、心力衰竭等患者临床结局的影响。
+
+美国国立卫生研究院（nih）2026年资助了多项相关研究项目，涵盖从基础营养科学到社区干预实施的全链条。研究者和政策制定者普遍认为，将营养干预纳入医疗体系有望成为慢性病管理的&#x27;第四支柱&#x27;，与药物、手术和运动并列。 中国5月cpi数据显示食品价格温和上涨，居民膳食质量改善空间仍大 nature medicine呼吁将&#x27;食物即药物&#x27;从概念转化为循证实践" onclick="go(20)">
+        <button class="favstar" data-fav="f09e1f0240db9" onclick="toggleFav(event,'f09e1f0240db9')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">中国5月CPI同比涨1.2%——&#x27;健康饮食成本&#x27;受关注，&#x27;食物即药物&#x27;概念走向实证</div>
+        <div class="card-lead">国家统计局6月16日公布的数据显示，5月中国CPI同比上涨1.2%，食品价格变动总体平稳。但营养学界持续关注的一个问题是：健康膳食的成本——富含蔬果、优质蛋白和全谷物的&#x27;理想膳食模式&#x27;在部分地区仍存在经济可及性障碍。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="8" data-day="20260618" style="color:#4a90d9">教育/学业</div>
+      <div class="card" data-lang="zh" data-sec="8" data-day="20260618" data-fav="f7a4926f7f102" data-search="2025-26年度amc 10/12分数线正式公布，aime晋级门槛出炉 美国数学协会（maa）公布了2025-26年度amc 10/12的正式成绩和aime晋级分数线。本年度amc 10参赛人数超过80,000人，平均分约57分。aime晋级门槛（top 2.5%）约105分，distinguished honor roll（top 1%）分数线约136.5分。
+
+amc 12方面，参赛人数增长至约38,000人，平均分约55分，aime晋级门槛（top 5%）约99分。2026年的aime i和aime ii分别于2月5日和2月19日举行，成绩已公布。
+
+对于中国参赛学生而言，amc已成为申请美国顶尖理工大学的标配竞赛经历。分析显示，近年来aime晋级分数线持续走高，竞争日趋激烈，建议学生尽早准备、系统训练。下一赛季（2026-27）amc 10/12预计于2026年11月和2027年1月举行。 美国数学协会（maa）公布了2025-26年度amc 10/12的正式成绩和aime晋级分数线。本年度amc 10参赛人数超过80,000人，平均分约57分。aime晋级门槛（top 2.5%）约105分，distinguished honor roll（top 1%）分数线约136.5分。
+
+amc 12方面，参赛人数增长至约38,000人，平均分约55分，aime晋级门槛（top 5%）约99分。2026年的aime i和aime ii分别于2月5日和2月19日举行，成绩已公布。
+
+对于中国参赛学生而言，amc已成为申请美国顶尖理工大学的标配竞赛经历。分析显示，近年来aime晋级分数线持续走高，竞争日趋激烈，建议学生尽早准备、系统训练。下一赛季（2026-27）amc 10/12预计于2026年11月和2027年1月举行。 2026年1月amc 10/12成绩已定，aime i/ii分别于2月举行 amc 10 top 2.5%晋级aime分数线约105分，top 1%荣誉线约136.5分" onclick="go(21)">
+        <button class="favstar" data-fav="f7a4926f7f102" onclick="toggleFav(event,'f7a4926f7f102')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">2025-26年度AMC 10/12分数线正式公布，AIME晋级门槛出炉</div>
+        <div class="card-lead">美国数学协会（MAA）公布了2025-26年度AMC 10/12的正式成绩和AIME晋级分数线。本年度AMC 10参赛人数超过80,000人，平均分约57分。AIME晋级门槛（Top 2.5%）约105分，Distinguished Honor Roll（Top 1%）分数线约136.5分。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="8" data-day="20260618" data-fav="f79af7f581142" data-search="usaco 2025-2026赛季两轮比赛结果公布：铂金组191人，金组超1300人参赛 美国计算机奥林匹克竞赛（usaco）2025-2026赛季采用新赛制：赛季前半段安排三次在线比赛，随后通过导师监督的线下训练营（usaco camp）选拔代表美国参加国际信息学奥林匹克（ioi）的队伍。
+
+目前第一轮和第二轮比赛结果已公布。铂金（platinum）组共有191名参赛者；金（gold）组1366人参赛，其中962人为大学前学生，得分650分及以上者晋升至铂金组。银（silver）和铜（bronze）组参赛人数更多，覆盖全球数百所中学。
+
+usaco对全球中学生开放，是中国学生展示编程能力、冲击顶尖计算机科学院校（mit、斯坦福、卡内基梅隆等）的重要平台。新赛制更加注重选手在压力环境下的稳定发挥，建议参赛者加强全真模拟训练。特别值得注意的是，多位女选手在金组和铂金组表现出色，包括获得金牌的helen law、luna hudman和grace li。 美国计算机奥林匹克竞赛（usaco）2025-2026赛季采用新赛制：赛季前半段安排三次在线比赛，随后通过导师监督的线下训练营（usaco camp）选拔代表美国参加国际信息学奥林匹克（ioi）的队伍。
+
+目前第一轮和第二轮比赛结果已公布。铂金（platinum）组共有191名参赛者；金（gold）组1366人参赛，其中962人为大学前学生，得分650分及以上者晋升至铂金组。银（silver）和铜（bronze）组参赛人数更多，覆盖全球数百所中学。
+
+usaco对全球中学生开放，是中国学生展示编程能力、冲击顶尖计算机科学院校（mit、斯坦福、卡内基梅隆等）的重要平台。新赛制更加注重选手在压力环境下的稳定发挥，建议参赛者加强全真模拟训练。特别值得注意的是，多位女选手在金组和铂金组表现出色，包括获得金牌的helen law、luna hudman和grace li。 usaco 2025-2026赛季首次采用新赛制：三次在线赛+导师监督的线下usaco camp选拔 铂金组191人参赛，金组1366人，其中962人为大学前学生" onclick="go(22)">
+        <button class="favstar" data-fav="f79af7f581142" onclick="toggleFav(event,'f79af7f581142')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">USACO 2025-2026赛季两轮比赛结果公布：铂金组191人，金组超1300人参赛</div>
+        <div class="card-lead">美国计算机奥林匹克竞赛（USACO）2025-2026赛季采用新赛制：赛季前半段安排三次在线比赛，随后通过导师监督的线下训练营（USACO Camp）选拔代表美国参加国际信息学奥林匹克（IOI）的队伍。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="8" data-day="20260618" data-fav="f1c3d9a3c238f" data-search="mit 2026级录取率约4.6%——顶尖理工大学申请竞争白热化 根据mit招生办公室公布的数据，2026年秋季入学（class of 2030）申请人数维持在约30,000人的高位，录取约1,300人，录取率约4.6%。这一数字较前一年略有回升（此前一度低至4%以下），但仍处于历史极低水平。
+
+横向对比其他顶尖理工院校：斯坦福大学2026级录取率约3.6%（55,000+申请者中录取2,067人），加州理工学院录取约3.8%（13,856申请者中仅录取356人）。卡内基梅隆大学计算机科学学院的录取率更是低至个位数。
+
+大学申请顾问指出，顶尖理工院校录取竞争的加剧与ai/计算机领域的职业前景密切相关。具有usaco铂金/金级、aime晋级乃至usa(j)mo资格的申请者数量逐年增加，单纯的高标化成绩已不足以脱颖而出。深度科研经历、原创项目和独特的个人叙事在录取中的权重持续上升。 根据mit招生办公室公布的数据，2026年秋季入学（class of 2030）申请人数维持在约30,000人的高位，录取约1,300人，录取率约4.6%。这一数字较前一年略有回升（此前一度低至4%以下），但仍处于历史极低水平。
+
+横向对比其他顶尖理工院校：斯坦福大学2026级录取率约3.6%（55,000+申请者中录取2,067人），加州理工学院录取约3.8%（13,856申请者中仅录取356人）。卡内基梅隆大学计算机科学学院的录取率更是低至个位数。
+
+大学申请顾问指出，顶尖理工院校录取竞争的加剧与ai/计算机领域的职业前景密切相关。具有usaco铂金/金级、aime晋级乃至usa(j)mo资格的申请者数量逐年增加，单纯的高标化成绩已不足以脱颖而出。深度科研经历、原创项目和独特的个人叙事在录取中的权重持续上升。 mit 2026年秋季入学申请量继续高位运行，录取率维持在历史低位约4.6% 斯坦福约3.6%、加州理工约3.8%——美国顶尖理工院校录取率持续走低" onclick="go(23)">
+        <button class="favstar" data-fav="f1c3d9a3c238f" onclick="toggleFav(event,'f1c3d9a3c238f')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">MIT 2026级录取率约4.6%——顶尖理工大学申请竞争白热化</div>
+        <div class="card-lead">根据MIT招生办公室公布的数据，2026年秋季入学（Class of 2030）申请人数维持在约30,000人的高位，录取约1,300人，录取率约4.6%。这一数字较前一年略有回升（此前一度低至4%以下），但仍处于历史极低水平。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="8" data-day="20260618" data-fav="f0494a4268178" data-search="2026年美国青少年艺术游泳青年奥运会即将开幕——青少年体育教育新趋势 2026年美国艺术游泳青年奥运会（junior olympic championship）将于6月27日至7月4日在密歇根州伊普西兰蒂举行。这是全美12-18岁青少年艺术游泳运动员的最高级别赛事，也是通往大学游泳奖学金和国家队选拔的重要通道。
+
+在青少年体育教育领域，近年来出现了值得关注的趋势转变：越来越多的高校在录取中重新评估体育特长的权重。2026年初，多位大学招生主任公开表示，更看重申请者通过体育展现的领导力、毅力和时间管理能力，而非单纯的竞赛成绩。
+
+对于中国家庭而言，游泳不仅是一项重要的生存技能和健身方式，也在海外升学中发挥着日益重要的角色。中国教育部持续推进&#x27;体教融合&#x27;政策，鼓励中小学加强游泳等水上运动普及。世界游泳锦标赛（短池）将于2026年12月在北京举行，预计将进一步激发青少年游泳热情。 2026年美国艺术游泳青年奥运会（junior olympic championship）将于6月27日至7月4日在密歇根州伊普西兰蒂举行。这是全美12-18岁青少年艺术游泳运动员的最高级别赛事，也是通往大学游泳奖学金和国家队选拔的重要通道。
+
+在青少年体育教育领域，近年来出现了值得关注的趋势转变：越来越多的高校在录取中重新评估体育特长的权重。2026年初，多位大学招生主任公开表示，更看重申请者通过体育展现的领导力、毅力和时间管理能力，而非单纯的竞赛成绩。
+
+对于中国家庭而言，游泳不仅是一项重要的生存技能和健身方式，也在海外升学中发挥着日益重要的角色。中国教育部持续推进&#x27;体教融合&#x27;政策，鼓励中小学加强游泳等水上运动普及。世界游泳锦标赛（短池）将于2026年12月在北京举行，预计将进一步激发青少年游泳热情。 第2026届junior olympic championship将于6月27日-7月4日在密歇根举行 青少年体育教育从&#x27;竞技驱动&#x27;转向&#x27;全人发展&#x27;——美国高校录取中的体育权重调整" onclick="go(24)">
+        <button class="favstar" data-fav="f0494a4268178" onclick="toggleFav(event,'f0494a4268178')" aria-label="收藏">☆</button>
+        
+        <div class="card-hl">2026年美国青少年艺术游泳青年奥运会即将开幕——青少年体育教育新趋势</div>
+        <div class="card-lead">2026年美国艺术游泳青年奥运会（Junior Olympic Championship）将于6月27日至7月4日在密歇根州伊普西兰蒂举行。这是全美12-18岁青少年艺术游泳运动员的最高级别赛事，也是通往大学游泳奖学金和国家队选拔的重要通道。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
       </div>
   </div>
   
@@ -190,6 +485,8 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
         <h1 class="atitle">2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线；小组赛激战正酣</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="feb13623e146f" onclick="toggleFav(event,'feb13623e146f')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。
 
 6月19日焦点战报（新华网体育、ESPN）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。
@@ -203,17 +500,9 @@
       <div class="article" id="a1" data-lang="zh" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
-        <h1 class="atitle">美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议</h1>
-        <p class="alead" >美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</p>
-        <ul class='abul'><li>美国众议院6月3日以215:208表决通过伊朗战争权力决议(H.Con.Res.38)，4名共和党人倒戈支持</li><li>决议要求终止美军对伊朗的敌对行动，系对特朗普的重大象征性谴责（BBC称「delivers rebuke to Trump」）</li><li>决议在参议院前景不明；美伊6月19日已签MOU，但决议反映国会反战声音</li><li>Walkinshaw众议员2月28日（开战当日）即提出该决议，历经四次尝试终获通过</li></ul>
-        <div class="abody"><p>美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cj6pldg39deo" target="_blank" rel="noopener">BBC<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-03</span></a> <a class="src" href="https://www.reuters.com/world/us/us-house-backs-resolution-curbing-trump-iran-war-powers-2026-06-03/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-03</span></a> <a class="src" href="https://www.pbs.org/newshour/politics/whats-next-for-the-war-powers-resolution-on-iran-politifact-explains" target="_blank" rel="noopener">PBS Newshour<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06</span></a></div>
-        <button class="back btm" onclick="home()">‹ 返回列表</button>
-      </div>
-      <div class="article" id="a2" data-lang="zh" style="display:none">
-        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
         <h1 class="atitle">G7反对单方面改变台海现状；两岸海警在南海普拉塔斯岛附近再次对峙</h1>
+        <div class="adate">2026-06-18</div>
+        <button class="favbtn" data-fav="fda368a49fb55" onclick="toggleFav(event,'fda368a49fb55')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >G7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在X平台表示感谢，台北时报以头条报道。中国外交部尚未就G7台海表述做单独回应（截至6月19日）。
 
 两岸海警对峙（Reuters 6月5日）：台湾和中国海警在南海普拉塔斯岛（东沙群岛）附近发生新一轮紧张对峙，延续近期双方在渔业执法、海域管辖权上的摩擦模式。台湾正推动本土无人机产业发展以应对，但面临立法程序挫折（AEI 6月12日报告）。</p>
@@ -222,10 +511,24 @@
         <div class="sources">来源：<a class="src" href="https://www.elysee.fr/en/G7evian/2026/06/17/g7-leaders-statement-on-geopolitical-issues" target="_blank" rel="noopener">Elysee<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-17</span></a> <a class="src" href="https://www.taipeitimes.com/News/front/archives/2026/06/18/2003859293" target="_blank" rel="noopener">Taipei Times<span class="stance" style="background:#5bbf8a">体制外</span><span class="srcdate">2026-06-18</span></a> <a class="src" href="https://www.reuters.com/world/china/taiwan-china-coast-guards-renewed-standoff-top-south-china-sea-2026-06-05/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-05</span></a> <a class="src" href="https://www.aei.org/articles/china-taiwan-update-june-12-2026/" target="_blank" rel="noopener">AEI<span class="stance" style="background:#ef8b5b">偏右</span><span class="srcdate">2026-06-12</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
+      <div class="article" id="a2" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议</h1>
+        <div class="adate">2026-06-03</div>
+        <button class="favbtn" data-fav="f77f3728ed752" onclick="toggleFav(event,'f77f3728ed752')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</p>
+        <ul class='abul'><li>美国众议院6月3日以215:208表决通过伊朗战争权力决议(H.Con.Res.38)，4名共和党人倒戈支持</li><li>决议要求终止美军对伊朗的敌对行动，系对特朗普的重大象征性谴责（BBC称「delivers rebuke to Trump」）</li><li>决议在参议院前景不明；美伊6月19日已签MOU，但决议反映国会反战声音</li><li>Walkinshaw众议员2月28日（开战当日）即提出该决议，历经四次尝试终获通过</li></ul>
+        <div class="abody"><p>美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cj6pldg39deo" target="_blank" rel="noopener">BBC<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-03</span></a> <a class="src" href="https://www.reuters.com/world/us/us-house-backs-resolution-curbing-trump-iran-war-powers-2026-06-03/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-03</span></a> <a class="src" href="https://www.pbs.org/newshour/politics/whats-next-for-the-war-powers-resolution-on-iran-politifact-explains" target="_blank" rel="noopener">PBS Newshour<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
       <div class="article" id="a3" data-lang="zh" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
         <h1 class="atitle">习近平给新华社老党员张连生回信：传承红色基因在新征程上书写优异答卷</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f23eb4c0e16f1" onclick="toggleFav(event,'f23eb4c0e16f1')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。</p>
         <ul class='abul'><li>习近平6月18日给新华社百岁老党员张连生回信，强调传承红色基因、不忘初心</li><li>新华社配发系列报道：学习快评、纪录片《四大队》、时代人物专题</li><li>6月19日发布「让红船精神永放光芒」习近平强党兴党故事；端午节推出屈原诗话家国情专题</li></ul>
         <div class="abody"><p>6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。</p></div>
@@ -236,6 +539,8 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
         <h1 class="atitle">国务院任免：蔡奇兼任国家行政学院院长；外交部就韩官员涉台表述答问</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="ff3b1d14e07f1" onclick="toggleFav(event,'ff3b1d14e07f1')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。</p>
         <ul class='abul'><li>6月18日国务院任免：蔡奇兼任国家行政学院院长，陈希卸任</li><li>外交部发言人林剑就韩官员重申中韩建交联合公报涉台表述答问</li><li>中方6月19日呼吁加沙真正持久停火，敦促推进利比亚包容性政治进程</li></ul>
         <div class="abody"><p>国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。</p></div>
@@ -246,6 +551,8 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#fdf2e3;color:#e6943a">科学健康</div>
         <h1 class="atitle">FDA戒烟新药Cytisinicline审批预计6月20日公布；GLP-1持续拓展新适应症</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f3c7f8b038aae" onclick="toggleFav(event,'f3c7f8b038aae')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >药物审批：Cytisinicline有望成为20年来首个获FDA批准全新戒烟药物，审批决定预计6月20日公布（GoodRx）。RGX-121（Regenxbio）一次性基因治疗亨特综合征（Hunter syndrome罕见CNS遗传病），FDA决定已出。GLP-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。Nature Medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。</p>
         <ul class='abul'><li>Cytisinicline有望成为20年来首个全新戒烟药物，FDA审批决定预计6月20日公布</li><li>RGX-121基因治疗亨特综合征FDA决定2026年初已出，为罕见CNS疾病基因治疗新模式</li><li>GLP-1类药物已从糖尿病/肥胖延伸至心血管、肾脏疾病和精神健康领域</li><li>2026年Nature Medicine重点关注：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV新方案</li></ul>
         <div class="abody"><p>药物审批：Cytisinicline有望成为20年来首个获FDA批准全新戒烟药物，审批决定预计6月20日公布（GoodRx）。RGX-121（Regenxbio）一次性基因治疗亨特综合征（Hunter syndrome罕见CNS遗传病），FDA决定已出。GLP-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。Nature Medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。</p></div>
@@ -256,6 +563,8 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#f2ecfa;color:#9b78c9">教育</div>
         <h1 class="atitle">第67届IMO 7月10-21日上海举办；2026 USAMO/USACO结果已公布</h1>
+        <div class="adate">2026-02-21</div>
+        <button class="favbtn" data-fav="f3ce5ff57a4ad" onclick="toggleFav(event,'f3ce5ff57a4ad')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >数学竞赛：第67届IMO将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（MAA）。USAMO/USAJMO 2026：MAA已公布获奖名单。据Ivy League Center：AMC 8 19名满分；AMC/AIME 104名晋级者；8名USAMO+7名USAJMO获奖者入MOP；4名MOP入选者。USACO 2025-2026：Brian Xue(银)、Alex Chen(铜)、Bing-Dong Liu(银)、Rain Jiang(金)。US Open结果已作为夏季训练营选拔主要依据。MIT 2026级录取率约4.6%（历史最低之一），EA阶段11883人申请录655人（5.51%）。</p>
         <ul class='abul'><li>第67届国际数学奥林匹克（IMO）7月10-21日在中国上海举办</li><li>2026 USAMO: 8名获奖者 + 7名USAJMO获奖者进入MOP训练营；AMC 8 19名满分</li><li>USACO 2025-2026公布4名最终入选者：Brian Xue(银), Alex Chen(铜), Bing-Dong Liu(银), Rain Jiang(金)</li><li>MIT 2026级录取率约4.6%，EA阶段11883人申请录取655人（5.51%）</li></ul>
         <div class="abody"><p>数学竞赛：第67届IMO将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（MAA）。USAMO/USAJMO 2026：MAA已公布获奖名单。据Ivy League Center：AMC 8 19名满分；AMC/AIME 104名晋级者；8名USAMO+7名USAJMO获奖者入MOP；4名MOP入选者。USACO 2025-2026：Brian Xue(银)、Alex Chen(铜)、Bing-Dong Liu(银)、Rain Jiang(金)。US Open结果已作为夏季训练营选拔主要依据。MIT 2026级录取率约4.6%（历史最低之一），EA阶段11883人申请录655人（5.51%）。</p></div>
@@ -266,6 +575,8 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
         <h1 class="atitle">纽约尼克斯4-1击败马刺夺得2026年NBA总冠军，Jalen Brunson荣膺FMVP</h1>
+        <div class="adate">2026-06</div>
+        <button class="favbtn" data-fav="ff4b3a02a080d" onclick="toggleFav(event,'ff4b3a02a080d')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >2026年NBA总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。FMVP：Jalen Brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。Game 5：94-90获胜锁定冠军。核心阵容：Brunson, Towns, Anunoby。ESPN称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。</p>
         <ul class='abul'><li>尼克斯4-1战胜马刺夺队史第3冠（首冠自1973年，时隔53年）</li><li>Jalen Brunson获FMVP；尼克斯每场都曾落后10+分逆转，创1971年以来首次</li><li>Game 5决战：尼克斯94-90胜马刺锁定冠军；Karl-Anthony Towns和OG Anunoby关键贡献</li></ul>
         <div class="abody"><p>2026年NBA总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。FMVP：Jalen Brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。Game 5：94-90获胜锁定冠军。核心阵容：Brunson, Towns, Anunoby。ESPN称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。</p></div>
@@ -276,6 +587,8 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
         <h1 class="atitle">2026 NBA选秀6月23-24日举行：奇才获状元签，AJ Dybantsa(BYU)预测第一顺位</h1>
+        <div class="adate">2026-06</div>
+        <button class="favbtn" data-fav="f29b4ff4c2722" onclick="toggleFav(event,'f29b4ff4c2722')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >2026年NBA选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。ESPN百大新秀前5：1. AJ Dybantsa(BYU, 小前锋, 身高6-9.5, 臂展7-0.25)；2. Darryn Peterson(Kansas, 后卫)；3. Cameron Boozer(Duke, 前锋)；4. Caleb Wilson(UNC, 前锋)；5. Keaton Wagler(Illinois, 后卫)。NBA Draft Room模拟选秀：奇才将在Dybantsa和Peterson间做艰难选择。</p>
         <ul class='abul'><li>2026年NBA选秀6月23-24日举行，恢复60个选秀签位（自2021年以来首次）</li><li>华盛顿奇才赢得乐透抽签获状元签；AJ Dybantsa(BYU小前锋)为ESPN预测状元</li><li>ESPN百大新秀前5：Dybantsa(BYU)、D. Peterson(Kansas)、C. Boozer(Duke)、C. Wilson(UNC)、K. Wagler(Illinois)</li><li>选秀与自由市场将重塑新赛季联盟格局，尼克斯夺冠后东部竞争力受关注</li></ul>
         <div class="abody"><p>2026年NBA选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。ESPN百大新秀前5：1. AJ Dybantsa(BYU, 小前锋, 身高6-9.5, 臂展7-0.25)；2. Darryn Peterson(Kansas, 后卫)；3. Cameron Boozer(Duke, 前锋)；4. Caleb Wilson(UNC, 前锋)；5. Keaton Wagler(Illinois, 后卫)。NBA Draft Room模拟选秀：奇才将在Dybantsa和Peterson间做艰难选择。</p></div>
@@ -286,10 +599,252 @@
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
         <h1 class="atitle">2026欧冠决赛：PSG在布达佩斯卫冕；新赛季7月7日资格赛启动</h1>
+        <div class="adate">2026-05-30</div>
+        <button class="favbtn" data-fav="f7c783ebf1173" onclick="toggleFav(event,'f7c783ebf1173')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
         <p class="alead" >2026年UEFA欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。</p>
         <ul class='abul'><li>2026年5月30日欧冠决赛：卫冕冠军巴黎圣日耳曼在布达佩斯普斯卡什竞技场成功卫冕</li><li>2026-27赛季欧冠资格赛7月7日开打，联赛阶段9月8日启动（延续瑞士轮赛制）</li><li>同期2026世界杯小组赛正在美加墨进行中，足球日程空前密集</li></ul>
         <div class="abody"><p>2026年UEFA欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。</p></div>
         <div class="sources">来源：<a class="src" href="https://en.wikipedia.org/wiki/2026_UEFA_Champions_League_final" target="_blank" rel="noopener">Wikipedia<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-05-30</span></a> <a class="src" href="https://www.uefa.com/uefachampionsleague/fixtures-results/" target="_blank" rel="noopener">UEFA<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a10" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">G7峰会在法国埃维安闭幕：聚焦乌克兰、全球经济与AI治理</h1>
+        
+        <button class="favbtn" data-fav="f6833b0af387e" onclick="toggleFav(event,'f6833b0af387e')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >2026年G7领导人峰会于6月15日至17日在法国埃维安举行，七国领导人讨论了国际和平与安全、全球经济挑战、人工智能治理、国际团结等广泛议题，并于17日发布联合声明。
+
+在乌克兰问题上，G7领导人同意增加军事支持，包括防空能力、额外武器系统和拦截器。在经济方面，领导人讨论了如何创造平衡、可持续和共享的增长条件。峰会还特别关注对抗癌症的跨国合作，与即将召开的欧盟峰会形成呼应。
+
+此次G7峰会在中东局势可能出现转折、全球经济面临通胀和贸易不确定性的背景下召开。分析人士注意到，峰会联合声明在措辞上较往年更为平衡，在对华政策方面维持了&#x27;去风险而非脱钩&#x27;的基调。</p>
+        <ul class='abul'><li>6月15-17日在法国埃维安（Evian）举行，峰会发布联合声明</li><li>G7同意加大对乌克兰军事支持，承诺加强抗癌合作与AI治理</li></ul>
+        <div class="abody"><p>2026年G7领导人峰会于6月15日至17日在法国埃维安举行，七国领导人讨论了国际和平与安全、全球经济挑战、人工智能治理、国际团结等广泛议题，并于17日发布联合声明。</p><p>在乌克兰问题上，G7领导人同意增加军事支持，包括防空能力、额外武器系统和拦截器。在经济方面，领导人讨论了如何创造平衡、可持续和共享的增长条件。峰会还特别关注对抗癌症的跨国合作，与即将召开的欧盟峰会形成呼应。</p><p>此次G7峰会在中东局势可能出现转折、全球经济面临通胀和贸易不确定性的背景下召开。分析人士注意到，峰会联合声明在措辞上较往年更为平衡，在对华政策方面维持了&#x27;去风险而非脱钩&#x27;的基调。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.consilium.europa.eu/en/press/press-releases/2026/06/17/g7-leaders-joint-statements-evian-france-16-17-june-2026/" target="_blank" rel="noopener">EU Council<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.elysee.fr/en/G7evian/2026/06/17/the-outcomes-of-the-evian-g7-summit" target="_blank" rel="noopener">Elysee<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a11" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">美伊宣布达成结束冲突框架协议，中东迎来和平曙光</h1>
+        
+        <button class="favbtn" data-fav="f42b2c005c7ca" onclick="toggleFav(event,'f42b2c005c7ca')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >6月14日，美国与伊朗经巴基斯坦斡旋宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎凡尔赛宫确认已签署谅解备忘录。伊朗外交部副部长在国家电视台上证实协议，称&#x27;这是伊朗人民的胜利&#x27;。
+
+协议内容包括逐步恢复霍尔木兹海峡通航、分阶段解除制裁等。国际油价应声大幅回落，布伦特原油跌破80美元/桶，缓解了全球通胀压力。联合国秘书长对此表示欢迎，称协议为中东和平开辟了新路径。
+
+与此同时，联合国粮农组织和世界粮食计划署6月18日发布《饥饿热点报告》警告，2026年6月至11月期间，13个国家数百万人的急性粮食不安全状况将恶化，中东局势缓和有望改善部分地区的粮食供应链。</p>
+        <ul class='abul'><li>特朗普6月17日在巴黎确认签署谅解备忘录，正式MOU预计6月19日签署</li><li>联合国粮农组织警告13国面临严重粮食不安全，中东局势缓和有助于缓解危机</li></ul>
+        <div class="abody"><p>6月14日，美国与伊朗经巴基斯坦斡旋宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎凡尔赛宫确认已签署谅解备忘录。伊朗外交部副部长在国家电视台上证实协议，称&#x27;这是伊朗人民的胜利&#x27;。</p><p>协议内容包括逐步恢复霍尔木兹海峡通航、分阶段解除制裁等。国际油价应声大幅回落，布伦特原油跌破80美元/桶，缓解了全球通胀压力。联合国秘书长对此表示欢迎，称协议为中东和平开辟了新路径。</p><p>与此同时，联合国粮农组织和世界粮食计划署6月18日发布《饥饿热点报告》警告，2026年6月至11月期间，13个国家数百万人的急性粮食不安全状况将恶化，中东局势缓和有望改善部分地区的粮食供应链。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/zhongwen/articles/c992nyg2kp3o/trad" target="_blank" rel="noopener">BBC中文<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.voachinese.com/z/1739" target="_blank" rel="noopener">美国之音<span class="stance" style="background:#5b8def">偏左</span></a> <a class="src" href="https://news.un.org/zh/news" target="_blank" rel="noopener">联合国新闻<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a12" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">欧盟峰会6月18-19日召开：27国领导人讨论防务安全与竞争力</h1>
+        
+        <button class="favbtn" data-fav="f54bab0cf03ef" onclick="toggleFav(event,'f54bab0cf03ef')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >欧洲理事会于6月18-19日在布鲁塞尔举行峰会。理事会主席科斯塔（Antonio Costa）在邀请函中列出议程：竞争力与全球经济挑战、乌克兰、中东局势、欧洲防务与安全架构、以及下一个多年度财政框架（MFF）。
+
+据会前分析，此次峰会预计不做具体决定，而是为即将上任的爱尔兰轮值主席国提供战略指导。核心看点在于各国领导人能否在防务融资和储蓄与投资联盟推进上达成共识。
+
+值得注意的是，法国总统马克龙此前已设定6月为欧盟经济重振计划的截止期限，此次峰会能否为停滞的欧盟经济注入新动力备受关注。峰会紧随G7之后，显示欧洲在协调应对地缘政治与经济挑战方面的努力。</p>
+        <ul class='abul'><li>峰会在布鲁塞尔举行，议题涵盖乌克兰、中东、防务、竞争力与新财政框架</li><li>紧随G7之后，法国总统马克龙设定6月为欧盟经济重振计划截止期</li></ul>
+        <div class="abody"><p>欧洲理事会于6月18-19日在布鲁塞尔举行峰会。理事会主席科斯塔（Antonio Costa）在邀请函中列出议程：竞争力与全球经济挑战、乌克兰、中东局势、欧洲防务与安全架构、以及下一个多年度财政框架（MFF）。</p><p>据会前分析，此次峰会预计不做具体决定，而是为即将上任的爱尔兰轮值主席国提供战略指导。核心看点在于各国领导人能否在防务融资和储蓄与投资联盟推进上达成共识。</p><p>值得注意的是，法国总统马克龙此前已设定6月为欧盟经济重振计划的截止期限，此次峰会能否为停滞的欧盟经济注入新动力备受关注。峰会紧随G7之后，显示欧洲在协调应对地缘政治与经济挑战方面的努力。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.consilium.europa.eu/en/meetings/european-council/2026/06/18-19/" target="_blank" rel="noopener">EU Council<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://epthinktank.eu/2026/06/17/outlook-for-the-european-council-18-19-june/" target="_blank" rel="noopener">EP Think Tank<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a13" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">缅甸总统敏昂莱访华，中缅加强战略对话与边境合作</h1>
+        
+        <button class="favbtn" data-fav="f9f0e4c1fdec6" onclick="toggleFav(event,'f9f0e4c1fdec6')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >应中国国家主席习近平邀请，缅甸总统敏昂莱于6月15日至19日对中国进行国事访问。这是缅甸2021年政局变化以来领导人最重要的外访之一，分析认为此访意在加强中缅经济走廊建设和边境稳定合作。
+
+同期，中国国防部6月中旬举行例行新闻发布会，宣布中国军队将同老挝一道，以建立外交、国防、公安&#x27;3+3&#x27;战略对话机制为契机，加强战略沟通，增进各层级交往，办好边境国防友好交流活动。
+
+中国外交部发言人林剑在6月17日记者会上强调，王毅外长此前提出全球治理倡议，号召各国携手构建更加公正合理的全球治理体系。分析人士认为，中国正通过多边和双边渠道强化在东南亚的影响力布局。</p>
+        <ul class='abul'><li>应习近平主席邀请，缅甸总统敏昂莱6月15日至19日对中国进行国事访问</li><li>中老&#x27;3+3&#x27;战略对话机制启动，中国国防部6月中旬举行例行新闻发布</li></ul>
+        <div class="abody"><p>应中国国家主席习近平邀请，缅甸总统敏昂莱于6月15日至19日对中国进行国事访问。这是缅甸2021年政局变化以来领导人最重要的外访之一，分析认为此访意在加强中缅经济走廊建设和边境稳定合作。</p><p>同期，中国国防部6月中旬举行例行新闻发布会，宣布中国军队将同老挝一道，以建立外交、国防、公安&#x27;3+3&#x27;战略对话机制为契机，加强战略沟通，增进各层级交往，办好边境国防友好交流活动。</p><p>中国外交部发言人林剑在6月17日记者会上强调，王毅外长此前提出全球治理倡议，号召各国携手构建更加公正合理的全球治理体系。分析人士认为，中国正通过多边和双边渠道强化在东南亚的影响力布局。</p></div>
+        <div class="sources">来源：<a class="src" href="https://zh.wikipedia.org/wiki/2026%E5%B9%B46%E6%9C%88%E4%B8%AD%E5%9B%BD%E5%A4%A7%E9%99%86" target="_blank" rel="noopener">维基百科<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="http://www.mod.gov.cn/gfbw/qwfb/16467714.html" target="_blank" rel="noopener">国防部<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.bbc.com/zhongwen/simp" target="_blank" rel="noopener">BBC中文<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a14" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
+        <h1 class="atitle">2026世界杯小组赛激战正酣：英格兰4-2克罗地亚，葡萄牙1-1刚果(金)</h1>
+        
+        <button class="favbtn" data-fav="fb23188d49620" onclick="toggleFav(event,'fb23188d49620')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >2026年FIFA世界杯（美国、加拿大、墨西哥联合举办）小组赛持续进行。6月17日多场焦点对决：L组英格兰在达拉斯4-2击败克罗地亚，K组葡萄牙1-1战平刚果(金)（休斯顿）。同天乌兹别克斯坦1-3不敌哥伦比亚，加纳1-0击败巴拿马。
+
+6月18日赛事继续：A组、G组和J组展开多场较量，包括阿根廷vs阿尔及利亚（堪萨斯城）等强强对话。截至目前，小组赛已进入白热化阶段，多个小组的出线形势尚不明朗。
+
+本届世界杯首次扩军至48支球队，共设16个小组，比赛在美国、加拿大、墨西哥的16座城市举行。赛事自6月11日开幕以来，全球收视人数屡创新高，中国男足虽未晋级，但亚洲球队整体表现引人关注。</p>
+        <ul class='abul'><li>6月17日焦点战：英格兰4-2克罗地亚（达拉斯），葡萄牙1-1刚果(金)（休斯顿）</li><li>6月18日继续小组赛：哥伦比亚等多队登场</li></ul>
+        <div class="abody"><p>2026年FIFA世界杯（美国、加拿大、墨西哥联合举办）小组赛持续进行。6月17日多场焦点对决：L组英格兰在达拉斯4-2击败克罗地亚，K组葡萄牙1-1战平刚果(金)（休斯顿）。同天乌兹别克斯坦1-3不敌哥伦比亚，加纳1-0击败巴拿马。</p><p>6月18日赛事继续：A组、G组和J组展开多场较量，包括阿根廷vs阿尔及利亚（堪萨斯城）等强强对话。截至目前，小组赛已进入白热化阶段，多个小组的出线形势尚不明朗。</p><p>本届世界杯首次扩军至48支球队，共设16个小组，比赛在美国、加拿大、墨西哥的16座城市举行。赛事自6月11日开幕以来，全球收视人数屡创新高，中国男足虽未晋级，但亚洲球队整体表现引人关注。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.espn.com/soccer/story/_/id/48939282/2026-fifa-world-cup-fixtures-results-match-schedule-group-stage-knockout-rounds-bracket" target="_blank" rel="noopener">ESPN<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures" target="_blank" rel="noopener">FIFA<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.aljazeera.com/video/2026/6/15/video-world-cup-2026-highlights" target="_blank" rel="noopener">半岛电视台<span class="stance" style="background:#5b8def">偏左</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a15" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
+        <h1 class="atitle">美国TYR职业游泳系列赛印第安纳波利斯站6月17-20日举行</h1>
+        
+        <button class="favbtn" data-fav="f7f4162cb413a" onclick="toggleFav(event,'f7f4162cb413a')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >美国游泳协会（USA Swimming）主办的TYR职业游泳系列赛（TYR Pro Swim Series）印第安纳波利斯站于6月17日至20日举行，这是美国国内最高水平的职业游泳赛事之一。多名奥运选手和世界冠军参赛，为即将于12月在北京举行的世界游泳锦标赛（25米池）热身。
+
+同时，美国青少年艺术游泳青年奥运会（Junior Olympic Championship）将于6月27日至7月4日在密歇根州伊普西兰蒂（Ypsilanti）的东密歇根大学举行。这是全美青少年艺术游泳最高级别赛事，吸引了众多年轻运动员参与。
+
+中国方面，世界游泳锦标赛（短池）将于2026年12月1-6日在北京举行，这是北京继2026年2月举办世界游泳锦标赛（长池）后再度承办世界级赛事，对中国青少年游泳运动将起到积极推动作用。</p>
+        <ul class='abul'><li>USA Swimming顶级职业系列赛在印第安纳波利斯进行，为世锦赛选拔热身</li><li>美国青少年艺术游泳青年奥运会（Junior Olympics）6月27日-7月4日在密歇根州举行</li></ul>
+        <div class="abody"><p>美国游泳协会（USA Swimming）主办的TYR职业游泳系列赛（TYR Pro Swim Series）印第安纳波利斯站于6月17日至20日举行，这是美国国内最高水平的职业游泳赛事之一。多名奥运选手和世界冠军参赛，为即将于12月在北京举行的世界游泳锦标赛（25米池）热身。</p><p>同时，美国青少年艺术游泳青年奥运会（Junior Olympic Championship）将于6月27日至7月4日在密歇根州伊普西兰蒂（Ypsilanti）的东密歇根大学举行。这是全美青少年艺术游泳最高级别赛事，吸引了众多年轻运动员参与。</p><p>中国方面，世界游泳锦标赛（短池）将于2026年12月1-6日在北京举行，这是北京继2026年2月举办世界游泳锦标赛（长池）后再度承办世界级赛事，对中国青少年游泳运动将起到积极推动作用。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.usaswimming.org/events" target="_blank" rel="noopener">USA Swimming<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.usaartisticswim.org/2026-junior-olympic-championship" target="_blank" rel="noopener">USA Artistic Swimming<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.worldaquatics.com/news/4368754/world-aquatics-confirms-dates-for-the-world-aquatics-swimming-championships-25m-beijing-2026" target="_blank" rel="noopener">World Aquatics<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a16" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
+        <h1 class="atitle">美伊和平协议带动全球体育赛事安全形势改善</h1>
+        
+        <button class="favbtn" data-fav="ffc75b91ba773" onclick="toggleFav(event,'ffc75b91ba773')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >随着美伊和平协议框架的达成，中东紧张局势显著缓解，对正在北美举行的2026年世界杯产生积极影响。赛事组织者表示，安全威胁级别的下调使得部分安保资源可以向其他环节倾斜。
+
+国际体育旅游也开始回暖——此前因中东冲突导致部分球迷取消赴美行程，随着局势缓和，国际航班预订量已出现反弹。各主办城市的酒店和交通预订量本周增长了约15%。
+
+全球体育产业在疫情后持续复苏，2026年预计将成为体育商业收入创纪录的一年。世界杯、冬奥会（米兰-科尔蒂纳）和多项世锦赛的叠加效应，推动体育赞助、转播权和周边消费全面增长。</p>
+        <ul class='abul'><li>中东局势缓和利好世界杯安保和球迷出行</li><li>国际体育赛事逐步恢复疫情前常态，全球体育产业持续复苏</li></ul>
+        <div class="abody"><p>随着美伊和平协议框架的达成，中东紧张局势显著缓解，对正在北美举行的2026年世界杯产生积极影响。赛事组织者表示，安全威胁级别的下调使得部分安保资源可以向其他环节倾斜。</p><p>国际体育旅游也开始回暖——此前因中东冲突导致部分球迷取消赴美行程，随着局势缓和，国际航班预订量已出现反弹。各主办城市的酒店和交通预订量本周增长了约15%。</p><p>全球体育产业在疫情后持续复苏，2026年预计将成为体育商业收入创纪录的一年。世界杯、冬奥会（米兰-科尔蒂纳）和多项世锦赛的叠加效应，推动体育赞助、转播权和周边消费全面增长。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c6217106px6o" target="_blank" rel="noopener">BBC<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/highlights" target="_blank" rel="noopener">FIFA<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a17" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">科学健康前沿</div>
+        <h1 class="atitle">《自然·医学》刊出2026年11项将改变医学的关键临床试验</h1>
+        
+        <button class="favbtn" data-fav="f224692a2b5fa" onclick="toggleFav(event,'f224692a2b5fa')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >《自然·医学》（Nature Medicine）2025年底推出年度特辑，评选出11项&#x27;将在2026年改变医学的关键临床试验&#x27;。研究人员从众多候选试验中提名了最具突破潜力的项目，涵盖传染病疫苗、癌症治疗、细胞疗法等多个前沿领域。
+
+其中备受关注的项目包括：一款长效结核病疫苗的III期试验、联合拉沙热-狂犬病双价疫苗的人体试验、以及针对高危无症状多发性骨髓瘤的BCMA靶向CAR-T细胞疗法II期结果（在AACR 2026年会上报告）。这些试验如果达到主要终点，有望显著改变相应的临床实践。
+
+Nature Medicine还特别关注了&#x27;食物即药物&#x27;（Food is Medicine）概念的科学验证——医疗定制饮食在慢性病管理中的随机对照试验正在从概念走向证据，这对于糖尿病、心血管疾病等的非药物干预具有重要公共卫生意义。</p>
+        <ul class='abul'><li>Nature Medicine邀请顶尖研究人员提名2026年最具影响力临床试验</li><li>涵盖结核病长效疫苗、联合拉沙热-狂犬病疫苗、HIV治疗、CAR-T等多领域</li></ul>
+        <div class="abody"><p>《自然·医学》（Nature Medicine）2025年底推出年度特辑，评选出11项&#x27;将在2026年改变医学的关键临床试验&#x27;。研究人员从众多候选试验中提名了最具突破潜力的项目，涵盖传染病疫苗、癌症治疗、细胞疗法等多个前沿领域。</p><p>其中备受关注的项目包括：一款长效结核病疫苗的III期试验、联合拉沙热-狂犬病双价疫苗的人体试验、以及针对高危无症状多发性骨髓瘤的BCMA靶向CAR-T细胞疗法II期结果（在AACR 2026年会上报告）。这些试验如果达到主要终点，有望显著改变相应的临床实践。</p><p>Nature Medicine还特别关注了&#x27;食物即药物&#x27;（Food is Medicine）概念的科学验证——医疗定制饮食在慢性病管理中的随机对照试验正在从概念走向证据，这对于糖尿病、心血管疾病等的非药物干预具有重要公共卫生意义。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.nature.com/nm/" target="_blank" rel="noopener">Nature Medicine<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.nature.com/subjects/clinical-trials/nm" target="_blank" rel="noopener">Nature Medicine<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a18" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">科学健康前沿</div>
+        <h1 class="atitle">AACR 2026年会展望：癌症早筛、个体化治疗与健康公平为三大焦点</h1>
+        
+        <button class="favbtn" data-fav="f570e4085e9b1" onclick="toggleFav(event,'f570e4085e9b1')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >美国癌症研究协会（AACR）在其2026年度展望中指出，癌症研究正经历从晚期治疗向早期检测和预防的战略转移。液体活检技术的成熟使得多癌种早筛（MCED）正在大规模临床试验中验证其有效性。
+
+个体化治疗方面，基于基因组学、蛋白质组学和免疫图谱的精准疗法继续扩展适应症。特别是CAR-T疗法在实体瘤中的应用取得了令人鼓舞的早期结果，多个针对胰腺癌和胶质母细胞瘤的试验进入关键阶段。
+
+AACR还强调了缩小癌症健康差距的紧迫性——不同种族、社会经济地位和地理区域之间的癌症发病率和存活率差距仍然显著。2026年的重点包括扩大临床试验的人口多样性和改善偏远地区的癌症筛查可及性。</p>
+        <ul class='abul'><li>美国癌症研究协会（AACR）在2026年初发布年度展望</li><li>研究重点转向早期检测与预防、精准个体化治疗、缩小癌症健康差距</li></ul>
+        <div class="abody"><p>美国癌症研究协会（AACR）在其2026年度展望中指出，癌症研究正经历从晚期治疗向早期检测和预防的战略转移。液体活检技术的成熟使得多癌种早筛（MCED）正在大规模临床试验中验证其有效性。</p><p>个体化治疗方面，基于基因组学、蛋白质组学和免疫图谱的精准疗法继续扩展适应症。特别是CAR-T疗法在实体瘤中的应用取得了令人鼓舞的早期结果，多个针对胰腺癌和胶质母细胞瘤的试验进入关键阶段。</p><p>AACR还强调了缩小癌症健康差距的紧迫性——不同种族、社会经济地位和地理区域之间的癌症发病率和存活率差距仍然显著。2026年的重点包括扩大临床试验的人口多样性和改善偏远地区的癌症筛查可及性。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.aacr.org/blog/2026/01/08/experts-forecast-cancer-research-and-treatment-advances-in-2026/" target="_blank" rel="noopener">AACR<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.nature.com/subjects/clinical-trials/nm" target="_blank" rel="noopener">Nature Medicine<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a19" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">科学健康前沿</div>
+        <h1 class="atitle">研究发现两种抗癌药或可逆转阿尔茨海默病脑部改变</h1>
+        
+        <button class="favbtn" data-fav="f52edff61ed2a" onclick="toggleFav(event,'f52edff61ed2a')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >一项发表于阿尔茨海默病研究领域期刊的临床前研究发现，两种已获批用于癌症治疗的药物可能能够逆转阿尔茨海默病引起的脑部改变。研究人员通过系统性药物筛选发现了这一意外关联，为神经退行性疾病的治疗提供了药物再利用（drug repurposing）的全新思路。
+
+阿尔茨海默病被称为&#x27;21世纪最大的未解决医学挑战之一&#x27;，全球患者超过5500万人。近年来，抗淀粉样蛋白单克隆抗体药物（如Leqembi和Kisunla）虽然获得了监管批准，但其疗效有限且价格高昂。
+
+此次发现的抗癌药可能存在的作用机制涉及炎症调节和细胞代谢通路，与阿尔茨海默病的神经炎症假说相符。研究团队正在推动进入临床试验阶段。与此同时，GLP-1受体激动剂（如司美格鲁肽）的神经保护作用也正在多个人体试验中评估——这一从糖尿病药物到脑健康的跨越式发现，被视为近年来最引人注目的药物再利用案例。</p>
+        <ul class='abul'><li>研究者在药物筛选中发现两种已获批抗癌药物可能逆转阿尔茨海默病脑部变化</li><li>研究尚处于临床前阶段，但为阿尔茨海默病治疗开辟了药物再利用新途径</li></ul>
+        <div class="abody"><p>一项发表于阿尔茨海默病研究领域期刊的临床前研究发现，两种已获批用于癌症治疗的药物可能能够逆转阿尔茨海默病引起的脑部改变。研究人员通过系统性药物筛选发现了这一意外关联，为神经退行性疾病的治疗提供了药物再利用（drug repurposing）的全新思路。</p><p>阿尔茨海默病被称为&#x27;21世纪最大的未解决医学挑战之一&#x27;，全球患者超过5500万人。近年来，抗淀粉样蛋白单克隆抗体药物（如Leqembi和Kisunla）虽然获得了监管批准，但其疗效有限且价格高昂。</p><p>此次发现的抗癌药可能存在的作用机制涉及炎症调节和细胞代谢通路，与阿尔茨海默病的神经炎症假说相符。研究团队正在推动进入临床试验阶段。与此同时，GLP-1受体激动剂（如司美格鲁肽）的神经保护作用也正在多个人体试验中评估——这一从糖尿病药物到脑健康的跨越式发现，被视为近年来最引人注目的药物再利用案例。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.alzra.org/blog/two-cancer-drugs-may-help-in-alzheimers-treatment/" target="_blank" rel="noopener">ALZRA<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://cdmrp.health.mil/" target="_blank" rel="noopener">NIH CDMRP<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a20" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">科学健康前沿</div>
+        <h1 class="atitle">中国5月CPI同比涨1.2%——&#x27;健康饮食成本&#x27;受关注，&#x27;食物即药物&#x27;概念走向实证</h1>
+        
+        <button class="favbtn" data-fav="f09e1f0240db9" onclick="toggleFav(event,'f09e1f0240db9')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >国家统计局6月16日公布的数据显示，5月中国CPI同比上涨1.2%，食品价格变动总体平稳。但营养学界持续关注的一个问题是：健康膳食的成本——富含蔬果、优质蛋白和全谷物的&#x27;理想膳食模式&#x27;在部分地区仍存在经济可及性障碍。
+
+《自然·医学》在近期的评论中聚焦了&#x27;食物即药物&#x27;（Food is Medicine）的概念——即通过医疗定制膳食干预来管理慢性病，正在从理论走向严格的随机对照试验验证。多个大型临床试验正在评估&#x27;医学定制餐食送货上门&#x27;对2型糖尿病、心力衰竭等患者临床结局的影响。
+
+美国国立卫生研究院（NIH）2026年资助了多项相关研究项目，涵盖从基础营养科学到社区干预实施的全链条。研究者和政策制定者普遍认为，将营养干预纳入医疗体系有望成为慢性病管理的&#x27;第四支柱&#x27;，与药物、手术和运动并列。</p>
+        <ul class='abul'><li>中国5月CPI数据显示食品价格温和上涨，居民膳食质量改善空间仍大</li><li>Nature Medicine呼吁将&#x27;食物即药物&#x27;从概念转化为循证实践</li></ul>
+        <div class="abody"><p>国家统计局6月16日公布的数据显示，5月中国CPI同比上涨1.2%，食品价格变动总体平稳。但营养学界持续关注的一个问题是：健康膳食的成本——富含蔬果、优质蛋白和全谷物的&#x27;理想膳食模式&#x27;在部分地区仍存在经济可及性障碍。</p><p>《自然·医学》在近期的评论中聚焦了&#x27;食物即药物&#x27;（Food is Medicine）的概念——即通过医疗定制膳食干预来管理慢性病，正在从理论走向严格的随机对照试验验证。多个大型临床试验正在评估&#x27;医学定制餐食送货上门&#x27;对2型糖尿病、心力衰竭等患者临床结局的影响。</p><p>美国国立卫生研究院（NIH）2026年资助了多项相关研究项目，涵盖从基础营养科学到社区干预实施的全链条。研究者和政策制定者普遍认为，将营养干预纳入医疗体系有望成为慢性病管理的&#x27;第四支柱&#x27;，与药物、手术和运动并列。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.nature.com/nm/" target="_blank" rel="noopener">Nature Medicine<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.stats.gov.cn/sj/zxfb/" target="_blank" rel="noopener">国家统计局<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://cdmrp.health.mil/" target="_blank" rel="noopener">NIH<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a21" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">教育/学业</div>
+        <h1 class="atitle">2025-26年度AMC 10/12分数线正式公布，AIME晋级门槛出炉</h1>
+        
+        <button class="favbtn" data-fav="f7a4926f7f102" onclick="toggleFav(event,'f7a4926f7f102')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >美国数学协会（MAA）公布了2025-26年度AMC 10/12的正式成绩和AIME晋级分数线。本年度AMC 10参赛人数超过80,000人，平均分约57分。AIME晋级门槛（Top 2.5%）约105分，Distinguished Honor Roll（Top 1%）分数线约136.5分。
+
+AMC 12方面，参赛人数增长至约38,000人，平均分约55分，AIME晋级门槛（Top 5%）约99分。2026年的AIME I和AIME II分别于2月5日和2月19日举行，成绩已公布。
+
+对于中国参赛学生而言，AMC已成为申请美国顶尖理工大学的标配竞赛经历。分析显示，近年来AIME晋级分数线持续走高，竞争日趋激烈，建议学生尽早准备、系统训练。下一赛季（2026-27）AMC 10/12预计于2026年11月和2027年1月举行。</p>
+        <ul class='abul'><li>2026年1月AMC 10/12成绩已定，AIME I/II分别于2月举行</li><li>AMC 10 Top 2.5%晋级AIME分数线约105分，Top 1%荣誉线约136.5分</li></ul>
+        <div class="abody"><p>美国数学协会（MAA）公布了2025-26年度AMC 10/12的正式成绩和AIME晋级分数线。本年度AMC 10参赛人数超过80,000人，平均分约57分。AIME晋级门槛（Top 2.5%）约105分，Distinguished Honor Roll（Top 1%）分数线约136.5分。</p><p>AMC 12方面，参赛人数增长至约38,000人，平均分约55分，AIME晋级门槛（Top 5%）约99分。2026年的AIME I和AIME II分别于2月5日和2月19日举行，成绩已公布。</p><p>对于中国参赛学生而言，AMC已成为申请美国顶尖理工大学的标配竞赛经历。分析显示，近年来AIME晋级分数线持续走高，竞争日趋激烈，建议学生尽早准备、系统训练。下一赛季（2026-27）AMC 10/12预计于2026年11月和2027年1月举行。</p></div>
+        <div class="sources">来源：<a class="src" href="https://maa.org/news/2025-26-aime-thresholds-are-now-available/" target="_blank" rel="noopener">MAA<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://artofproblemsolving.com/wiki/index.php/AMC_historical_results" target="_blank" rel="noopener">AoPS Wiki<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.thethinkacademy.com/blog/all-about-2026-amc-10-dates-registration-scores-and-prep-tips/" target="_blank" rel="noopener">Think Academy<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a22" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">教育/学业</div>
+        <h1 class="atitle">USACO 2025-2026赛季两轮比赛结果公布：铂金组191人，金组超1300人参赛</h1>
+        
+        <button class="favbtn" data-fav="f79af7f581142" onclick="toggleFav(event,'f79af7f581142')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >美国计算机奥林匹克竞赛（USACO）2025-2026赛季采用新赛制：赛季前半段安排三次在线比赛，随后通过导师监督的线下训练营（USACO Camp）选拔代表美国参加国际信息学奥林匹克（IOI）的队伍。
+
+目前第一轮和第二轮比赛结果已公布。铂金（Platinum）组共有191名参赛者；金（Gold）组1366人参赛，其中962人为大学前学生，得分650分及以上者晋升至铂金组。银（Silver）和铜（Bronze）组参赛人数更多，覆盖全球数百所中学。
+
+USACO对全球中学生开放，是中国学生展示编程能力、冲击顶尖计算机科学院校（MIT、斯坦福、卡内基梅隆等）的重要平台。新赛制更加注重选手在压力环境下的稳定发挥，建议参赛者加强全真模拟训练。特别值得注意的是，多位女选手在金组和铂金组表现出色，包括获得金牌的Helen Law、Luna Hudman和Grace Li。</p>
+        <ul class='abul'><li>USACO 2025-2026赛季首次采用新赛制：三次在线赛+导师监督的线下USACO Camp选拔</li><li>铂金组191人参赛，金组1366人，其中962人为大学前学生</li></ul>
+        <div class="abody"><p>美国计算机奥林匹克竞赛（USACO）2025-2026赛季采用新赛制：赛季前半段安排三次在线比赛，随后通过导师监督的线下训练营（USACO Camp）选拔代表美国参加国际信息学奥林匹克（IOI）的队伍。</p><p>目前第一轮和第二轮比赛结果已公布。铂金（Platinum）组共有191名参赛者；金（Gold）组1366人参赛，其中962人为大学前学生，得分650分及以上者晋升至铂金组。银（Silver）和铜（Bronze）组参赛人数更多，覆盖全球数百所中学。</p><p>USACO对全球中学生开放，是中国学生展示编程能力、冲击顶尖计算机科学院校（MIT、斯坦福、卡内基梅隆等）的重要平台。新赛制更加注重选手在压力环境下的稳定发挥，建议参赛者加强全真模拟训练。特别值得注意的是，多位女选手在金组和铂金组表现出色，包括获得金牌的Helen Law、Luna Hudman和Grace Li。</p></div>
+        <div class="sources">来源：<a class="src" href="https://usaco.org/" target="_blank" rel="noopener">USACO<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://usaco.org/index.php?page=season26contest1results" target="_blank" rel="noopener">USACO Results<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://usaco.org/index.php?page=season26contest2results" target="_blank" rel="noopener">USACO Results<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a23" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">教育/学业</div>
+        <h1 class="atitle">MIT 2026级录取率约4.6%——顶尖理工大学申请竞争白热化</h1>
+        
+        <button class="favbtn" data-fav="f1c3d9a3c238f" onclick="toggleFav(event,'f1c3d9a3c238f')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >根据MIT招生办公室公布的数据，2026年秋季入学（Class of 2030）申请人数维持在约30,000人的高位，录取约1,300人，录取率约4.6%。这一数字较前一年略有回升（此前一度低至4%以下），但仍处于历史极低水平。
+
+横向对比其他顶尖理工院校：斯坦福大学2026级录取率约3.6%（55,000+申请者中录取2,067人），加州理工学院录取约3.8%（13,856申请者中仅录取356人）。卡内基梅隆大学计算机科学学院的录取率更是低至个位数。
+
+大学申请顾问指出，顶尖理工院校录取竞争的加剧与AI/计算机领域的职业前景密切相关。具有USACO铂金/金级、AIME晋级乃至USA(J)MO资格的申请者数量逐年增加，单纯的高标化成绩已不足以脱颖而出。深度科研经历、原创项目和独特的个人叙事在录取中的权重持续上升。</p>
+        <ul class='abul'><li>MIT 2026年秋季入学申请量继续高位运行，录取率维持在历史低位约4.6%</li><li>斯坦福约3.6%、加州理工约3.8%——美国顶尖理工院校录取率持续走低</li></ul>
+        <div class="abody"><p>根据MIT招生办公室公布的数据，2026年秋季入学（Class of 2030）申请人数维持在约30,000人的高位，录取约1,300人，录取率约4.6%。这一数字较前一年略有回升（此前一度低至4%以下），但仍处于历史极低水平。</p><p>横向对比其他顶尖理工院校：斯坦福大学2026级录取率约3.6%（55,000+申请者中录取2,067人），加州理工学院录取约3.8%（13,856申请者中仅录取356人）。卡内基梅隆大学计算机科学学院的录取率更是低至个位数。</p><p>大学申请顾问指出，顶尖理工院校录取竞争的加剧与AI/计算机领域的职业前景密切相关。具有USACO铂金/金级、AIME晋级乃至USA(J)MO资格的申请者数量逐年增加，单纯的高标化成绩已不足以脱颖而出。深度科研经历、原创项目和独特的个人叙事在录取中的权重持续上升。</p></div>
+        <div class="sources">来源：<a class="src" href="https://mitadmissions.org/apply/process/stats/" target="_blank" rel="noopener">MIT Admissions<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.cosmic.nyc/blog/cs-at-stanford-vs-cs-at-caltech-in-2026" target="_blank" rel="noopener">Cosmic Consulting<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://toptieradmissions.com/resources/college-acceptance-rates/mit-admissions-acceptance-rates-statistics/" target="_blank" rel="noopener">Top Tier Admissions<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a24" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">教育/学业</div>
+        <h1 class="atitle">2026年美国青少年艺术游泳青年奥运会即将开幕——青少年体育教育新趋势</h1>
+        
+        <button class="favbtn" data-fav="f0494a4268178" onclick="toggleFav(event,'f0494a4268178')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >2026年美国艺术游泳青年奥运会（Junior Olympic Championship）将于6月27日至7月4日在密歇根州伊普西兰蒂举行。这是全美12-18岁青少年艺术游泳运动员的最高级别赛事，也是通往大学游泳奖学金和国家队选拔的重要通道。
+
+在青少年体育教育领域，近年来出现了值得关注的趋势转变：越来越多的高校在录取中重新评估体育特长的权重。2026年初，多位大学招生主任公开表示，更看重申请者通过体育展现的领导力、毅力和时间管理能力，而非单纯的竞赛成绩。
+
+对于中国家庭而言，游泳不仅是一项重要的生存技能和健身方式，也在海外升学中发挥着日益重要的角色。中国教育部持续推进&#x27;体教融合&#x27;政策，鼓励中小学加强游泳等水上运动普及。世界游泳锦标赛（短池）将于2026年12月在北京举行，预计将进一步激发青少年游泳热情。</p>
+        <ul class='abul'><li>第2026届Junior Olympic Championship将于6月27日-7月4日在密歇根举行</li><li>青少年体育教育从&#x27;竞技驱动&#x27;转向&#x27;全人发展&#x27;——美国高校录取中的体育权重调整</li></ul>
+        <div class="abody"><p>2026年美国艺术游泳青年奥运会（Junior Olympic Championship）将于6月27日至7月4日在密歇根州伊普西兰蒂举行。这是全美12-18岁青少年艺术游泳运动员的最高级别赛事，也是通往大学游泳奖学金和国家队选拔的重要通道。</p><p>在青少年体育教育领域，近年来出现了值得关注的趋势转变：越来越多的高校在录取中重新评估体育特长的权重。2026年初，多位大学招生主任公开表示，更看重申请者通过体育展现的领导力、毅力和时间管理能力，而非单纯的竞赛成绩。</p><p>对于中国家庭而言，游泳不仅是一项重要的生存技能和健身方式，也在海外升学中发挥着日益重要的角色。中国教育部持续推进&#x27;体教融合&#x27;政策，鼓励中小学加强游泳等水上运动普及。世界游泳锦标赛（短池）将于2026年12月在北京举行，预计将进一步激发青少年游泳热情。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.usaartisticswim.org/2026-junior-olympic-championship" target="_blank" rel="noopener">USA Artistic Swimming<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.usaswimming.org/events" target="_blank" rel="noopener">USA Swimming<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.worldaquatics.com/news/4368754/world-aquatics-confirms-dates-for-the-world-aquatics-swimming-championships-25m-beijing-2026" target="_blank" rel="noopener">World Aquatics<span class="stance" style="background:#8a94a6">中立</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
 
@@ -309,40 +864,111 @@
     var sl=document.getElementsByClassName('fsr-art'); for(var i=0;i<sl.length;i++){ sl[i].value=v; }
     var nb=document.getElementsByClassName('fsv-art'); for(var j=0;j<nb.length;j++){ nb[j].textContent=v; }
   }
-  // —— 中/英/自动 语言切换 (David 2026-06-19): 中=只看中文原文, ENG=只看英文原文, 自动=各显其原文语言(全显示) ——
+  // —— 中/英/自动 语言切换 + 搜索 + 空块隐藏, 统一过滤 (David 2026-06-19) ——
   var savedLang = localStorage.getItem('himi_lang') || 'zh';   // 默认中文
+  var curQuery = '';
   function setLang(L){
     localStorage.setItem('himi_lang', L);
-    // 按钮高亮
     var btns=document.getElementsByClassName('langbtn');
     for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i].getAttribute('data-lang')===L); }
-    // 过滤卡片: 自动=全显示; 中/英=只显示对应原文语言
+    applyFilters();
+  }
+  function curLang(){ return localStorage.getItem('himi_lang') || 'zh'; }
+  function doSearch(q){ curQuery=(q||'').trim().toLowerCase(); applyFilters(); }
+  function applyFilters(){
+    var L=curLang();
+    var favs=getFavs(), favView=isFavView();
+    // 1) 每张卡片: 语言 AND 搜索 AND (收藏视图时仅显示已收藏) 都过
     var cards=document.querySelectorAll('#list .card');
     for(var j=0;j<cards.length;j++){
       var cl=cards[j].getAttribute('data-lang');
-      cards[j].style.display=(L==='auto'||cl===L)?'':'none';
+      var okLang=(L==='auto'||cl===L);
+      var okQ=(!curQuery) || (cards[j].getAttribute('data-search')||'').indexOf(curQuery)>=0;
+      var okFav=(!favView) || favs[cards[j].getAttribute('data-fav')];
+      cards[j].style.display=(okLang&&okQ&&okFav)?'':'none';
     }
-    // 板块小标: 本板块过滤后若一条新闻都不剩, 就隐藏该板块标题
+    // 2) 板块小标: 本(天,板块)若无可见卡片就隐藏
     var labels=document.querySelectorAll('#list .seclabel');
     for(var k=0;k<labels.length;k++){
       var si=labels[k].getAttribute('data-sec');
       var any=document.querySelectorAll('#list .card[data-sec="'+si+'"]');
-      var visible=0;
-      for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') visible++; }
-      labels[k].style.display=visible?'':'none';
+      var vis=0; for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') vis++; }
+      labels[k].style.display=vis?'':'none';
     }
-    // 列表空提示
+    // 3) 日期分隔线: 该天若无任何可见卡片就隐藏(整天被语言/搜索滤空)
+    var divs=document.querySelectorAll('#list .daydivider');
+    for(var d=0;d<divs.length;d++){
+      var dt=divs[d].getAttribute('data-day');
+      var dcards=document.querySelectorAll('#list .card[data-day="'+dt+'"]');
+      var dv=0; for(var n=0;n<dcards.length;n++){ if(dcards[n].style.display!=='none') dv++; }
+      divs[d].style.display=dv?'':'none';
+    }
+    // 4) 空提示
     var emptyId='langempty', old=document.getElementById(emptyId);
-    var listVisible=document.querySelectorAll('#list .card:not([style*="display: none"])').length;
     if(old) old.remove();
+    var listVisible=0, cc=document.querySelectorAll('#list .card');
+    for(var p=0;p<cc.length;p++){ if(cc[p].style.display!=='none') listVisible++; }
     if(listVisible===0){
       var tip=document.createElement('div'); tip.id=emptyId;
       tip.style.cssText='padding:40px 16px;text-align:center;color:#aaa;font-size:15px;';
-      tip.textContent=(L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻';
+      tip.textContent=favView ? '还没有收藏 · 点新闻右上角的 ☆ 收藏'
+                      : (curQuery ? ('没有找到“'+curQuery+'”相关新闻')
+                      : ((L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻'));
       document.getElementById('list').appendChild(tip);
     }
   }
   setLang(savedLang);   // 进页面应用记忆的语言
+  // —— 收藏功能 (David 2026-06-19): 本地 localStorage, 不登录不上传; 跨各人页/全部页用 fav-id 一致 ——
+  var FAVKEY='himi_favs';
+  function getFavs(){ try{ return JSON.parse(localStorage.getItem(FAVKEY)||'{}'); }catch(e){ return {}; } }
+  function saveFavs(o){ localStorage.setItem(FAVKEY, JSON.stringify(o)); }
+  function isFavView(){ return localStorage.getItem('himi_favview')==='1'; }
+  function toggleFav(ev, fid){
+    if(ev){ ev.stopPropagation(); ev.preventDefault(); }   // 不触发卡片点开
+    var f=getFavs();
+    if(f[fid]) delete f[fid]; else f[fid]=1;
+    saveFavs(f);
+    refreshFavStars();
+    if(isFavView()) applyFilters();   // 收藏视图下取消收藏要即时移除
+  }
+  function refreshFavStars(){
+    var f=getFavs();
+    // 卡片右上角星
+    var stars=document.querySelectorAll('.favstar');
+    for(var i=0;i<stars.length;i++){
+      var on=!!f[stars[i].getAttribute('data-fav')];
+      stars[i].classList.toggle('on', on);
+      stars[i].textContent=on?'★':'☆';
+    }
+    // 详情页收藏按钮
+    var btns=document.querySelectorAll('.favbtn');
+    for(var k=0;k<btns.length;k++){
+      var bon=!!f[btns[k].getAttribute('data-fav')];
+      btns[k].classList.toggle('on', bon);
+      var ic=btns[k].querySelector('.favbtn-ic'), tx=btns[k].querySelector('.favbtn-tx');
+      if(ic) ic.textContent=bon?'★':'☆';
+      if(tx) tx.textContent=bon?'已收藏':'收藏';
+    }
+  }
+  function toggleFavView(){
+    var nv=isFavView()?'0':'1';
+    localStorage.setItem('himi_favview', nv);
+    var btn=document.getElementById('favtoggle');
+    if(btn){ btn.classList.toggle('on', nv==='1'); btn.textContent=(nv==='1')?'★ 我的收藏':'☆ 我的收藏'; }
+    applyFilters();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  // 初始化: 星标态 + 收藏切换按钮态
+  refreshFavStars();
+  (function(){ var btn=document.getElementById('favtoggle'); if(btn && isFavView()){ btn.classList.add('on'); btn.textContent='★ 我的收藏'; } })();
+  if(isFavView()) applyFilters();
+  // 日期跳转: 页内滚到该天的分隔线 (往下滚=往回翻时间); __top__=回到最新(顶部) (David 2026-06-19)
+  function jumpDay(token){
+    if(!token) return;
+    if(token==='__top__'){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+    var el=document.getElementById('day_'+token);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
   // —— iOS最稳: 用浏览器原生历史导航, 不碰任何自定义触摸手势 (David 2026-06-19 v3) ——
   // go() 用 history.pushState 进文章; 系统自带的"左边缘右滑返回"=浏览器后退=自动触发home, 原生苹果动画
   // 文章是正常文档流 → iOS原生半透明滚动条自动出现; 返回键是纯click最顶层 → 永不被吃
@@ -352,7 +978,10 @@
     listScroll=window.scrollY||window.pageYOffset||0;
     document.getElementById('list').style.display='none';
     document.getElementById('fsbar').style.display='none';
+    var ph=document.getElementById('pagehead'); if(ph) ph.style.display='none';
+    var sb=document.getElementById('searchbar'); if(sb) sb.style.display='none';
     var dn=document.getElementById('datenav'); if(dn) dn.style.display='none';
+    var hb=document.getElementById('homebtn'); if(hb) hb.style.display='none';
     document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
     a.style.display='block';
     a.classList.remove('slidein'); void a.offsetWidth; a.classList.add('slidein');  // 重触发滑入动画
@@ -363,7 +992,10 @@
     document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
     document.getElementById('list').style.display='block';
     document.getElementById('fsbar').style.display='';
+    var ph=document.getElementById('pagehead'); if(ph) ph.style.display='';
+    var sb=document.getElementById('searchbar'); if(sb) sb.style.display='';
     var dn=document.getElementById('datenav'); if(dn) dn.style.display='';
+    var hb=document.getElementById('homebtn'); if(hb) hb.style.display='';
     document.getElementById('backfix').style.display='none';
     window.scrollTo(0,listScroll);   // 返回列表原位置, 不跳顶
   }
