@@ -1,0 +1,581 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小姨夫·每日财经简报</title>
+<style>
+  :root { --fs-ui: 19px; --fs-art: 20px; }
+  * { box-sizing:border-box; -webkit-text-size-adjust:100%; -webkit-print-color-adjust:exact; }
+  body { margin:0; font-family:-apple-system,"PingFang SC","Heiti SC",sans-serif;
+         background:#f2f4f7; color:#1f2937; line-height:1.75; }
+  .wrap { max-width:820px; margin:0 auto; background:#fff; min-height:100vh; }
+  header { background:linear-gradient(135deg,#3aab9a,#2b8fa0); color:#fff; padding:24px 20px 20px 64px; position:relative; }
+  /* 标题小字: 固定大小, 不随字号滑块变 (David 2026-06-19) */
+  header h1 { margin:0; font-size:28px; font-weight:700; }
+  header .sub { margin-top:3px; font-size:14px; opacity:.82; }
+  /* Home图标: 每个profile左上角, 点回主页(选人+全部) (David 2026-06-19) */
+  .homebtn { position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#fff; opacity:.92;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.16);
+    text-decoration:none; -webkit-tap-highlight-color:transparent; }
+  .homebtn:active { background:rgba(255,255,255,.3); }
+
+  /* 日期翻阅 + 全部 导航条 (David 2026-06-19 B2/B4: 像新闻App翻昨天/前天 + 全部入口) */
+  .datenav { display:flex; align-items:center; gap:10px; padding:8px 16px;
+    background:#f6f9fa; border-bottom:1px solid #eef0f3; font-size:14px; color:#667; }
+  .datenav .dn-label { font-weight:600; flex-shrink:0; color:#555; }
+  .datenav .dn-sel { font-size:14px; color:#333; border:1px solid #d8e0e6; border-radius:9px;
+    padding:5px 9px; background:#fff; max-width:180px; -webkit-appearance:none; appearance:none; }
+  .datenav .dn-all { margin-left:auto; flex-shrink:0; color:#2b8fa0; font-weight:700;
+    text-decoration:none; background:#e7f7f4; padding:5px 13px; border-radius:14px;
+    -webkit-tap-highlight-color:transparent; }
+  .datenav .dn-all:active { background:#cdeee7; }
+
+  /* 字号滑块条 — 静止在顶部, 往下滑就消失 (David 2026-06-19: 不固定/不跟随) */
+  .fsbar { background:#fff; border-bottom:1px solid #eef0f3;
+           display:flex; align-items:center; gap:8px; padding:9px 16px; font-size:14px; color:#888; }
+  .fsbar .fslabel, .fsbar .fsunit { flex-shrink:0; white-space:nowrap; }
+  .fsbar b { color:#3aab9a; min-width:24px; text-align:center; flex-shrink:0; }
+  /* 中/英/自动 语言切换: 放字号条右边, 不挡滑块 (David 2026-06-19) */
+  .langsw { margin-left:auto; display:inline-flex; gap:4px; flex-shrink:0; }
+  .langbtn { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
+    padding:5px 10px; border-radius:14px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .langbtn.on { background:#3aab9a; color:#fff; }
+  .langbtn:active { transform:scale(.94); }
+  /* 文章里的字号条: 下移到固定返回键之下, 不被挡 (David 2026-06-19) */
+  .fsbar-art { margin-top:46px; }
+  /* 大圆点滑块 — 触摸范围做大, 一点就中 (David 2026-06-19: 之前太小点不准) */
+  .fsbar input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:34px;
+    background:transparent; cursor:pointer; }
+  .fsbar input[type=range]::-webkit-slider-runnable-track { height:8px; border-radius:4px; background:#d8e8e4; }
+  .fsbar input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
+    width:30px; height:30px; margin-top:-11px; border-radius:50%; background:#3aab9a;
+    border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+  .fsbar input[type=range]::-moz-range-track { height:8px; border-radius:4px; background:#d8e8e4; }
+  .fsbar input[type=range]::-moz-range-thumb { width:28px; height:28px; border-radius:50%;
+    background:#3aab9a; border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+
+  /* 列表页 */
+  #list { padding:6px 16px 30px; }
+  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:22px 0 6px; padding-left:10px;
+              border-left:5px solid currentColor; }
+  .card { background:#fff; border-bottom:1px solid #eef0f3; padding:16px 4px; cursor:pointer; }
+  .card:active { background:#f7f9fb; }
+  /* 每条story左上角发布日期小字 (David 2026-06-19) */
+  .card-date { font-size:12px; color:#aaa; margin-bottom:4px; font-weight:500; }
+  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; }
+  .card-lead { font-size:var(--fs-ui); color:#555; margin-top:7px; line-height:1.7; }
+  .card-more { font-size:calc(var(--fs-ui) - 4px); margin-top:8px; font-weight:600; }
+
+  /* 详情页 — 正常文档流, 用原生滚动+原生半透明滚动条 (David 2026-06-19 v3: 砍掉自定义手势, iOS最稳) */
+  .article { max-width:820px; margin:0 auto; background:#fff; min-height:100vh;
+    padding:8px 18px 40px; }
+  .article.slidein { animation:slidein .26s cubic-bezier(.4,0,.2,1); }
+  @keyframes slidein { from { transform:translateX(34px); opacity:.35; } to { transform:none; opacity:1; } }
+  .back { background:#eef2f5; border:none; color:#555; font-size:15px; padding:8px 16px;
+          border-radius:20px; cursor:pointer; margin:8px 0; }
+  .back.btm { margin-top:24px; }
+  .atag { display:inline-block; font-size:calc(var(--fs-art) - 4px); font-weight:700;
+          padding:3px 12px; border-radius:6px; margin:10px 0 6px; }
+  .atitle { font-size:calc(var(--fs-art) + 9px); line-height:1.4; color:#1a1a1a; margin:6px 0 14px; }
+  .alead { font-size:calc(var(--fs-art) + 1px); background:#fff8e8; border-left:5px solid #f0c14b;
+           padding:13px 15px; border-radius:8px; color:#444; line-height:1.75; }
+  .abul { padding-left:26px; margin:14px 0; }
+  .abul li { font-size:var(--fs-art); color:#333; margin:7px 0; }
+  .abody p { font-size:calc(var(--fs-art) + 1px); color:#222; margin:13px 0; line-height:1.85; }
+  .sources { margin-top:18px; font-size:14px; color:#999; }
+  .src { display:inline-block; margin:4px 5px 4px 0; padding:4px 11px; background:#eef2f7;
+         border-radius:20px; color:#2b8fa0; text-decoration:none; font-size:14px; }
+  .stance { display:inline-block; margin-left:5px; padding:1px 7px; border-radius:8px; color:#fff; font-size:12px; }
+  .srcdate { margin-left:6px; color:#aaa; font-size:12px; }
+
+  footer { padding:20px 18px 44px; font-size:13px; color:#888; border-top:1px solid #eef0f3; }
+  footer .glo { background:#f6f8fa; border-radius:10px; padding:13px 15px; line-height:1.85; }
+  @media (min-width:768px) {
+    .wrap { margin:22px auto; border-radius:16px; box-shadow:0 4px 26px rgba(0,0,0,.07); overflow:hidden; }
+  }
+  /* —— 固定返回键: 看文章滚到哪都在左上角 (David 2026-06-19) —— */
+  .backfix { position:fixed; top:12px; left:12px; z-index:200; display:none;
+    background:rgba(255,255,255,.94); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border:1px solid #d8e0e6; color:#2b8fa0; font-size:15px; font-weight:700;
+    padding:9px 17px; border-radius:22px; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.14); }
+  .backfix:active { transform:scale(.96); }
+</style>
+</head>
+<body>
+<button class="backfix" id="backfix" onclick="home()">‹ 返回</button>
+<div class="wrap">
+  <header>
+    <a class="homebtn" href="index.html" title="返回家庭简报主页" aria-label="主页">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg>
+    </a>
+    <h1>小姨夫·每日财经简报</h1>
+    <div class="sub">FOMC鹰派按兵不动，美伊协议压低油价，A股窄幅震荡北向活跃</div>
+  </header>
+  <div class="datenav" id="datenav"><span class="dn-label">📅</span><select class="dn-sel" onchange="if(this.value)location.href=this.value"><option value="xiaoyifu.html">6月19日</option><option value="xiaoyifu_20260618.html" selected>6月18日</option></select><a class="dn-all" href="all_20260618.html">📚 全部 ›</a></div>
+  <div class="fsbar" id="fsbar"><span class="fslabel">字号</span> <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b><span class="fsunit">px</span>
+    <span class="langsw" id="langsw">
+      <button class="langbtn" data-lang="zh" onclick="setLang('zh')">中</button>
+      <button class="langbtn" data-lang="en" onclick="setLang('en')">ENG</button>
+      <button class="langbtn" data-lang="auto" onclick="setLang('auto')">自动</button>
+    </span>
+  </div>
+
+  <div id="list">
+    <div class="seclabel" data-sec="0" style="color:#4a90d9">美股深度</div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(0)">
+        
+        <div class="card-hl">美联储6月会议维持利率3.75%不变，点阵图显示鹰派转向</div>
+        <div class="card-lead">美联储于6月16-17日举行FOMC会议，17日公布决议，将联邦基金利率目标区间维持在3.50%-3.75%不变，符合市场预期。这是自2026年1月以来连续第五次会议维持利率不变。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(1)">
+        
+        <div class="card-hl">美股三大指数6月18日反弹，收复前日部分跌幅</div>
+        <div class="card-lead">6月18日美股开盘后三大指数全线反弹。截至午盘，标普500指数上涨0.5%，报7480点附近；纳斯达克综合指数上涨0.7%；道琼斯工业平均指数一度创下盘中历史新高后微跌。此前一日（6月17日），受FOMC鹰派信号影响，纳指下跌约1.2%。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(2)">
+        
+        <div class="card-hl">SpaceX上市后连续大涨，创史上最大IPO纪录</div>
+        <div class="card-lead">SpaceX于6月13日（周五）在纳斯达克上市，IPO定价每股135美元，募资750亿美元，创全球最大IPO纪录。上市首日股价上涨20%，截至6月16日（周一）继续上涨，累计涨幅约25%，市值一度突破2万亿美元。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" onclick="go(3)">
+        
+        <div class="card-hl">美伊达成和平协议框架，国际油价暴跌至三个月低点</div>
+        <div class="card-lead">6月14日，美国与伊朗宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎确认已签署谅解备忘录，预计6月19日正式签署MOU。这是自中东军事冲突爆发以来最具实质性的和平进展。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="1" style="color:#3aab9a">A股深度</div>
+      <div class="card" data-lang="zh" data-sec="1" onclick="go(4)">
+        
+        <div class="card-hl">上证指数6月18日微跌0.14%，收于4108点附近窄幅震荡</div>
+        <div class="card-lead">6月18日A股三大指数小幅收跌。上证指数收报4108.08点，跌0.14%；深证成指小幅走低。两市合计成交额较前一交易日萎缩，市场观望情绪浓厚。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" onclick="go(5)">
+        
+        <div class="card-hl">北向资金6月18日成交4293亿元，龙虎榜净卖出4.19亿元</div>
+        <div class="card-lead">交易所数据显示，6月18日北向资金共成交4293.44亿元，占两市总成交额的12.97%。寒武纪、澜起科技、工业富联位列沪股通成交前三。北向资金ETF成交额55.41亿元，较前日增加2.05亿元。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" onclick="go(6)">
+        
+        <div class="card-hl">5月宏观经济数据出炉：CPI同比涨1.2%，工业增加值增4.5%</div>
+        <div class="card-lead">国家统计局6月16日发布5月国民经济运行数据。5月CPI同比上涨1.2%，环比下降0.1%，扣除食品和能源价格的核心CPI同比上涨1.1%，消费市场运行总体平稳。PPI受国内部分行业需求增加和国际大宗商品价格波动传导影响继续上涨。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" onclick="go(7)">
+        
+        <div class="card-hl">央行定调2026年货币政策：降准降息可期，LPR调整预期升温</div>
+        <div class="card-lead">2026年以来央行维持稳健偏宽松的货币政策基调。年初政策定调明确表示&#x27;降准降息可期&#x27;，A股新开户数创近三年新高。5月25日央行开展6000亿元MLF操作，期限1年，以维持银行体系流动性充裕。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="2" style="color:#e6943a">宏观经济</div>
+      <div class="card" data-lang="zh" data-sec="2" onclick="go(8)">
+        
+        <div class="card-hl">美国5月CPI同比上涨4.2%创三年新高，通胀压力持续</div>
+        <div class="card-lead">美国劳工统计局6月10日公布数据显示，5月CPI同比上涨4.2%，为近三年最高，较4月的3.8%显著上升。经季节调整后，5月CPI环比上涨0.5%。扣除食品和能源的核心CPI同比上涨3.3%。</div>
+        <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="2" onclick="go(9)">
+        
+        <div class="card-hl">IMF维持2026年全球经济增长3.3%预期，但警告贸易风险</div>
+        <div class="card-lead">国际货币基金组织（IMF）在4月发布的《世界经济展望》中维持2026年全球经济增长3.3%的预期，并预计2027年增速略降至3.2%。全球通胀预计继续回落，但美国通胀回归目标的速度慢于预期。</div>
+        <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="2" onclick="go(10)">
+        
+        <div class="card-hl">中美贸易谈判取得进展：拟互减约300亿美元商品关税</div>
+        <div class="card-lead">6月11日前后，多家媒体报道中美经贸磋商取得阶段性进展。双方同意成立一个贸易委员会，负责确定约300亿美元的非战略性商品，双方可就这些商品降低或取消关税。德媒报道称，美对华关税水平将降至约30%，中对美关税降至约10%。</div>
+        <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="3" style="color:#9b78c9">AI/半导体</div>
+      <div class="card" data-lang="zh" data-sec="3" onclick="go(11)">
+        
+        <div class="card-hl">英伟达发布Blackwell Ultra和Vera Rubin AI芯片，路线图延伸至2027年</div>
+        <div class="card-lead">英伟达CEO黄仁勋在GTC 2026大会上正式发布Blackwell Ultra系列GPU，这是基于Blackwell架构的升级版本，专为AI训练和推理优化，将于2026年下半年出货。同时公布下一代&#x27;Rubin&#x27;平台路线图（以发现暗物质的天文学家命名），预计2027年起出货。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" onclick="go(12)">
+        
+        <div class="card-hl">台积电举办2026北美技术论坛，揭示A13制程技术路线</div>
+        <div class="card-lead">台积电于6月中旬举办2026年北美技术论坛，公布了下一代A13制程（相当于1.4nm级别）的技术细节。同时发布了紧凑型通用光子引擎（TSMC-COUPE），采用基板上共同封装光学（CPO）解决方案，预计2026年下半年实现里程碑式突破。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" onclick="go(13)">
+        
+        <div class="card-hl">美光HBM产能2026年全部售罄，6月24日财报成关键催化剂</div>
+        <div class="card-lead">美光科技在Computex 2026上宣布，其HBM（高带宽内存）产能2026年全年已全部售罄，并已与客户签订长期协议延伸至更远未来。年初至今美光股价累计涨幅超过120%，成为AI内存热潮的最大受益者之一。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" onclick="go(14)">
+        
+        <div class="card-hl">美国商务部急发新规：禁止向境外中企出口先进AI芯片</div>
+        <div class="card-lead">美国商务部6月初紧急发布新规，禁止英伟达、AMD等企业向中国境外的中国实体公司出口最先进AI芯片，旨在封堵已存在一年之久的监管漏洞。此举引发中方强烈反对，中国驻美使馆称美方&#x27;滥用出口管制措施，是典型的单边霸凌行径&#x27;。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="4" style="color:#5cb56b">政治</div>
+      <div class="card" data-lang="zh" data-sec="4" onclick="go(15)">
+        
+        <div class="card-hl">G7峰会在法国埃维安闭幕，聚焦乌克兰援助与全球经济挑战</div>
+        <div class="card-lead">2026年G7领导人峰会于6月15日至17日在法国埃维安（Evian）举行，与会领导人讨论了国际和平与安全、全球经济挑战、竞争力、人工智能治理等议题。峰会在17日发布联合声明。</div>
+        <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="4" onclick="go(16)">
+        
+        <div class="card-hl">欧盟峰会6月18-19日召开：讨论乌克兰、竞争力及中期预算</div>
+        <div class="card-lead">欧洲理事会于6月18-19日在布鲁塞尔举行峰会。欧洲理事会主席科斯塔（Antonio Costa）在邀请函中表示，会议将讨论若干关键议题，包括竞争力和全球经济挑战、乌克兰及中东局势。</div>
+        <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="4" onclick="go(17)">
+        
+        <div class="card-hl">特朗普确认签署美伊谅解备忘录，中东局势重大转折</div>
+        <div class="card-lead">美国总统特朗普6月17日在巴黎凡尔赛宫表示，已签署与伊朗的谅解备忘录。此前的6月14日，美伊双方宣布达成结束军事冲突的框架协议，经巴基斯坦斡旋。正式MOU预计于6月19日签署。</div>
+        <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div>
+  </div>
+  
+      <div class="article" id="a0" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">美股深度</div>
+        <h1 class="atitle">美联储6月会议维持利率3.75%不变，点阵图显示鹰派转向</h1>
+        <p class="alead" >美联储于6月16-17日举行FOMC会议，17日公布决议，将联邦基金利率目标区间维持在3.50%-3.75%不变，符合市场预期。这是自2026年1月以来连续第五次会议维持利率不变。
+
+更新的点阵图反映鹰派转向：9位委员预计年内至少加息一次，另外9位预计维持或降息。2026年利率中位数预期从3.6%上调至3.8%，意味着年内降息空间收窄。经济预测摘要(SEP)小幅上调通胀预期。
+
+美联储主席沃什（Kevin Warsh）在新闻发布会上表示，特朗普政府的关税政策对通胀构成上行风险，劳动力市场依然强劲，&#x27;我们可以在较长时间内保持耐心&#x27;。此番言论令市场对9月降息的预期从60%降至约30%。
+
+会议后美股三大指数下跌，10年期美债收益率升至4.65%，美元指数走强。6月18日亚洲交易时段，标普500期货小幅反弹0.3%。</p>
+        <ul class='abul'><li>联邦基金利率目标区间维持3.50%-3.75%，连续第五次按兵不动</li><li>点阵图中位数预期年内不再降息，近半数委员预计至少加息一次</li></ul>
+        <div class="abody"><p>美联储于6月16-17日举行FOMC会议，17日公布决议，将联邦基金利率目标区间维持在3.50%-3.75%不变，符合市场预期。这是自2026年1月以来连续第五次会议维持利率不变。</p><p>更新的点阵图反映鹰派转向：9位委员预计年内至少加息一次，另外9位预计维持或降息。2026年利率中位数预期从3.6%上调至3.8%，意味着年内降息空间收窄。经济预测摘要(SEP)小幅上调通胀预期。</p><p>美联储主席沃什（Kevin Warsh）在新闻发布会上表示，特朗普政府的关税政策对通胀构成上行风险，劳动力市场依然强劲，&#x27;我们可以在较长时间内保持耐心&#x27;。此番言论令市场对9月降息的预期从60%降至约30%。</p><p>会议后美股三大指数下跌，10年期美债收益率升至4.65%，美元指数走强。6月18日亚洲交易时段，标普500期货小幅反弹0.3%。</p></div>
+        <div class="sources">来源：<a class="src" href="https://finance.yahoo.com/economy/policy/article/fed-dot-plot-almost-half-of-fomc-members-project-at-least-one-interest-rate-hike-this-year-183645064.html" target="_blank" rel="noopener">Yahoo Finance<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.wsj.com/livecoverage/fed-meeting-warsh-interest-rate-06-17-2026" target="_blank" rel="noopener">WSJ<span class="stance" style="background:#ef8b5b">偏右</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a1" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">美股深度</div>
+        <h1 class="atitle">美股三大指数6月18日反弹，收复前日部分跌幅</h1>
+        <p class="alead" >6月18日美股开盘后三大指数全线反弹。截至午盘，标普500指数上涨0.5%，报7480点附近；纳斯达克综合指数上涨0.7%；道琼斯工业平均指数一度创下盘中历史新高后微跌。此前一日（6月17日），受FOMC鹰派信号影响，纳指下跌约1.2%。
+
+板块方面，消费品、公用事业和科技股领涨；能源板块受油价暴跌拖累走低，埃克森美孚和雪佛龙下跌约2%。航空和邮轮股因燃油成本下降预期大幅走高。
+
+市场情绪受到美伊和平协议推动，布伦特原油跌破80美元/桶，缓解了通胀担忧。不过投资者仍在消化美联储的鹰派信号和中东地缘政治变化。</p>
+        <ul class='abul'><li>道指盘中创新高后小幅回落，标普500和纳指反弹约0.5%</li><li>油价大跌提振消费板块，能源股承压</li></ul>
+        <div class="abody"><p>6月18日美股开盘后三大指数全线反弹。截至午盘，标普500指数上涨0.5%，报7480点附近；纳斯达克综合指数上涨0.7%；道琼斯工业平均指数一度创下盘中历史新高后微跌。此前一日（6月17日），受FOMC鹰派信号影响，纳指下跌约1.2%。</p><p>板块方面，消费品、公用事业和科技股领涨；能源板块受油价暴跌拖累走低，埃克森美孚和雪佛龙下跌约2%。航空和邮轮股因燃油成本下降预期大幅走高。</p><p>市场情绪受到美伊和平协议推动，布伦特原油跌破80美元/桶，缓解了通胀担忧。不过投资者仍在消化美联储的鹰派信号和中东地缘政治变化。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-06-18-2026" target="_blank" rel="noopener">WSJ<span class="stance" style="background:#ef8b5b">偏右</span></a> <a class="src" href="https://www.post-gazette.com/business/money/2026/06/18/stock-market-today-june-18-2026/stories/202606180050" target="_blank" rel="noopener">Post-Gazette<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a2" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">美股深度</div>
+        <h1 class="atitle">SpaceX上市后连续大涨，创史上最大IPO纪录</h1>
+        <p class="alead" >SpaceX于6月13日（周五）在纳斯达克上市，IPO定价每股135美元，募资750亿美元，创全球最大IPO纪录。上市首日股价上涨20%，截至6月16日（周一）继续上涨，累计涨幅约25%，市值一度突破2万亿美元。
+
+然而6月17日受FOMC鹰派信号及大盘拖累，SpaceX股价回落约5%。市场对其天价估值存在分歧：支持者认为其在航天发射和星链（Starlink）领域的垄断地位无可匹敌；质疑者则担忧其盈利能力能否支撑近2万亿美元市值。
+
+SpaceX的上市吸引了大量散户和机构资金，也在一定程度上分流了其他科技股的流动性。分析人士认为，其股价波动将成为美股科技板块的重要风向标。</p>
+        <ul class='abul'><li>SpaceX以每股135美元定价，募资750亿美元，估值约1.77万亿美元</li><li>上市首日涨20%，次日再涨，累计涨幅约25%</li></ul>
+        <div class="abody"><p>SpaceX于6月13日（周五）在纳斯达克上市，IPO定价每股135美元，募资750亿美元，创全球最大IPO纪录。上市首日股价上涨20%，截至6月16日（周一）继续上涨，累计涨幅约25%，市值一度突破2万亿美元。</p><p>然而6月17日受FOMC鹰派信号及大盘拖累，SpaceX股价回落约5%。市场对其天价估值存在分歧：支持者认为其在航天发射和星链（Starlink）领域的垄断地位无可匹敌；质疑者则担忧其盈利能力能否支撑近2万亿美元市值。</p><p>SpaceX的上市吸引了大量散户和机构资金，也在一定程度上分流了其他科技股的流动性。分析人士认为，其股价波动将成为美股科技板块的重要风向标。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.cnbc.com/2026/06/15/spacex-stock-record-ipo-debut.html" target="_blank" rel="noopener">CNBC<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.reuters.com/business/media-telecom/spacex-plans-raise-75-billion-ipo-135-per-share-source-says-2026-06-03/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a3" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">美股深度</div>
+        <h1 class="atitle">美伊达成和平协议框架，国际油价暴跌至三个月低点</h1>
+        <p class="alead" >6月14日，美国与伊朗宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎确认已签署谅解备忘录，预计6月19日正式签署MOU。这是自中东军事冲突爆发以来最具实质性的和平进展。
+
+消息公布后，国际油价连续大幅下跌。布伦特原油从月初的约90美元/桶跌至80美元以下，WTI跌至约80美元/桶，均创三个月新低。过去一周两种原油累计跌幅均超过10美元/桶。
+
+油价下跌对全球通胀预期形成压制，也减轻了美联储继续加息的压力。能源板块承压，但航空、运输和消费品板块受益。分析人士预计，若协议顺利落实，布伦特原油2026年下半年均价将在80-100美元区间震荡。</p>
+        <ul class='abul'><li>布伦特原油跌破80美元/桶，WTI跌至80美元附近</li><li>协议将于6月19日正式签署MOU，霍尔木兹海峡预计逐步恢复通航</li></ul>
+        <div class="abody"><p>6月14日，美国与伊朗宣布就结束军事冲突达成框架协议。特朗普总统6月17日在巴黎确认已签署谅解备忘录，预计6月19日正式签署MOU。这是自中东军事冲突爆发以来最具实质性的和平进展。</p><p>消息公布后，国际油价连续大幅下跌。布伦特原油从月初的约90美元/桶跌至80美元以下，WTI跌至约80美元/桶，均创三个月新低。过去一周两种原油累计跌幅均超过10美元/桶。</p><p>油价下跌对全球通胀预期形成压制，也减轻了美联储继续加息的压力。能源板块承压，但航空、运输和消费品板块受益。分析人士预计，若协议顺利落实，布伦特原油2026年下半年均价将在80-100美元区间震荡。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c6217106px6o" target="_blank" rel="noopener">BBC<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.cnbc.com/2026/06/16/us-iran-peace-agreement-oil-prices-tankers-strait-of-hormuz-transit.html" target="_blank" rel="noopener">CNBC<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.news.cn/world/20260615/9f8b392a794447dc835714fcacc0cc97/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a4" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">A股深度</div>
+        <h1 class="atitle">上证指数6月18日微跌0.14%，收于4108点附近窄幅震荡</h1>
+        <p class="alead" >6月18日A股三大指数小幅收跌。上证指数收报4108.08点，跌0.14%；深证成指小幅走低。两市合计成交额较前一交易日萎缩，市场观望情绪浓厚。
+
+板块方面，有色金属（稀土永磁）、电子和通信板块表现活跃，盛和资源涨停，北向资金净买入12.32亿元。新能源和地产板块走弱。市场在等待更多政策信号和即将于周末公布的LPR报价。
+
+从技术面看，上证指数在4100点附近反复拉锯，上方4150点构成短期压力位，下方4050点有较强支撑。投资者关注后续成交量能否放大配合突破。</p>
+        <ul class='abul'><li>上证指数收报4108.08点，跌5.80点，跌幅0.14%</li><li>两市成交缩量，北向资金成交4293亿元</li></ul>
+        <div class="abody"><p>6月18日A股三大指数小幅收跌。上证指数收报4108.08点，跌0.14%；深证成指小幅走低。两市合计成交额较前一交易日萎缩，市场观望情绪浓厚。</p><p>板块方面，有色金属（稀土永磁）、电子和通信板块表现活跃，盛和资源涨停，北向资金净买入12.32亿元。新能源和地产板块走弱。市场在等待更多政策信号和即将于周末公布的LPR报价。</p><p>从技术面看，上证指数在4100点附近反复拉锯，上方4150点构成短期压力位，下方4050点有较强支撑。投资者关注后续成交量能否放大配合突破。</p></div>
+        <div class="sources">来源：<a class="src" href="https://q.stock.sohu.com/zs/000001/lshq.shtml" target="_blank" rel="noopener">搜狐证券<span class="stance" style="background:#5bbf8a">体制外</span></a> <a class="src" href="https://www.sse.com.cn/market/sseindex/quotation/" target="_blank" rel="noopener">上交所<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a5" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">A股深度</div>
+        <h1 class="atitle">北向资金6月18日成交4293亿元，龙虎榜净卖出4.19亿元</h1>
+        <p class="alead" >交易所数据显示，6月18日北向资金共成交4293.44亿元，占两市总成交额的12.97%。寒武纪、澜起科技、工业富联位列沪股通成交前三。北向资金ETF成交额55.41亿元，较前日增加2.05亿元。
+
+龙虎榜方面，北向资金参与33只个股，合计净卖出4.19亿元。其中沪股通净买入8股、净卖出6股；深股通净买入8股、净卖出11股。盛和资源（稀土）涨停，北向资金净买入12.32亿元居首。
+
+机构席位方面，厦门钨业获机构大举买入，中钨高新获6.39亿资金抢筹。整体看，外资对A股维持谨慎参与态度，稀土、半导体板块是主要加仓方向。</p>
+        <ul class='abul'><li>北向资金共成交4293.44亿元，占两市总成交额12.97%</li><li>盛和资源获北向净买入12.32亿元，稀土板块受追捧</li></ul>
+        <div class="abody"><p>交易所数据显示，6月18日北向资金共成交4293.44亿元，占两市总成交额的12.97%。寒武纪、澜起科技、工业富联位列沪股通成交前三。北向资金ETF成交额55.41亿元，较前日增加2.05亿元。</p><p>龙虎榜方面，北向资金参与33只个股，合计净卖出4.19亿元。其中沪股通净买入8股、净卖出6股；深股通净买入8股、净卖出11股。盛和资源（稀土）涨停，北向资金净买入12.32亿元居首。</p><p>机构席位方面，厦门钨业获机构大举买入，中钨高新获6.39亿资金抢筹。整体看，外资对A股维持谨慎参与态度，稀土、半导体板块是主要加仓方向。</p></div>
+        <div class="sources">来源：<a class="src" href="https://stock.eastmoney.com/a/cyjyc.html" target="_blank" rel="noopener">东方财富<span class="stance" style="background:#5bbf8a">体制外</span></a> <a class="src" href="https://www.21jingji.com/article/20260618/herald/ac0947865f4a40aa6e513f5ad29a7706.html" target="_blank" rel="noopener">21财经<span class="stance" style="background:#5bbf8a">体制外</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a6" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">A股深度</div>
+        <h1 class="atitle">5月宏观经济数据出炉：CPI同比涨1.2%，工业增加值增4.5%</h1>
+        <p class="alead" >国家统计局6月16日发布5月国民经济运行数据。5月CPI同比上涨1.2%，环比下降0.1%，扣除食品和能源价格的核心CPI同比上涨1.1%，消费市场运行总体平稳。PPI受国内部分行业需求增加和国际大宗商品价格波动传导影响继续上涨。
+
+5月规模以上工业增加值同比增长4.5%，1-5月固定资产投资和社会消费品零售总额增速均保持平稳。统计局表示&#x27;国民经济运行总体平稳、向新向优&#x27;。
+
+市场分析人士指出，数据反映出中国经济延续温和复苏态势，但内需尤其是消费复苏力度仍偏弱，房地产投资持续拖累。央行后续降准降息空间仍存，市场关注6月LPR报价是否调整。</p>
+        <ul class='abul'><li>5月CPI同比上涨1.2%，PPI继续上涨，核心CPI同比涨1.1%</li><li>规模以上工业增加值同比增长4.5%，经济总体平稳</li></ul>
+        <div class="abody"><p>国家统计局6月16日发布5月国民经济运行数据。5月CPI同比上涨1.2%，环比下降0.1%，扣除食品和能源价格的核心CPI同比上涨1.1%，消费市场运行总体平稳。PPI受国内部分行业需求增加和国际大宗商品价格波动传导影响继续上涨。</p><p>5月规模以上工业增加值同比增长4.5%，1-5月固定资产投资和社会消费品零售总额增速均保持平稳。统计局表示&#x27;国民经济运行总体平稳、向新向优&#x27;。</p><p>市场分析人士指出，数据反映出中国经济延续温和复苏态势，但内需尤其是消费复苏力度仍偏弱，房地产投资持续拖累。央行后续降准降息空间仍存，市场关注6月LPR报价是否调整。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.stats.gov.cn/sj/zxfb/" target="_blank" rel="noopener">国家统计局<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://jingji.cctv.com/2026/06/10/ARTIqV5QoWdD81XiinoA9Y4e260610.shtml" target="_blank" rel="noopener">央视财经<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a7" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">A股深度</div>
+        <h1 class="atitle">央行定调2026年货币政策：降准降息可期，LPR调整预期升温</h1>
+        <p class="alead" >2026年以来央行维持稳健偏宽松的货币政策基调。年初政策定调明确表示&#x27;降准降息可期&#x27;，A股新开户数创近三年新高。5月25日央行开展6000亿元MLF操作，期限1年，以维持银行体系流动性充裕。
+
+当前1年期LPR为3.00%，5年期以上LPR为3.50%，已连续多个月保持不变。市场对6月20日即将公布的LPR报价存在下调预期，但分析人士认为短期内下调空间有限，需观察美联储6月决议后的外部环境变化。
+
+央行在2025年Q4货币政策执行报告中指出，将继续实施适度宽松的货币政策，保持流动性合理充裕，引导信贷合理增长。市场预计下半年可能有1-2次降准，LPR调整时机取决于经济数据和外部环境。</p>
+        <ul class='abul'><li>央行2026年政策定调保持流动性合理充裕，降准降息可期</li><li>5月开展6000亿元MLF操作，6月20日将公布LPR报价</li></ul>
+        <div class="abody"><p>2026年以来央行维持稳健偏宽松的货币政策基调。年初政策定调明确表示&#x27;降准降息可期&#x27;，A股新开户数创近三年新高。5月25日央行开展6000亿元MLF操作，期限1年，以维持银行体系流动性充裕。</p><p>当前1年期LPR为3.00%，5年期以上LPR为3.50%，已连续多个月保持不变。市场对6月20日即将公布的LPR报价存在下调预期，但分析人士认为短期内下调空间有限，需观察美联储6月决议后的外部环境变化。</p><p>央行在2025年Q4货币政策执行报告中指出，将继续实施适度宽松的货币政策，保持流动性合理充裕，引导信贷合理增长。市场预计下半年可能有1-2次降准，LPR调整时机取决于经济数据和外部环境。</p></div>
+        <div class="sources">来源：<a class="src" href="https://finance.sina.com.cn/stock/y/2026-01-07/doc-inhfmppz5027201.shtml" target="_blank" rel="noopener">新浪财经<span class="stance" style="background:#5bbf8a">体制外</span></a> <a class="src" href="http://www.cb.com.cn/index/show/jj/cv/cv135399492069" target="_blank" rel="noopener">中国证券报<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a8" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">宏观经济</div>
+        <h1 class="atitle">美国5月CPI同比上涨4.2%创三年新高，通胀压力持续</h1>
+        <p class="alead" >美国劳工统计局6月10日公布数据显示，5月CPI同比上涨4.2%，为近三年最高，较4月的3.8%显著上升。经季节调整后，5月CPI环比上涨0.5%。扣除食品和能源的核心CPI同比上涨3.3%。
+
+推动通胀的主要因素包括住房成本持续上行、交通和保险费用增加、以及部分进口商品因关税传导提价。能源价格在5月仍处高位，但6月因美伊和平协议大幅回落，将影响后续CPI走势。
+
+克利夫兰联储Nowcasting模型预测6月CPI同比约4.01%，核心CPI约3.30%。通胀数据加大了美联储维持高利率的压力，6月FOMC会议的点阵图已反映这一趋势。</p>
+        <ul class='abul'><li>5月CPI同比上涨4.2%，高于4月的3.8%，创三年新高</li><li>核心CPI环比上涨0.4%，住房和交通成本为主要推手</li></ul>
+        <div class="abody"><p>美国劳工统计局6月10日公布数据显示，5月CPI同比上涨4.2%，为近三年最高，较4月的3.8%显著上升。经季节调整后，5月CPI环比上涨0.5%。扣除食品和能源的核心CPI同比上涨3.3%。</p><p>推动通胀的主要因素包括住房成本持续上行、交通和保险费用增加、以及部分进口商品因关税传导提价。能源价格在5月仍处高位，但6月因美伊和平协议大幅回落，将影响后续CPI走势。</p><p>克利夫兰联储Nowcasting模型预测6月CPI同比约4.01%，核心CPI约3.30%。通胀数据加大了美联储维持高利率的压力，6月FOMC会议的点阵图已反映这一趋势。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.cnbc.com/2026/06/10/cpi-inflation-report-may-2026.html" target="_blank" rel="noopener">CNBC<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.bls.gov/news.release/cpi.nr0.htm" target="_blank" rel="noopener">BLS<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a9" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">宏观经济</div>
+        <h1 class="atitle">IMF维持2026年全球经济增长3.3%预期，但警告贸易风险</h1>
+        <p class="alead" >国际货币基金组织（IMF）在4月发布的《世界经济展望》中维持2026年全球经济增长3.3%的预期，并预计2027年增速略降至3.2%。全球通胀预计继续回落，但美国通胀回归目标的速度慢于预期。
+
+IMF指出，中东冲突、贸易政策不确定性和主要经济体的财政整顿是主要下行风险。在&#x27;有限冲突&#x27;假设下，若中东局势缓解（如美伊协议），全球增长前景将改善。
+
+世界银行6月发布《全球经济展望》报告，将焦点放在发展中经济体的债务压力和增长前景分化上。联合国最新预测2026年中国增长率为4.4%，较此前上调0.4个百分点。</p>
+        <ul class='abul'><li>IMF预计2026年全球增长3.3%，2027年3.2%</li><li>美国通胀回落偏慢，全球贸易政策不确定性为最大风险</li></ul>
+        <div class="abody"><p>国际货币基金组织（IMF）在4月发布的《世界经济展望》中维持2026年全球经济增长3.3%的预期，并预计2027年增速略降至3.2%。全球通胀预计继续回落，但美国通胀回归目标的速度慢于预期。</p><p>IMF指出，中东冲突、贸易政策不确定性和主要经济体的财政整顿是主要下行风险。在&#x27;有限冲突&#x27;假设下，若中东局势缓解（如美伊协议），全球增长前景将改善。</p><p>世界银行6月发布《全球经济展望》报告，将焦点放在发展中经济体的债务压力和增长前景分化上。联合国最新预测2026年中国增长率为4.4%，较此前上调0.4个百分点。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.imf.org/en/publications/weo" target="_blank" rel="noopener">IMF<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://news.un.org/zh/story/2026/01/1141460" target="_blank" rel="noopener">联合国<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a10" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">宏观经济</div>
+        <h1 class="atitle">中美贸易谈判取得进展：拟互减约300亿美元商品关税</h1>
+        <p class="alead" >6月11日前后，多家媒体报道中美经贸磋商取得阶段性进展。双方同意成立一个贸易委员会，负责确定约300亿美元的非战略性商品，双方可就这些商品降低或取消关税。德媒报道称，美对华关税水平将降至约30%，中对美关税降至约10%。
+
+美国贸易代表办公室此前于5月底宣布，将就可能符合关税削减条件的中国商品征求公众意见，标志着贸易摩擦的阶段性缓和。但分析人士指出，在半导体、AI等战略性领域的出口管制仍在加强。
+
+美国商务部6月初急发新规，禁止向中国境外的中企出口先进AI芯片，封堵已存在一年之久的监管漏洞。这显示在部分领域的科技竞争仍在加剧，全面贸易缓和仍需时日。</p>
+        <ul class='abul'><li>美中拟成立贸易委员会，确定约300亿美元非战略性商品降低或取消关税</li><li>美方将就符合关税削减条件的中国商品征求公众意见</li></ul>
+        <div class="abody"><p>6月11日前后，多家媒体报道中美经贸磋商取得阶段性进展。双方同意成立一个贸易委员会，负责确定约300亿美元的非战略性商品，双方可就这些商品降低或取消关税。德媒报道称，美对华关税水平将降至约30%，中对美关税降至约10%。</p><p>美国贸易代表办公室此前于5月底宣布，将就可能符合关税削减条件的中国商品征求公众意见，标志着贸易摩擦的阶段性缓和。但分析人士指出，在半导体、AI等战略性领域的出口管制仍在加强。</p><p>美国商务部6月初急发新规，禁止向中国境外的中企出口先进AI芯片，封堵已存在一年之久的监管漏洞。这显示在部分领域的科技竞争仍在加剧，全面贸易缓和仍需时日。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.voachinese.com/a/us-to-seek-public-input-on-chinese-goods-for-possible-tariff-reductions-20260527/8154446.html" target="_blank" rel="noopener">美国之音<span class="stance" style="background:#5b8def">偏左</span></a> <a class="src" href="https://www.dw.com/zh/美中贸易拟降壁垒-互减300亿美元商品关税/a-77227256" target="_blank" rel="noopener">DW<span class="stance" style="background:#5b8def">偏左</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a11" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">AI/半导体</div>
+        <h1 class="atitle">英伟达发布Blackwell Ultra和Vera Rubin AI芯片，路线图延伸至2027年</h1>
+        <p class="alead" >英伟达CEO黄仁勋在GTC 2026大会上正式发布Blackwell Ultra系列GPU，这是基于Blackwell架构的升级版本，专为AI训练和推理优化，将于2026年下半年出货。同时公布下一代&#x27;Rubin&#x27;平台路线图（以发现暗物质的天文学家命名），预计2027年起出货。
+
+Blackwell Ultra融合了硅创新与更高带宽的HBM内存，显著提升大语言模型推理吞吐量。英伟达还推出了Dynamo推理加速平台，支持更大规模AI模型的部署。
+
+英伟达股价年初至今表现强势，6月1日单日上涨6.3%，因AI热潮持续。分析师关注Blackwell Ultra的量产进度及其对英伟达2026年Q3/Q4收入的贡献。不过英伟达当前估值已反映极高增长预期，部分分析师开始提示回调风险——关键支撑位在195-210美元区间。</p>
+        <ul class='abul'><li>Blackwell Ultra下半年出货，下一代Vera Rubin预计2027年推出</li><li>新平台专为AI工厂时代设计，推理性能大幅提升</li></ul>
+        <div class="abody"><p>英伟达CEO黄仁勋在GTC 2026大会上正式发布Blackwell Ultra系列GPU，这是基于Blackwell架构的升级版本，专为AI训练和推理优化，将于2026年下半年出货。同时公布下一代&#x27;Rubin&#x27;平台路线图（以发现暗物质的天文学家命名），预计2027年起出货。</p><p>Blackwell Ultra融合了硅创新与更高带宽的HBM内存，显著提升大语言模型推理吞吐量。英伟达还推出了Dynamo推理加速平台，支持更大规模AI模型的部署。</p><p>英伟达股价年初至今表现强势，6月1日单日上涨6.3%，因AI热潮持续。分析师关注Blackwell Ultra的量产进度及其对英伟达2026年Q3/Q4收入的贡献。不过英伟达当前估值已反映极高增长预期，部分分析师开始提示回调风险——关键支撑位在195-210美元区间。</p></div>
+        <div class="sources">来源：<a class="src" href="https://developer.nvidia.com/blog/inside-nvidia-blackwell-ultra-the-chip-powering-the-ai-factory-era/" target="_blank" rel="noopener">NVIDIA Blog<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.investing.com/analysis/nvidias-outlook-gains-momentum-stock-price-to-follow-200682081" target="_blank" rel="noopener">Investing.com<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a12" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">AI/半导体</div>
+        <h1 class="atitle">台积电举办2026北美技术论坛，揭示A13制程技术路线</h1>
+        <p class="alead" >台积电于6月中旬举办2026年北美技术论坛，公布了下一代A13制程（相当于1.4nm级别）的技术细节。同时发布了紧凑型通用光子引擎（TSMC-COUPE），采用基板上共同封装光学（CPO）解决方案，预计2026年下半年实现里程碑式突破。
+
+台积电2026年Q1财报亮眼：合并营收约1.13万亿新台币，税后纯益约5724.8亿新台币，每股盈利22.08新台币。董事长魏哲家在6月4日股东常会上表示，AI需求持续强劲，先进制程产能供不应求。
+
+台积电连续第四年上调先进制程价格，2nm工艺涨幅约50%。公司也在推进面板级封装（CoPoS）布局，最快2027年量产。MSCI台湾指数将台积电权重上调0.56个百分点至58.33%，有望吸引被动资金持续流入。</p>
+        <ul class='abul'><li>台积电发布A13（1.4nm级）制程技术细节，推进紧凑型通用光子引擎</li><li>Q1营收1.13万亿新台币，每股盈利22.08元，AI需求驱动增长</li></ul>
+        <div class="abody"><p>台积电于6月中旬举办2026年北美技术论坛，公布了下一代A13制程（相当于1.4nm级别）的技术细节。同时发布了紧凑型通用光子引擎（TSMC-COUPE），采用基板上共同封装光学（CPO）解决方案，预计2026年下半年实现里程碑式突破。</p><p>台积电2026年Q1财报亮眼：合并营收约1.13万亿新台币，税后纯益约5724.8亿新台币，每股盈利22.08新台币。董事长魏哲家在6月4日股东常会上表示，AI需求持续强劲，先进制程产能供不应求。</p><p>台积电连续第四年上调先进制程价格，2nm工艺涨幅约50%。公司也在推进面板级封装（CoPoS）布局，最快2027年量产。MSCI台湾指数将台积电权重上调0.56个百分点至58.33%，有望吸引被动资金持续流入。</p></div>
+        <div class="sources">来源：<a class="src" href="https://pr.tsmc.com/chinese/news/3302" target="_blank" rel="noopener">台积电<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://pr.tsmc.com/chinese/news/3297" target="_blank" rel="noopener">台积电<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a13" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">AI/半导体</div>
+        <h1 class="atitle">美光HBM产能2026年全部售罄，6月24日财报成关键催化剂</h1>
+        <p class="alead" >美光科技在Computex 2026上宣布，其HBM（高带宽内存）产能2026年全年已全部售罄，并已与客户签订长期协议延伸至更远未来。年初至今美光股价累计涨幅超过120%，成为AI内存热潮的最大受益者之一。
+
+美光发布的HBM4 36GB 12H产品实现了大语言模型推理吞吐量2.6倍的提升，每GPU交付3.5倍内存容量，可支持34倍更大的AI模型。市场将此视为AI基础设施需求持续爆发的信号。
+
+美光将于6月24日发布最新季报，市场将其视为半导体行业的重要催化剂。分析人士认为，若业绩和展望超出预期，有望带动整个AI芯片板块反弹。此前半导体板块曾因Broadcom AI收入不及预期遭遇1.3万亿美元市值蒸发。</p>
+        <ul class='abul'><li>美光HBM内存2026全年产能已售罄，年初至今股价上涨超120%</li><li>HBM4 36GB 12H实现LLM推理吞吐量2.6倍提升</li></ul>
+        <div class="abody"><p>美光科技在Computex 2026上宣布，其HBM（高带宽内存）产能2026年全年已全部售罄，并已与客户签订长期协议延伸至更远未来。年初至今美光股价累计涨幅超过120%，成为AI内存热潮的最大受益者之一。</p><p>美光发布的HBM4 36GB 12H产品实现了大语言模型推理吞吐量2.6倍的提升，每GPU交付3.5倍内存容量，可支持34倍更大的AI模型。市场将此视为AI基础设施需求持续爆发的信号。</p><p>美光将于6月24日发布最新季报，市场将其视为半导体行业的重要催化剂。分析人士认为，若业绩和展望超出预期，有望带动整个AI芯片板块反弹。此前半导体板块曾因Broadcom AI收入不及预期遭遇1.3万亿美元市值蒸发。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.investing.com/analysis/microns-soldout-hbm-capacity-makes-june-24-a-makeorbreak-catalyst-200682176" target="_blank" rel="noopener">Investing.com<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://investors.micron.com/news-releases/news-release-details/micron-powers-ai-everywhere-computex-2026" target="_blank" rel="noopener">Micron<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a14" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">AI/半导体</div>
+        <h1 class="atitle">美国商务部急发新规：禁止向境外中企出口先进AI芯片</h1>
+        <p class="alead" >美国商务部6月初紧急发布新规，禁止英伟达、AMD等企业向中国境外的中国实体公司出口最先进AI芯片，旨在封堵已存在一年之久的监管漏洞。此举引发中方强烈反对，中国驻美使馆称美方&#x27;滥用出口管制措施，是典型的单边霸凌行径&#x27;。
+
+在此背景下，中国半导体国产化进程加速。分析报告显示，2026上半年半导体行业全面涨价，国内晶圆厂扩产提速，半导体设备国产化率已从2017年的13%提升至约35%，预计2025-2028年中国半导体产业链将释放超过3万亿元的国产替代空间。
+
+中国对镓、锗等关键原材料的出口管制政策出现松动——商务部2025年11月宣布暂停对美出口管制措施至2026年11月27日，显示在部分领域的博弈趋于务实。</p>
+        <ul class='abul'><li>新规封堵监管漏洞，限制英伟达、AMD向境外中国实体出口AI芯片</li><li>中国半导体国产化率持续提升，2026-2028年国产替代空间超3万亿元</li></ul>
+        <div class="abody"><p>美国商务部6月初紧急发布新规，禁止英伟达、AMD等企业向中国境外的中国实体公司出口最先进AI芯片，旨在封堵已存在一年之久的监管漏洞。此举引发中方强烈反对，中国驻美使馆称美方&#x27;滥用出口管制措施，是典型的单边霸凌行径&#x27;。</p><p>在此背景下，中国半导体国产化进程加速。分析报告显示，2026上半年半导体行业全面涨价，国内晶圆厂扩产提速，半导体设备国产化率已从2017年的13%提升至约35%，预计2025-2028年中国半导体产业链将释放超过3万亿元的国产替代空间。</p><p>中国对镓、锗等关键原材料的出口管制政策出现松动——商务部2025年11月宣布暂停对美出口管制措施至2026年11月27日，显示在部分领域的博弈趋于务实。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.voachinese.com/a/us-takes-step-to-halt-ai-chips-to-chinese-firms-outside-china-20260601/8156110.html" target="_blank" rel="noopener">美国之音<span class="stance" style="background:#5b8def">偏左</span></a> <a class="src" href="https://openaxo.com/trends/2026-h1-semiconductor-industry-analysis" target="_blank" rel="noopener">OpenAxo<span class="stance" style="background:#5bbf8a">体制外</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a15" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">政治</div>
+        <h1 class="atitle">G7峰会在法国埃维安闭幕，聚焦乌克兰援助与全球经济挑战</h1>
+        <p class="alead" >2026年G7领导人峰会于6月15日至17日在法国埃维安（Evian）举行，与会领导人讨论了国际和平与安全、全球经济挑战、竞争力、人工智能治理等议题。峰会在17日发布联合声明。
+
+G7领导人同意增加对乌克兰的军事支持，包括防空能力、额外系统和拦截器。在经济方面，讨论了创造更平衡、可持续和共享增长的条件，以及加强国际团结的新共识。
+
+值得注意的是，G7领导人还承诺加强对抗癌症的合作。在AI治理方面，讨论了如何平衡创新与风险管控。峰会后各国领导人赴法国参加后续活动。</p>
+        <ul class='abul'><li>6月15-17日在法国埃维安举行，讨论国际和平、经济与全球伙伴关系</li><li>G7同意加大对乌克兰军事支持（防空系统、弹药等），并对抗癌症议题达成共识</li></ul>
+        <div class="abody"><p>2026年G7领导人峰会于6月15日至17日在法国埃维安（Evian）举行，与会领导人讨论了国际和平与安全、全球经济挑战、竞争力、人工智能治理等议题。峰会在17日发布联合声明。</p><p>G7领导人同意增加对乌克兰的军事支持，包括防空能力、额外系统和拦截器。在经济方面，讨论了创造更平衡、可持续和共享增长的条件，以及加强国际团结的新共识。</p><p>值得注意的是，G7领导人还承诺加强对抗癌症的合作。在AI治理方面，讨论了如何平衡创新与风险管控。峰会后各国领导人赴法国参加后续活动。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.consilium.europa.eu/en/press/press-releases/2026/06/17/g7-leaders-joint-statements-evian-france-16-17-june-2026/" target="_blank" rel="noopener">EU Council<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.elysee.fr/en/G7evian/2026/06/17/the-outcomes-of-the-evian-g7-summit" target="_blank" rel="noopener">Elysee<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a16" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">政治</div>
+        <h1 class="atitle">欧盟峰会6月18-19日召开：讨论乌克兰、竞争力及中期预算</h1>
+        <p class="alead" >欧洲理事会于6月18-19日在布鲁塞尔举行峰会。欧洲理事会主席科斯塔（Antonio Costa）在邀请函中表示，会议将讨论若干关键议题，包括竞争力和全球经济挑战、乌克兰及中东局势。
+
+根据会前分析，此次峰会预计不会做出具体决定，科斯塔的目标是为即将上任的爱尔兰轮值主席国提供进一步指导。核心议题包括欧洲防务和安全架构建设、下一个多年度财政框架（MFF）以及储蓄与投资联盟的推进。
+
+此次峰会紧随G7之后召开，显示出欧洲在应对地缘政治和经济挑战方面的协调努力。法国总统马克龙此前曾设定6月为欧盟经济重振计划的截止期限。</p>
+        <ul class='abul'><li>欧盟27国领导人18-19日在布鲁塞尔举行峰会</li><li>主要议题包括乌克兰局势、中东、欧洲防务安全及新多年度财政框架</li></ul>
+        <div class="abody"><p>欧洲理事会于6月18-19日在布鲁塞尔举行峰会。欧洲理事会主席科斯塔（Antonio Costa）在邀请函中表示，会议将讨论若干关键议题，包括竞争力和全球经济挑战、乌克兰及中东局势。</p><p>根据会前分析，此次峰会预计不会做出具体决定，科斯塔的目标是为即将上任的爱尔兰轮值主席国提供进一步指导。核心议题包括欧洲防务和安全架构建设、下一个多年度财政框架（MFF）以及储蓄与投资联盟的推进。</p><p>此次峰会紧随G7之后召开，显示出欧洲在应对地缘政治和经济挑战方面的协调努力。法国总统马克龙此前曾设定6月为欧盟经济重振计划的截止期限。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.consilium.europa.eu/en/meetings/european-council/2026/06/18-19/" target="_blank" rel="noopener">EU Council<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://epthinktank.eu/2026/06/17/outlook-for-the-european-council-18-19-june/" target="_blank" rel="noopener">EP Think Tank<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a17" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">政治</div>
+        <h1 class="atitle">特朗普确认签署美伊谅解备忘录，中东局势重大转折</h1>
+        <p class="alead" >美国总统特朗普6月17日在巴黎凡尔赛宫表示，已签署与伊朗的谅解备忘录。此前的6月14日，美伊双方宣布达成结束军事冲突的框架协议，经巴基斯坦斡旋。正式MOU预计于6月19日签署。
+
+特朗普在声明中称&#x27;让石油流动起来&#x27;，承诺霍尔木兹海峡将逐步恢复通航。伊朗外交部副部长在国家电视台上证实协议，表示&#x27;这是伊朗人民的胜利&#x27;。
+
+该协议标志着中东局势的重大转折。自冲突爆发以来，国际油价持续高企，全球通胀承压。协议框架公布后，布伦特原油应声跌破80美元/桶，全球股市风险偏好显著回升。</p>
+        <ul class='abul'><li>特朗普6月17日在巴黎确认已签署美伊谅解备忘录，6月19日正式签署MOU</li><li>油价应声暴跌，全球市场风险偏好回升</li></ul>
+        <div class="abody"><p>美国总统特朗普6月17日在巴黎凡尔赛宫表示，已签署与伊朗的谅解备忘录。此前的6月14日，美伊双方宣布达成结束军事冲突的框架协议，经巴基斯坦斡旋。正式MOU预计于6月19日签署。</p><p>特朗普在声明中称&#x27;让石油流动起来&#x27;，承诺霍尔木兹海峡将逐步恢复通航。伊朗外交部副部长在国家电视台上证实协议，表示&#x27;这是伊朗人民的胜利&#x27;。</p><p>该协议标志着中东局势的重大转折。自冲突爆发以来，国际油价持续高企，全球通胀承压。协议框架公布后，布伦特原油应声跌破80美元/桶，全球股市风险偏好显著回升。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.voachinese.com/z/1739" target="_blank" rel="noopener">美国之音<span class="stance" style="background:#5b8def">偏左</span></a> <a class="src" href="https://www.bbc.com/zhongwen/articles/c992nyg2kp3o/trad" target="_blank" rel="noopener">BBC中文<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.epochtimes.com/gb/26/6/15/n14788763.htm" target="_blank" rel="noopener">大纪元<span class="stance" style="background:#ef8b5b">偏右</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+
+  <footer><div class="glo">本简报基于2026年6月18日公开新闻报道整理，信息来源已标注。所有内容仅供参考，不构成投资建议。</div></footer>
+</div>
+<script>
+  // 两套独立字号: 主界面UI (--fs-ui) 和 文章阅读 (--fs-art), 各自记忆 (David 2026-06-19)
+  var savedUi = localStorage.getItem('himi_fs_ui');
+  if(savedUi){ fsUiApply(savedUi); document.getElementById('fsr').value=savedUi; }
+  var savedArt = localStorage.getItem('himi_fs_art');
+  if(savedArt){ fsArtApply(savedArt); }
+  function fs(v){ fsUiApply(v); localStorage.setItem('himi_fs_ui', v); }
+  function fsUiApply(v){ document.documentElement.style.setProperty('--fs-ui', v+'px'); document.getElementById('fsv').textContent=v; }
+  function fsArt(v){ fsArtApply(v); localStorage.setItem('himi_fs_art', v); }
+  function fsArtApply(v){
+    document.documentElement.style.setProperty('--fs-art', v+'px');
+    var sl=document.getElementsByClassName('fsr-art'); for(var i=0;i<sl.length;i++){ sl[i].value=v; }
+    var nb=document.getElementsByClassName('fsv-art'); for(var j=0;j<nb.length;j++){ nb[j].textContent=v; }
+  }
+  // —— 中/英/自动 语言切换 (David 2026-06-19): 中=只看中文原文, ENG=只看英文原文, 自动=各显其原文语言(全显示) ——
+  var savedLang = localStorage.getItem('himi_lang') || 'zh';   // 默认中文
+  function setLang(L){
+    localStorage.setItem('himi_lang', L);
+    // 按钮高亮
+    var btns=document.getElementsByClassName('langbtn');
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i].getAttribute('data-lang')===L); }
+    // 过滤卡片: 自动=全显示; 中/英=只显示对应原文语言
+    var cards=document.querySelectorAll('#list .card');
+    for(var j=0;j<cards.length;j++){
+      var cl=cards[j].getAttribute('data-lang');
+      cards[j].style.display=(L==='auto'||cl===L)?'':'none';
+    }
+    // 板块小标: 本板块过滤后若一条新闻都不剩, 就隐藏该板块标题
+    var labels=document.querySelectorAll('#list .seclabel');
+    for(var k=0;k<labels.length;k++){
+      var si=labels[k].getAttribute('data-sec');
+      var any=document.querySelectorAll('#list .card[data-sec="'+si+'"]');
+      var visible=0;
+      for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') visible++; }
+      labels[k].style.display=visible?'':'none';
+    }
+    // 列表空提示
+    var emptyId='langempty', old=document.getElementById(emptyId);
+    var listVisible=document.querySelectorAll('#list .card:not([style*="display: none"])').length;
+    if(old) old.remove();
+    if(listVisible===0){
+      var tip=document.createElement('div'); tip.id=emptyId;
+      tip.style.cssText='padding:40px 16px;text-align:center;color:#aaa;font-size:15px;';
+      tip.textContent=(L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻';
+      document.getElementById('list').appendChild(tip);
+    }
+  }
+  setLang(savedLang);   // 进页面应用记忆的语言
+  // —— iOS最稳: 用浏览器原生历史导航, 不碰任何自定义触摸手势 (David 2026-06-19 v3) ——
+  // go() 用 history.pushState 进文章; 系统自带的"左边缘右滑返回"=浏览器后退=自动触发home, 原生苹果动画
+  // 文章是正常文档流 → iOS原生半透明滚动条自动出现; 返回键是纯click最顶层 → 永不被吃
+  var listScroll=0;
+  function showArticle(i){
+    var a=document.getElementById('a'+i); if(!a) return;
+    listScroll=window.scrollY||window.pageYOffset||0;
+    document.getElementById('list').style.display='none';
+    document.getElementById('fsbar').style.display='none';
+    var dn=document.getElementById('datenav'); if(dn) dn.style.display='none';
+    document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
+    a.style.display='block';
+    a.classList.remove('slidein'); void a.offsetWidth; a.classList.add('slidein');  // 重触发滑入动画
+    document.getElementById('backfix').style.display='block';
+    window.scrollTo(0,0);
+  }
+  function showList(){
+    document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
+    document.getElementById('list').style.display='block';
+    document.getElementById('fsbar').style.display='';
+    var dn=document.getElementById('datenav'); if(dn) dn.style.display='';
+    document.getElementById('backfix').style.display='none';
+    window.scrollTo(0,listScroll);   // 返回列表原位置, 不跳顶
+  }
+  function go(i){
+    history.pushState({art:i}, '', '#a'+i);   // 压一条历史 → 边缘滑/后退键都能弹回
+    showArticle(i);
+  }
+  function home(){
+    if(location.hash){ history.back(); }       // 触发popstate → showList; 与边缘滑返回同一条路径
+    else { showList(); }
+  }
+  // 浏览器后退(含iOS边缘右滑返回手势) → 回列表
+  window.addEventListener('popstate', function(e){
+    if(e.state && typeof e.state.art!=='undefined'){ showArticle(e.state.art); }
+    else { showList(); }
+  });
+</script>
+</body>
+</html>

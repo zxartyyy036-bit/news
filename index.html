@@ -1,34 +1,41 @@
 <!DOCTYPE html>
-<html lang="zh-CN"><head><meta charset="utf-8">
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>家庭每日简报</title>
 <style>
-*{box-sizing:border-box;margin:0;padding:0;-webkit-text-size-adjust:100%;}
-body{font-family:-apple-system,"PingFang SC","Heiti SC",sans-serif;background:linear-gradient(160deg,#3aab9a,#2b8fa0);min-height:100vh;color:#fff;}
-.wrap{max-width:560px;margin:0 auto;padding:34px 20px 50px;}
-h1{font-size:30px;font-weight:800;text-align:center;letter-spacing:1px;}
-.date{text-align:center;opacity:.9;margin-top:8px;font-size:16px;}
-.tip{text-align:center;opacity:.82;margin:18px 0 26px;font-size:14px;line-height:1.7;}
-.grid{display:flex;flex-direction:column;gap:13px;}
-a.card{display:flex;align-items:center;justify-content:space-between;background:rgba(255,255,255,.96);color:#1f2937;text-decoration:none;padding:20px 22px;border-radius:16px;box-shadow:0 4px 16px rgba(0,0,0,.13);transition:transform .12s;}
-a.card:active{transform:scale(.97);}
-a.card.all{background:rgba(255,255,255,.99);border:2px solid #f0c14b;}
-.name{font-size:22px;font-weight:700;}
-.meta{font-size:14px;color:#3aab9a;font-weight:700;}
-.arrow{color:#3aab9a;font-size:20px;font-weight:700;margin-left:8px;}
-footer{text-align:center;opacity:.75;font-size:12px;margin-top:30px;line-height:1.8;}
-</style></head><body><div class="wrap">
-<h1>家庭每日简报</h1>
-<div class="date">2026年06月19日 · 冰见为全家整理</div>
-<div class="tip">点你的名字,看为你定制的新闻 ☀️<br>每条都标了来源和媒体立场,自己判断</div>
-<div class="grid">
-    <a class="card all" href="all.html"><span class="name">📰 全部</span><span><span class="meta">所有人 · 所有日期</span><span class="arrow"> ›</span></span></a>
-    <a class="card" href="laoye.html"><span class="name">姥爷</span><span><span class="meta">13 条</span><span class="arrow"> ›</span></span></a>
-    <a class="card" href="baba.html"><span class="name">爸爸</span><span><span class="meta">14 条</span><span class="arrow"> ›</span></span></a>
-    <a class="card" href="mama.html"><span class="name">妈妈</span><span><span class="meta">21 条</span><span class="arrow"> ›</span></span></a>
-    <a class="card" href="yangyang.html"><span class="name">阳阳</span><span><span class="meta">14 条</span><span class="arrow"> ›</span></span></a>
-    <a class="card" href="xiaoyifu.html"><span class="name">小姨夫</span><span><span class="meta">16 条</span><span class="arrow"> ›</span></span></a>
-    <a class="card" href="xiaoyi.html"><span class="name">小姨</span><span><span class="meta">10 条</span><span class="arrow"> ›</span></span></a>
+  *{box-sizing:border-box;-webkit-text-size-adjust:100%;}
+  body{margin:0;font-family:-apple-system,"PingFang SC","Heiti SC",sans-serif;
+       background:#f2f4f7;color:#1f2937;line-height:1.7;}
+  .wrap{max-width:600px;margin:0 auto;background:#fff;min-height:100vh;}
+  header{background:linear-gradient(135deg,#3aab9a,#2b8fa0);color:#fff;padding:32px 22px 26px;}
+  header h1{margin:0;font-size:26px;font-weight:700;}
+  header .meta{margin-top:8px;font-size:15px;opacity:.92;}
+  .grid{padding:14px 16px 30px;}
+  .who{display:flex;align-items:center;gap:14px;background:#fff;border:1px solid #eef0f3;
+       border-radius:14px;padding:18px 18px;margin:11px 0;cursor:pointer;text-decoration:none;
+       color:inherit;box-shadow:0 1px 4px rgba(0,0,0,.04);transition:transform .12s;}
+  .who:active{transform:scale(.98);background:#f7f9fb;}
+  .allcard{background:#f3fbf9;border:1px solid #cdeee7;}
+  .ava{width:48px;height:48px;border-radius:50%;flex-shrink:0;display:flex;
+       align-items:center;justify-content:center;font-size:22px;color:#fff;font-weight:700;}
+  .who .nm{font-size:20px;font-weight:700;}
+  .who .ds{font-size:13px;color:#999;margin-top:2px;}
+  .who .go{margin-left:auto;color:#3aab9a;font-size:22px;font-weight:700;}
+  footer{padding:18px 22px 40px;font-size:12px;color:#aaa;text-align:center;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>📰 家庭每日简报</h1>
+    <div class="meta">6月19日 · 点选名字 / 看全部</div>
+  </header>
+  <div class="grid">
+    <a class="who allcard" href="all.html"><span class="ava" style="background:#2b8fa0">全</span><span><div class="nm">📚 全部</div><div class="ds">全家所有新闻 · 不限板块</div></span><span class="go">›</span></a><a class="who" href="laoye.html"><span class="ava" style="background:#4a90d9">爷</span><span><div class="nm">姥爷</div><div class="ds">国际要闻 · 中国AI · 文化</div></span><span class="go">›</span></a><a class="who" href="baba.html"><span class="ava" style="background:#3aab9a">爸</span><span><div class="nm">爸爸</div><div class="ds">时政 · 高尔夫 · 经济商业</div></span><span class="go">›</span></a><a class="who" href="mama.html"><span class="ava" style="background:#e6943a">妈</span><span><div class="nm">妈妈</div><div class="ds">高尔夫 · 理财 · 海外生活</div></span><span class="go">›</span></a><a class="who" href="david.html"><span class="ava" style="background:#9b78c9">D</span><span><div class="nm">David</div><div class="ds">开源AI · 半导体 · 电竞 · 科学</div></span><span class="go">›</span></a><a class="who" href="xiaoyifu.html"><span class="ava" style="background:#5cb56b">夫</span><span><div class="nm">小姨夫</div><div class="ds">A股美股 · 宏观 · 量化</div></span><span class="go">›</span></a><a class="who" href="xiaoyi.html"><span class="ava" style="background:#d98aa8">姨</span><span><div class="nm">小姨</div><div class="ds">时政 · 体育 · 科学健康 · 教育</div></span><span class="go">›</span></a>
+  </div>
+  <footer>冰见 · 每日为家人整理 · 个性化新闻简报</footer>
 </div>
-<footer>每天上午自动更新 · 链接不变,收藏即可<br>新闻来自公开媒体,仅供家人阅读参考</footer>
-</div></body></html>
+</body>
+</html>
