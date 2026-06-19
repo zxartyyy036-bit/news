@@ -14,12 +14,16 @@
   /* 标题小字: 固定大小, 不随字号滑块变 (David 2026-06-19) */
   header h1 { margin:0; font-size:28px; font-weight:700; }
   header .sub { margin-top:3px; font-size:14px; opacity:.82; }
-  /* Home图标: 每个profile左上角, 点回主页(选人+全部) (David 2026-06-19) */
-  .homebtn { position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#fff; opacity:.92;
+  /* Home按钮: 半透明(David喜欢) + 描边+投影+按压反馈 让它一眼是"可点按钮"非图标 (David 2026-06-19) */
+  .homebtn { position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#fff;
     display:inline-flex; align-items:center; justify-content:center;
-    width:42px; height:42px; border-radius:50%; background:rgba(255,255,255,.16);
-    text-decoration:none; -webkit-tap-highlight-color:transparent; }
-  .homebtn:active { background:rgba(255,255,255,.3); }
+    width:40px; height:40px; border-radius:12px;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 2px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.25);
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+    text-decoration:none; -webkit-tap-highlight-color:transparent; transition:transform .1s, background .15s; }
+  .homebtn:active { background:rgba(255,255,255,.36); transform:translateY(-50%) scale(.9);
+    box-shadow:0 1px 3px rgba(0,0,0,.2); }
 
   /* 日期翻阅 + 全部 导航条 (David 2026-06-19 B2/B4: 像新闻App翻昨天/前天 + 全部入口) */
   .datenav { display:flex; align-items:center; gap:10px; padding:8px 16px;
@@ -39,12 +43,17 @@
   .datenav .dn-fav:active { transform:scale(.95); }
 
   /* 搜索框: 每个profile列表页, 关键词搜本页新闻 (David 2026-06-19) */
-  .searchbar { padding:12px 14px 4px; background:#f2f4f7; border-bottom:none;
-    display:flex; align-items:center; gap:8px; }
-  .searchbox { flex:1; min-width:0; box-sizing:border-box; font-size:15px; height:42px; padding:0 16px;
+  .searchbar { padding:12px 14px 4px; background:#f2f4f7; border-bottom:none; }
+  .searchwrap { position:relative; width:100%; }
+  .searchbox { width:100%; box-sizing:border-box; font-size:15px; height:42px; padding:0 40px 0 16px;
     border:1px solid #e2e8ec; border-radius:21px; background:#fff; color:#333;
     box-shadow:0 1px 2px rgba(0,0,0,.04); -webkit-appearance:none; appearance:none; outline:none; }
   .searchbox:focus { border-color:#3aab9a; box-shadow:0 0 0 3px rgba(58,171,154,.12); }
+  /* 谷歌式清除✕: 输入后出现, 点了清空 (David 2026-06-19) */
+  .searchclear { position:absolute; top:50%; right:9px; transform:translateY(-50%);
+    width:26px; height:26px; border:none; border-radius:50%; background:#c8d0d8; color:#fff;
+    font-size:13px; line-height:1; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .searchclear:active { background:#aab4bd; }
 
   /* 字号滑块条 — 静止在顶部, 往下滑就消失 (David 2026-06-19: 不固定/不跟随) */
   .fsbar { background:#fff; border-bottom:1px solid #eef0f3;
@@ -86,7 +95,8 @@
   .card:active { transform:scale(.985); box-shadow:0 2px 8px rgba(0,0,0,.10); background:#fcfdfe; }
   /* 每条story左上角发布日期小字 (David 2026-06-19) */
   .card-date { font-size:12px; color:#aaa; margin-bottom:4px; font-weight:500; }
-  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; }
+  /* 标题右侧留出收藏星空间, 永不被星星盖住 (David 2026-06-19) */
+  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; padding-right:34px; }
   .card-lead { font-size:var(--fs-ui); color:#555; margin-top:7px; line-height:1.7; }
   .card-more { font-size:calc(var(--fs-ui) - 4px); margin-top:8px; font-weight:600; }
 
@@ -105,8 +115,8 @@
   .adate { font-size:14px; color:#999; margin:-8px 0 12px; }
 
   /* —— 收藏功能 (David 2026-06-19): 卡片右上角空心☆, 点亮金黄实心★; 本地存储 —— */
-  .card { position:relative; }
-  .favstar { position:absolute; top:10px; right:8px; z-index:5; background:none; border:none;
+  .card { position:relative; padding-right:42px; }   /* 右侧留出星星空间, 标题不被盖 */
+  .favstar { position:absolute; top:14px; right:6px; z-index:5; background:none; border:none;
     font-size:24px; line-height:1; color:#ccc; cursor:pointer; padding:4px 6px;
     -webkit-tap-highlight-color:transparent; transition:transform .12s; }
   .favstar:active { transform:scale(1.25); }
@@ -146,17 +156,24 @@
     border:1px solid #d8e0e6; color:#2b8fa0; font-size:15px; font-weight:700;
     padding:9px 17px; border-radius:22px; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.14); }
   .backfix:active { transform:scale(.96); }
+  /* 回到顶部箭头: 右下角, 滚动超过1.5屏才出现, 点了平滑回最新(顶部) (David 2026-06-19) */
+  .totop { position:fixed; right:16px; bottom:24px; z-index:150; display:none;
+    width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(43,143,160,.92); color:#fff; font-size:22px; line-height:1;
+    box-shadow:0 3px 12px rgba(0,0,0,.22); -webkit-tap-highlight-color:transparent; }
+  .totop:active { transform:scale(.92); }
 </style>
 </head>
 <body>
 <button class="backfix" id="backfix" onclick="home()">‹ 返回</button>
+<button class="totop" id="totop" onclick="scrollTopSmooth()" aria-label="回到顶部">↑</button>
 <div class="wrap">
   <header id="pagehead">
     <a class="homebtn" id="homebtn" href="index.html" title="返回家庭简报主页" aria-label="主页">
       <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg>
     </a>
     <h1>小姨夫·每日简报</h1>
-    <div class="sub">共 34 条 · 最新 6月19日</div>
+    
   </header>
   <div class="datenav" id="datenav"><span class="dn-label">📅 跳到</span><select class="dn-sel" onchange="jumpDay(this.value)"><option value="__top__">全部 · 回到最新</option><optgroup label="2026年6月"><option value="20260619" selected>6月19日 周五</option><option value="20260618">6月18日 周四</option></optgroup></select><span class="dn-right"><a class="dn-all" href="all.html">📚 全部</a><button class="dn-fav" id="favtoggle" onclick="toggleFavView()">☆ 我的收藏</button></span></div>
   <div class="fsbar" id="fsbar"><span class="fslabel">字号</span> <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b><span class="fsunit">px</span>
@@ -167,7 +184,10 @@
     </span>
   </div>
   <div class="searchbar" id="searchbar">
-    <input type="search" id="searchbox" class="searchbox" placeholder="🔍 搜索新闻关键词" oninput="doSearch(this.value)" autocomplete="off">
+    <div class="searchwrap">
+      <input type="search" id="searchbox" class="searchbox" placeholder="🔍 搜索新闻关键词" oninput="doSearch(this.value)" autocomplete="off">
+      <button class="searchclear" id="searchclear" onclick="clearSearch()" aria-label="清除" style="display:none">✕</button>
+    </div>
   </div>
 
   <div id="list">
@@ -1354,7 +1374,17 @@ G7领导人同意增加对乌克兰的军事支持，包括防空能力、额外
     applyFilters();
   }
   function curLang(){ return localStorage.getItem('himi_lang') || 'zh'; }
-  function doSearch(q){ curQuery=(q||'').trim().toLowerCase(); applyFilters(); }
+  function doSearch(q){
+    curQuery=(q||'').trim().toLowerCase();
+    var clr=document.getElementById('searchclear');
+    if(clr) clr.style.display=(document.getElementById('searchbox').value)?'':'none';
+    applyFilters();
+  }
+  function clearSearch(){
+    var sb=document.getElementById('searchbox'); if(sb) sb.value='';
+    doSearch('');
+    if(sb) sb.focus();
+  }
   function applyFilters(){
     var L=curLang();
     var favs=getFavs(), favView=isFavView();
@@ -1449,6 +1479,15 @@ G7领导人同意增加对乌克兰的军事支持，包括防空能力、额外
     var el=document.getElementById('day_'+token);
     if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
   }
+  // 回到顶部箭头: 滚动超1.5屏出现, 点了平滑回最新(顶) (David 2026-06-19)
+  function scrollTopSmooth(){ window.scrollTo({top:0, behavior:'smooth'}); }
+  window.addEventListener('scroll', function(){
+    var btn=document.getElementById('totop'); if(!btn) return;
+    // 只在列表页(非文章页)且滚动超1.5屏时显示
+    var inArticle=document.getElementById('backfix').style.display==='block';
+    var y=window.scrollY||window.pageYOffset||0;
+    btn.style.display=(!inArticle && y > window.innerHeight*1.5)?'block':'none';
+  }, {passive:true});
   // —— iOS最稳: 用浏览器原生历史导航, 不碰任何自定义触摸手势 (David 2026-06-19 v3) ——
   // go() 用 history.pushState 进文章; 系统自带的"左边缘右滑返回"=浏览器后退=自动触发home, 原生苹果动画
   // 文章是正常文档流 → iOS原生半透明滚动条自动出现; 返回键是纯click最顶层 → 永不被吃
@@ -1462,6 +1501,7 @@ G7领导人同意增加对乌克兰的军事支持，包括防空能力、额外
     var sb=document.getElementById('searchbar'); if(sb) sb.style.display='none';
     var dn=document.getElementById('datenav'); if(dn) dn.style.display='none';
     var hb=document.getElementById('homebtn'); if(hb) hb.style.display='none';
+    var tt=document.getElementById('totop'); if(tt) tt.style.display='none';
     document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
     a.style.display='block';
     a.classList.remove('slidein'); void a.offsetWidth; a.classList.add('slidein');  // 重触发滑入动画
