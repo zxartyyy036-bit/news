@@ -10,16 +10,56 @@
   body { margin:0; font-family:-apple-system,"PingFang SC","Heiti SC",sans-serif;
          background:#f2f4f7; color:#1f2937; line-height:1.75; }
   .wrap { max-width:820px; margin:0 auto; background:#fff; min-height:100vh; }
-  header { background:linear-gradient(135deg,#3aab9a,#2b8fa0); color:#fff; padding:24px 20px 20px; }
-  /* 标题+日期小字: 固定大小, 不随字号滑块变 (David 2026-06-19) */
+  header { background:linear-gradient(135deg,#3aab9a,#2b8fa0); color:#fff; padding:24px 20px 20px 64px; position:relative; }
+  /* 标题小字: 固定大小, 不随字号滑块变 (David 2026-06-19) */
   header h1 { margin:0; font-size:28px; font-weight:700; }
-  header .meta { margin-top:6px; font-size:15px; opacity:.92; }
   header .sub { margin-top:3px; font-size:14px; opacity:.82; }
+  /* Home按钮: 半透明(David喜欢) + 描边+投影+按压反馈 让它一眼是"可点按钮"非图标 (David 2026-06-19) */
+  .homebtn { position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:12px;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 2px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.25);
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+    text-decoration:none; -webkit-tap-highlight-color:transparent; transition:transform .1s, background .15s; }
+  .homebtn:active { background:rgba(255,255,255,.36); transform:translateY(-50%) scale(.9);
+    box-shadow:0 1px 3px rgba(0,0,0,.2); }
+
+  /* 日期翻阅 + 全部 导航条 (David 2026-06-19 B2/B4: 像新闻App翻昨天/前天 + 全部入口) */
+  .datenav { display:flex; align-items:center; gap:10px; padding:8px 16px;
+    background:#f6f9fa; border-bottom:1px solid #eef0f3; font-size:14px; color:#667; }
+  .datenav .dn-label { font-weight:600; flex-shrink:0; color:#555; }
+  .datenav .dn-sel { font-size:14px; color:#333; border:1px solid #d8e0e6; border-radius:9px;
+    padding:5px 9px; background:#fff; max-width:150px; -webkit-appearance:none; appearance:none; }
+  /* 右侧按钮组: 📚全部 + ⭐我的收藏 (David 2026-06-19: 两个独立按钮, 跟搜索框分开) */
+  .datenav .dn-right { margin-left:auto; display:inline-flex; gap:7px; flex-shrink:0; }
+  .datenav .dn-all, .datenav .dn-fav { flex-shrink:0; font-size:13px; font-weight:700;
+    padding:5px 12px; border-radius:14px; cursor:pointer; border:none;
+    -webkit-tap-highlight-color:transparent; white-space:nowrap; }
+  .datenav .dn-all { color:#2b8fa0; text-decoration:none; background:#e7f7f4; }
+  .datenav .dn-all:active { background:#cdeee7; }
+  .datenav .dn-fav { color:#b8860b; background:#fff5db; }
+  .datenav .dn-fav.on { color:#fff; background:#f5b301; }
+  .datenav .dn-fav:active { transform:scale(.95); }
+
+  /* 搜索框: 每个profile列表页, 关键词搜本页新闻 (David 2026-06-19) */
+  .searchbar { padding:12px 14px 4px; background:#f2f4f7; border-bottom:none; }
+  .searchwrap { position:relative; width:100%; }
+  .searchbox { width:100%; box-sizing:border-box; font-size:15px; height:42px; padding:0 40px 0 16px;
+    border:1px solid #e2e8ec; border-radius:21px; background:#fff; color:#333;
+    box-shadow:0 1px 2px rgba(0,0,0,.04); -webkit-appearance:none; appearance:none; outline:none; }
+  .searchbox:focus { border-color:#3aab9a; box-shadow:0 0 0 3px rgba(58,171,154,.12); }
+  /* 谷歌式清除✕: 输入后出现, 点了清空 (David 2026-06-19) */
+  .searchclear { position:absolute; top:50%; right:9px; transform:translateY(-50%);
+    width:26px; height:26px; border:none; border-radius:50%; background:#c8d0d8; color:#fff;
+    font-size:13px; line-height:1; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .searchclear:active { background:#aab4bd; }
 
   /* 字号滑块条 — 静止在顶部, 往下滑就消失 (David 2026-06-19: 不固定/不跟随) */
   .fsbar { background:#fff; border-bottom:1px solid #eef0f3;
-           display:flex; align-items:center; gap:10px; padding:9px 16px; font-size:14px; color:#888; }
-  .fsbar b { color:#3aab9a; min-width:24px; text-align:center; }
+           display:flex; align-items:center; gap:8px; padding:9px 16px; font-size:14px; color:#888; }
+  .fsbar .fslabel, .fsbar .fsunit { flex-shrink:0; white-space:nowrap; }
+  .fsbar b { color:#3aab9a; min-width:24px; text-align:center; flex-shrink:0; }
   /* 中/英/自动 语言切换: 放字号条右边, 不挡滑块 (David 2026-06-19) */
   .langsw { margin-left:auto; display:inline-flex; gap:4px; flex-shrink:0; }
   .langbtn { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
@@ -40,12 +80,23 @@
     background:#3aab9a; border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
 
   /* 列表页 */
-  #list { padding:6px 16px 30px; }
-  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:22px 0 6px; padding-left:10px;
+  #list { padding:10px 14px 30px; background:#f2f4f7; }
+  /* 按天分隔线: 最新一天在顶, 往下滚=往回翻 (David 2026-06-19) */
+  .daydivider { display:flex; align-items:center; text-align:center; margin:26px 0 10px;
+    color:#2b8fa0; font-size:15px; font-weight:700; }
+  .daydivider::before, .daydivider::after { content:""; flex:1; height:1px; background:#dde6ea; }
+  .daydivider span { padding:4px 14px; background:#e7f7f4; border-radius:14px; margin:0 10px; }
+  .daydivider:first-child { margin-top:8px; }
+  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:20px 0 8px; padding-left:10px;
               border-left:5px solid currentColor; }
-  .card { background:#fff; border-bottom:1px solid #eef0f3; padding:16px 4px; cursor:pointer; }
-  .card:active { background:#f7f9fb; }
-  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; }
+  /* 独立白卡片 + 留白 + 圆角 + 轻阴影 — Apple式呼吸感 (David 2026-06-19: 弃0间距+1px灰线) */
+  .card { background:#fff; border-radius:14px; padding:16px 16px; margin:0 0 12px; cursor:pointer;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); transition:transform .12s, box-shadow .12s; }
+  .card:active { transform:scale(.985); box-shadow:0 2px 8px rgba(0,0,0,.10); background:#fcfdfe; }
+  /* 每条story左上角发布日期小字 (David 2026-06-19) */
+  .card-date { font-size:12px; color:#aaa; margin-bottom:4px; font-weight:500; }
+  /* 标题右侧留出收藏星空间, 永不被星星盖住 (David 2026-06-19) */
+  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; padding-right:34px; }
   .card-lead { font-size:var(--fs-ui); color:#555; margin-top:7px; line-height:1.7; }
   .card-more { font-size:calc(var(--fs-ui) - 4px); margin-top:8px; font-weight:600; }
 
@@ -60,6 +111,29 @@
   .atag { display:inline-block; font-size:calc(var(--fs-art) - 4px); font-weight:700;
           padding:3px 12px; border-radius:6px; margin:10px 0 6px; }
   .atitle { font-size:calc(var(--fs-art) + 9px); line-height:1.4; color:#1a1a1a; margin:6px 0 14px; }
+  /* Story详情页: 日期标在主标题下方(新闻惯例: kicker→标题→日期→正文) (David 2026-06-19) */
+  .adate { font-size:14px; color:#999; margin:-8px 0 12px; }
+
+  /* —— 收藏功能 (David 2026-06-19): 卡片右上角空心☆, 点亮金黄实心★; 本地存储 —— */
+  .card { position:relative; padding-right:42px; }   /* 右侧留出星星空间, 标题不被盖 */
+  .favstar { position:absolute; top:14px; right:6px; z-index:5; background:none; border:none;
+    font-size:24px; line-height:1; color:#ccc; cursor:pointer; padding:4px 6px;
+    -webkit-tap-highlight-color:transparent; transition:transform .12s; }
+  .favstar:active { transform:scale(1.25); }
+  .favstar.on { color:#f5b301; text-shadow:0 0 8px rgba(245,179,1,.6); }
+  /* 详情页"☆收藏"按钮 */
+  .favbtn { display:inline-flex; align-items:center; gap:5px; background:#fff8e8; border:1px solid #f0d896;
+    color:#b8860b; font-size:14px; font-weight:600; padding:6px 14px; border-radius:18px;
+    cursor:pointer; margin:2px 0 12px; -webkit-tap-highlight-color:transparent; }
+  .favbtn:active { transform:scale(.96); }
+  .favbtn.on { background:#f5b301; border-color:#f5b301; color:#fff; }
+  .favbtn.on .favbtn-ic { }
+  /* 顶部"只看收藏"切换 */
+  .favtoggle { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
+    padding:5px 11px; border-radius:14px; cursor:pointer; flex-shrink:0; margin-left:8px;
+    -webkit-tap-highlight-color:transparent; }
+  .favtoggle.on { background:#f5b301; color:#fff; }
+  .favtoggle:active { transform:scale(.94); }
   .alead { font-size:calc(var(--fs-art) + 1px); background:#fff8e8; border-left:5px solid #f0c14b;
            padding:13px 15px; border-radius:8px; color:#444; line-height:1.75; }
   .abul { padding-left:26px; margin:14px 0; }
@@ -69,6 +143,7 @@
   .src { display:inline-block; margin:4px 5px 4px 0; padding:4px 11px; background:#eef2f7;
          border-radius:20px; color:#2b8fa0; text-decoration:none; font-size:14px; }
   .stance { display:inline-block; margin-left:5px; padding:1px 7px; border-radius:8px; color:#fff; font-size:12px; }
+  .srcdate { margin-left:6px; color:#aaa; font-size:12px; }
 
   footer { padding:20px 18px 44px; font-size:13px; color:#888; border-top:1px solid #eef0f3; }
   footer .glo { background:#f6f8fa; border-radius:10px; padding:13px 15px; line-height:1.85; }
@@ -81,182 +156,710 @@
     border:1px solid #d8e0e6; color:#2b8fa0; font-size:15px; font-weight:700;
     padding:9px 17px; border-radius:22px; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.14); }
   .backfix:active { transform:scale(.96); }
+  /* 回到顶部箭头: 右下角, 滚动超过1.5屏才出现, 点了平滑回最新(顶部) (David 2026-06-19) */
+  .totop { position:fixed; right:16px; bottom:24px; z-index:150; display:none;
+    width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(43,143,160,.92); color:#fff; font-size:22px; line-height:1;
+    box-shadow:0 3px 12px rgba(0,0,0,.22); -webkit-tap-highlight-color:transparent; }
+  .totop:active { transform:scale(.92); }
 </style>
 </head>
 <body>
 <button class="backfix" id="backfix" onclick="home()">‹ 返回</button>
+<button class="totop" id="totop" onclick="scrollTopSmooth()" aria-label="回到顶部">↑</button>
 <div class="wrap">
-  <header>
+  <header id="pagehead">
+    <a class="homebtn" id="homebtn" href="index.html" title="返回家庭简报主页" aria-label="主页">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg>
+    </a>
     <h1>小姨·每日简报</h1>
-    <div class="meta">2026年6月19日</div>
     
   </header>
-  <div class="fsbar" id="fsbar">字号 <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b>px
+  
+  <div class="fsbar" id="fsbar"><span class="fslabel">字号</span> <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b><span class="fsunit">px</span>
     <span class="langsw" id="langsw">
       <button class="langbtn" data-lang="zh" onclick="setLang('zh')">中</button>
       <button class="langbtn" data-lang="en" onclick="setLang('en')">ENG</button>
       <button class="langbtn" data-lang="auto" onclick="setLang('auto')">自动</button>
     </span>
   </div>
+  <div class="searchbar" id="searchbar">
+    <div class="searchwrap">
+      <input type="search" id="searchbox" class="searchbox" placeholder="🔍 搜索新闻关键词" oninput="doSearch(this.value)" autocomplete="off">
+      <button class="searchclear" id="searchclear" onclick="clearSearch()" aria-label="清除" style="display:none">✕</button>
+    </div>
+  </div>
 
   <div id="list">
-    <div class="seclabel" data-sec="0" style="color:#4a90d9">国际要闻</div>
-      <div class="card" data-lang="zh" data-sec="0" onclick="go(0)">
-        <div class="card-hl">2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线；小组赛激战正酣</div>
-        <div class="card-lead">2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。</div>
+    <div class="daydivider" id="day_d0" data-day="d0"><span>2026年6月19日</span></div><div class="seclabel" data-sec="0" data-day="d0" style="color:#4a90d9">国际要闻</div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f7b2720ee4e6c" data-search="us and iran sign peace deal ending four-month war; naval blockade lifted, strait of hormuz to reopen 【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。
+
+【联动机制与影响推演】
+一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。
+
+二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国cpi从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在q3-q4加速下行，届时美联储和英国央行可能重启降息周期。
+
+三、对创业者（阳阳）：能源成本下降利好所有ai推理和数据中心的电力成本（ai算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和ipo窗口（openai和spacex都在筹备ipo，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。
+
+四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。
+
+⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026q4-2027q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在g7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。 【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。
+
+【联动机制与影响推演】
+一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。
+
+二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国cpi从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在q3-q4加速下行，届时美联储和英国央行可能重启降息周期。
+
+三、对创业者（阳阳）：能源成本下降利好所有ai推理和数据中心的电力成本（ai算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和ipo窗口（openai和spacex都在筹备ipo，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。
+
+四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。
+
+⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026q4-2027q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在g7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。 trump and iran sign 14-point memorandum at versailles on june 18; deal includes $300bn reconstruction fund and termination of all us sanctions us lifts naval blockade of iran; strait of hormuz — the world&#x27;s most critical oil chokepoint — set to reopen within 60 days iran&#x27;s supreme leader mojtaba khamenei says he approved deal despite &#x27;different view&#x27;, claiming trump acted &#x27;out of desperation&#x27; deal defers thorniest issues — including iran&#x27;s nuclear programme — to &#x27;technical talks&#x27; within 60 days; vance cancels first round in switzerland israel-lebanon fighting continues despite deal: israeli strikes kill 18 in nabatieh overnight; 4 idf soldiers killed in hezbollah clashes" onclick="go(0)">
+        <button class="favstar" data-fav="f7b2720ee4e6c" onclick="toggleFav(event,'f7b2720ee4e6c')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">US and Iran Sign Peace Deal Ending Four-Month War; Naval Blockade Lifted, Strait of Hormuz to Reopen</div>
+        <div class="card-lead">【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。</div>
         <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="0" onclick="go(1)">
-        <div class="card-hl">美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议</div>
-        <div class="card-lead">美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="fd468e9af0a78" data-search="thousands killed in us-israeli war on iran — experts say true total may never be known bbc verify综合多方数据显示，自2月28日美以对伊朗开战至4月中旬，伊朗官方统计至少3,468人死亡（1,460平民+2,008军人），但人权活动者新闻社(hrana)的独立统计为3,636人，且强调这仅是&#x27;绝对最低数字&#x27;。黎巴嫩方面确认3,912人死亡。最惨烈的单一事件：开战首日美军导弹击中minab一所女子学校，168人死亡（含110名儿童）。伊朗也被指控用集束炸弹攻击以色列平民区，hrw称这构成战争罪。专家警告：由于互联网封锁、政府限制和武装团体存在，真实死亡人数可能在数年内都无法确定，&#x27;最终数字可能远高于当前可用数据&#x27;。 bbc verify综合多方数据显示，自2月28日美以对伊朗开战至4月中旬，伊朗官方统计至少3,468人死亡（1,460平民+2,008军人），但人权活动者新闻社(hrana)的独立统计为3,636人，且强调这仅是&#x27;绝对最低数字&#x27;。黎巴嫩方面确认3,912人死亡。最惨烈的单一事件：开战首日美军导弹击中minab一所女子学校，168人死亡（含110名儿童）。伊朗也被指控用集束炸弹攻击以色列平民区，hrw称这构成战争罪。专家警告：由于互联网封锁、政府限制和武装团体存在，真实死亡人数可能在数年内都无法确定，&#x27;最终数字可能远高于当前可用数据&#x27;。 7,300+ killed across iran and lebanon since feb 28; 3,468+ iranians including 499 women; 3,912 lebanese including 366 women and 247 children us missile strike on minab girls&#x27; school killed 168 (110 children) on war&#x27;s opening day; us military investigating israel says 60 killed: 29 civilians (21 from iranian missiles), 31 idf soldiers; iran accused of using cluster munitions against civilian areas un says 7 peacekeepers killed in lebanon; 13 us personnel killed; 14 sailors killed in strait of hormuz strikes human rights watch accuses iran of war crimes for cluster munitions use; analysts say true death toll likely substantially higher — internet blackouts and government restrictions hamper casualty reporting" onclick="go(1)">
+        <button class="favstar" data-fav="fd468e9af0a78" onclick="toggleFav(event,'fd468e9af0a78')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Thousands Killed in US-Israeli War on Iran — Experts Say True Total May Never Be Known</div>
+        <div class="card-lead">BBC Verify综合多方数据显示，自2月28日美以对伊朗开战至4月中旬，伊朗官方统计至少3,468人死亡（1,460平民+2,008军人），但人权活动者新闻社(HRANA)的独立统计为3,636人，且强调这仅是&#x27;绝对最低数字&#x27;。黎巴嫩方面确认3,912人死亡。最惨烈的单一事件：开战首日美军导弹击中Minab一所女子学校，168人死亡（含110名儿童）。伊朗也被指控用集束炸弹攻击以色列平民区，HRW称这构成战争罪。专家警告：由于互联网封锁、政府限制和武装团体存在，真实死亡人数可能在数年内都无法确定，&#x27;最终数字可能远高于当前可用数据&#x27;。</div>
         <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="0" onclick="go(2)">
-        <div class="card-hl">G7反对单方面改变台海现状；两岸海警在南海普拉塔斯岛附近再次对峙</div>
-        <div class="card-lead">G7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在X平台表示感谢，台北时报以头条报道。中国外交部尚未就G7台海表述做单独回应（截至6月19日）。</div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="fb72b1bd1e370" data-search="g7 summit in évian concludes: iran peace deal endorsed, ai leaders call for us-led coalition, trump criticizes idf 【g7与伊朗协议】本次g7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，g7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。
+
+【ai联盟动向】峰会另一条暗线是ai治理话语权的争夺。altman、amodei、hassabis三位ai界最有权势的人同时出现在g7，呼应anthropic和deepmind提出的&#x27;美国主导的ai联盟&#x27;构想——本质上是希望将g7打造成西方ai标准的制定平台，与中国ai生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动g7级ai出口管制+标准联盟，中国ai公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。
+
+【全球治理格局】本次g7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。 【g7与伊朗协议】本次g7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，g7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。
+
+【ai联盟动向】峰会另一条暗线是ai治理话语权的争夺。altman、amodei、hassabis三位ai界最有权势的人同时出现在g7，呼应anthropic和deepmind提出的&#x27;美国主导的ai联盟&#x27;构想——本质上是希望将g7打造成西方ai标准的制定平台，与中国ai生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动g7级ai出口管制+标准联盟，中国ai公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。
+
+【全球治理格局】本次g7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。 52nd g7 summit held june 15-17 in évian-les-bains, france; macron calls iran deal &#x27;very good&#x27; and says g7 allies support it trump sharply criticizes idf at g7: &#x27;you don&#x27;t have to knock down an apartment house every time you&#x27;re looking for somebody&#x27; — signals us pressure on israel to preserve iran deal openai&#x27;s sam altman, anthropic&#x27;s dario amodei, and deepmind&#x27;s demis hassabis attend g7; call for us-led ai coalition summit communiqué covers international peace, global economy, ai governance, climate trump holds closing press conference emphasizing iran deal as victory to &#x27;avoid global economic recession&#x27;" onclick="go(2)">
+        <button class="favstar" data-fav="fb72b1bd1e370" onclick="toggleFav(event,'fb72b1bd1e370')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">G7 Summit in Évian Concludes: Iran Peace Deal Endorsed, AI Leaders Call for US-Led Coalition, Trump Criticizes IDF</div>
+        <div class="card-lead">【G7与伊朗协议】本次G7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，G7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。</div>
         <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="1" style="color:#3aab9a">政治</div>
-      <div class="card" data-lang="zh" data-sec="1" onclick="go(3)">
-        <div class="card-hl">习近平给新华社老党员张连生回信：传承红色基因在新征程上书写优异答卷</div>
-        <div class="card-lead">6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="fa350b5ae7d4e" data-search="andy burnham wins by-election with 55% vote, paving way for possible labour leadership challenge to pm starmer 英国工党重量级人物andy burnham以55%的得票率赢得补选，重返威斯敏斯特议会。burnham此前担任大曼彻斯特市长期间积累了广泛的民众支持，被视为工党内最有可能挑战现任首相斯塔默领导地位的人物。burnham在胜选演讲中称这可能成为工党的&#x27;转折点&#x27;，暗示党内对斯塔默中间路线的普遍不满。他对脱欧经济代价的公开批评也与斯塔默政府试图淡化脱欧负面影响的策略形成对比。 英国工党重量级人物andy burnham以55%的得票率赢得补选，重返威斯敏斯特议会。burnham此前担任大曼彻斯特市长期间积累了广泛的民众支持，被视为工党内最有可能挑战现任首相斯塔默领导地位的人物。burnham在胜选演讲中称这可能成为工党的&#x27;转折点&#x27;，暗示党内对斯塔默中间路线的普遍不满。他对脱欧经济代价的公开批评也与斯塔默政府试图淡化脱欧负面影响的策略形成对比。 greater manchester mayor andy burnham wins parliamentary by-election with 55% of vote; returns to westminster burnham declares this could be &#x27;turning point&#x27; for labour party; seen as potential challenger to pm keir starmer burnham, 56, positioning for third attempt at labour leadership; campaigns on &#x27;honest accounting of brexit costs&#x27; and regional devolution by-election result interpreted as voter discontent with starmer&#x27;s centrist approach and handling of post-war economy starmer&#x27;s office says pm &#x27;welcomes andy back to parliament&#x27; and looks forward to working together" onclick="go(3)">
+        <button class="favstar" data-fav="fa350b5ae7d4e" onclick="toggleFav(event,'fa350b5ae7d4e')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Andy Burnham Wins By-Election with 55% Vote, Paving Way for Possible Labour Leadership Challenge to PM Starmer</div>
+        <div class="card-lead">英国工党重量级人物Andy Burnham以55%的得票率赢得补选，重返威斯敏斯特议会。Burnham此前担任大曼彻斯特市长期间积累了广泛的民众支持，被视为工党内最有可能挑战现任首相斯塔默领导地位的人物。Burnham在胜选演讲中称这可能成为工党的&#x27;转折点&#x27;，暗示党内对斯塔默中间路线的普遍不满。他对脱欧经济代价的公开批评也与斯塔默政府试图淡化脱欧负面影响的策略形成对比。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="fe1d4415d3fa9" data-search="obamas host star-studded opening of chicago presidential centre; four living presidents attend — trump not invited 奥巴马总统中心于6月18日在芝加哥南区正式揭幕。四位在世美国总统（奥巴马、布什、克林顿、拜登）出席——特朗普是唯一未被邀请的。奥巴马在演讲中强调&#x27;美国将不会有国王&#x27;，被广泛解读为对特朗普时代总统权力扩张的含蓄批评。中心位于奥巴马政治生涯起点的芝加哥南区，占地广阔，预计每年吸引75万+参观者，将成为芝加哥新文化地标。 奥巴马总统中心于6月18日在芝加哥南区正式揭幕。四位在世美国总统（奥巴马、布什、克林顿、拜登）出席——特朗普是唯一未被邀请的。奥巴马在演讲中强调&#x27;美国将不会有国王&#x27;，被广泛解读为对特朗普时代总统权力扩张的含蓄批评。中心位于奥巴马政治生涯起点的芝加哥南区，占地广阔，预计每年吸引75万+参观者，将成为芝加哥新文化地标。 barack obama presidential center officially opens in chicago on june 18; ceremony attended by bush, clinton, and biden donald trump was not invited; obama&#x27;s speech includes veiled critique of trump era: &#x27;there will be no kings in america&#x27; the center on chicago&#x27;s south side includes museum, library, athletic center, and community garden — largest of any presidential library michelle obama delivers emotional tribute to chicago&#x27;s south side community; center expected to draw 750,000+ visitors annually obama&#x27;s speech resonates against backdrop of iran war ending — calls for &#x27;rebuilding trust in institutions at home and abroad&#x27;" onclick="go(4)">
+        <button class="favstar" data-fav="fe1d4415d3fa9" onclick="toggleFav(event,'fe1d4415d3fa9')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Obamas Host Star-Studded Opening of Chicago Presidential Centre; Four Living Presidents Attend — Trump Not Invited</div>
+        <div class="card-lead">奥巴马总统中心于6月18日在芝加哥南区正式揭幕。四位在世美国总统（奥巴马、布什、克林顿、拜登）出席——特朗普是唯一未被邀请的。奥巴马在演讲中强调&#x27;美国将不会有国王&#x27;，被广泛解读为对特朗普时代总统权力扩张的含蓄批评。中心位于奥巴马政治生涯起点的芝加哥南区，占地广阔，预计每年吸引75万+参观者，将成为芝加哥新文化地标。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f1c05ee7faef7" data-search="iran to lodge official fifa complaint over world cup travel restrictions imposed during war 伊朗足协将就战争期间的旅行限制向国际足联提出正式投诉。在美伊战争的四个月里，多个国家关闭了对伊朗航班的领空或限制中转，使伊朗国家队的备战和移动严重受阻。伊朗在小组赛首轮2-2战平新西兰，仍保留出线希望。此事凸显了地缘政治冲突如何渗透到本应&#x27;非政治化&#x27;的国际体育赛事中。 伊朗足协将就战争期间的旅行限制向国际足联提出正式投诉。在美伊战争的四个月里，多个国家关闭了对伊朗航班的领空或限制中转，使伊朗国家队的备战和移动严重受阻。伊朗在小组赛首轮2-2战平新西兰，仍保留出线希望。此事凸显了地缘政治冲突如何渗透到本应&#x27;非政治化&#x27;的国际体育赛事中。 iran football federation to submit formal complaint to fifa about travel restrictions affecting team melli during world cup multiple countries closed airspace or restricted iranian flights during the four-month war, complicating team logistics fifa regulations guarantee equal treatment for all participating teams; iran argues restrictions violated this principle iran drew 2-2 with new zealand in their opening group match, keeping knockout stage hopes alive complaint raises broader questions about how geopolitical conflicts impact international sporting events" onclick="go(5)">
+        <button class="favstar" data-fav="f1c05ee7faef7" onclick="toggleFav(event,'f1c05ee7faef7')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Iran to Lodge Official FIFA Complaint Over World Cup Travel Restrictions Imposed During War</div>
+        <div class="card-lead">伊朗足协将就战争期间的旅行限制向国际足联提出正式投诉。在美伊战争的四个月里，多个国家关闭了对伊朗航班的领空或限制中转，使伊朗国家队的备战和移动严重受阻。伊朗在小组赛首轮2-2战平新西兰，仍保留出线希望。此事凸显了地缘政治冲突如何渗透到本应&#x27;非政治化&#x27;的国际体育赛事中。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" data-day="d0" data-fav="f116b9477f35d" data-search="乌克兰发动迄今最大规模无人机攻击俄炼油厂，莫斯科居民称降下&#x27;黑雨&#x27; 乌克兰发动了自战争以来最大规模的无人机袭击，以俄罗斯炼油厂为主要目标。莫斯科居民报告称出现&#x27;黑雨&#x27;——炼油厂燃烧产生的烟尘与降水混合后降落在城市。与此同时，俄罗斯声称扎波罗热核电站每天遭受50次以上的袭击，核安全风险持续存在。bbc俄罗斯主编steve rosenberg分析认为普京可能改变战术应对乌克兰日益有效的无人机攻击。欧盟同步宣布了对俄罗斯的新一轮制裁，俄方誓言采取&#x27;强硬反制措施&#x27;。 乌克兰发动了自战争以来最大规模的无人机袭击，以俄罗斯炼油厂为主要目标。莫斯科居民报告称出现&#x27;黑雨&#x27;——炼油厂燃烧产生的烟尘与降水混合后降落在城市。与此同时，俄罗斯声称扎波罗热核电站每天遭受50次以上的袭击，核安全风险持续存在。bbc俄罗斯主编steve rosenberg分析认为普京可能改变战术应对乌克兰日益有效的无人机攻击。欧盟同步宣布了对俄罗斯的新一轮制裁，俄方誓言采取&#x27;强硬反制措施&#x27;。 乌克兰对俄罗斯发动战争中最大规模无人机袭击，主要目标为炼油设施 莫斯科居民报告&#x27;黑雨&#x27;现象——炼油厂被击中后燃烧产生的烟尘混合雨水降落 俄方称扎波罗热核电站日均遭受50次以上袭击，局势持续危急 普京可能改变战术应对乌无人机袭击——bbc俄 editor分析 欧盟宣布对俄罗斯新一轮制裁，俄外交部誓言&#x27;强硬反制&#x27;" onclick="go(6)">
+        <button class="favstar" data-fav="f116b9477f35d" onclick="toggleFav(event,'f116b9477f35d')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">乌克兰发动迄今最大规模无人机攻击俄炼油厂，莫斯科居民称降下&#x27;黑雨&#x27;</div>
+        <div class="card-lead">乌克兰发动了自战争以来最大规模的无人机袭击，以俄罗斯炼油厂为主要目标。莫斯科居民报告称出现&#x27;黑雨&#x27;——炼油厂燃烧产生的烟尘与降水混合后降落在城市。与此同时，俄罗斯声称扎波罗热核电站每天遭受50次以上的袭击，核安全风险持续存在。BBC俄罗斯主编Steve Rosenberg分析认为普京可能改变战术应对乌克兰日益有效的无人机攻击。欧盟同步宣布了对俄罗斯的新一轮制裁，俄方誓言采取&#x27;强硬反制措施&#x27;。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f95781ccdc188" data-search="thirty-five killed as gunmen attack niger&#x27;s biggest airport — latest in decade-long islamist insurgency 武装分子袭击了尼日尔首都尼亚美最大的迪奥里·哈马尼国际机场，造成35人死亡。这是同一机场今年第二次遭受袭击（1月也曾被疑似圣战分子袭击）。尼日尔作为西方在萨赫勒地区反恐的关键盟友（马里和布基纳法索军事政变后驱逐了法国和美国军队），此次袭击凸显了该地区安全形势的持续恶化。 武装分子袭击了尼日尔首都尼亚美最大的迪奥里·哈马尼国际机场，造成35人死亡。这是同一机场今年第二次遭受袭击（1月也曾被疑似圣战分子袭击）。尼日尔作为西方在萨赫勒地区反恐的关键盟友（马里和布基纳法索军事政变后驱逐了法国和美国军队），此次袭击凸显了该地区安全形势的持续恶化。 35 killed in attack on diori hamani international airport in niamey, niger&#x27;s capital gunmen stormed airport; attackers&#x27; affiliation unclear — niger has been fighting militant islamist insurgency for a decade same airport was targeted by suspected jihadists in january 2026; security concerns mounting niger is key western ally in sahel counterterrorism after military coups pushed france/us out of mali and burkina faso attack comes amid broader deterioration of security across the sahel region" onclick="go(7)">
+        <button class="favstar" data-fav="f95781ccdc188" onclick="toggleFav(event,'f95781ccdc188')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Thirty-Five Killed as Gunmen Attack Niger&#x27;s Biggest Airport — Latest in Decade-Long Islamist Insurgency</div>
+        <div class="card-lead">武装分子袭击了尼日尔首都尼亚美最大的迪奥里·哈马尼国际机场，造成35人死亡。这是同一机场今年第二次遭受袭击（1月也曾被疑似圣战分子袭击）。尼日尔作为西方在萨赫勒地区反恐的关键盟友（马里和布基纳法索军事政变后驱逐了法国和美国军队），此次袭击凸显了该地区安全形势的持续恶化。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" data-day="d0" data-fav="f0517904bd3f3" data-search="中方就韩官员重申中韩建交联合公报涉台表述答问——敦促韩方恪守一个中国原则 中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。 中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。 韩国外交官员近期重申中韩建交联合公报中关于台湾问题的表述 中国外交部发言人就相关表态回答记者提问，敦促韩方恪守一个中国原则 中方也呼吁加沙实现真正持久停火、敦促国际社会合力推进利比亚包容性政治进程 中国外交部发言人还就利比亚问题表态，呼吁推进包容性政治进程 中国在联合国等多边场合持续就中东、非洲安全问题表达立场" onclick="go(8)">
+        <button class="favstar" data-fav="f0517904bd3f3" onclick="toggleFav(event,'f0517904bd3f3')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">中方就韩官员重申中韩建交联合公报涉台表述答问——敦促韩方恪守一个中国原则</div>
+        <div class="card-lead">中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f7ca8aa057c23" data-search="pressure mounts on church of england to ditch slavery reparations plan amid shifting political winds 英国国教会在2020年&#x27;黑人命也是命&#x27;运动高潮时承诺设立1亿英镑奴隶制赔偿基金，但如今在政治风向转变下面临放弃该计划的压力。这一争议反映了更广泛的全球性历史反思辩论——一些国家加速文物归还和赔偿进程，另一些则在政治变化中退缩。英国政府表示不会强制机构设立赔偿要求，教会保留自主决策权。 英国国教会在2020年&#x27;黑人命也是命&#x27;运动高潮时承诺设立1亿英镑奴隶制赔偿基金，但如今在政治风向转变下面临放弃该计划的压力。这一争议反映了更广泛的全球性历史反思辩论——一些国家加速文物归还和赔偿进程，另一些则在政治变化中退缩。英国政府表示不会强制机构设立赔偿要求，教会保留自主决策权。 church of england faces growing pressure to abandon its £100m slavery reparations fund commitment reparations plan — announced amid 2020 black lives matter momentum — now faces political headwinds in post-trump landscape critics argue the church should focus on current community needs rather than historical wrongs; supporters say moral obligation remains the debate reflects broader global reckoning with colonial history: some countries accelerate restitution, others retreat uk government has signaled it will not impose reparations requirements on institutions; church retains autonomy over its decision" onclick="go(9)">
+        <button class="favstar" data-fav="f7ca8aa057c23" onclick="toggleFav(event,'f7ca8aa057c23')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Pressure Mounts on Church of England to Ditch Slavery Reparations Plan Amid Shifting Political Winds</div>
+        <div class="card-lead">英国国教会在2020年&#x27;黑人命也是命&#x27;运动高潮时承诺设立1亿英镑奴隶制赔偿基金，但如今在政治风向转变下面临放弃该计划的压力。这一争议反映了更广泛的全球性历史反思辩论——一些国家加速文物归还和赔偿进程，另一些则在政治变化中退缩。英国政府表示不会强制机构设立赔偿要求，教会保留自主决策权。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f26087bbe1ed5" data-search="india&#x27;s cash transfer boom gives relief to the poor but strains government budgets — welfare model faces sustainability questions 印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近gdp的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。 印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近gdp的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。 india&#x27;s direct cash transfer schemes have expanded dramatically; millions of poor households now receive regular government payments the model provides immediate poverty relief and financial inclusion — but comes at huge fiscal cost multiple indian states now run cash transfer programs; combined cost approaching 2% of gdp in some states economists debate long-term efficacy: cash transfers alleviate acute poverty but don&#x27;t build productive capacity india&#x27;s experience is being watched closely by other developing nations considering similar programs" onclick="go(10)">
+        <button class="favstar" data-fav="f26087bbe1ed5" onclick="toggleFav(event,'f26087bbe1ed5')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">India&#x27;s Cash Transfer Boom Gives Relief to the Poor but Strains Government Budgets — Welfare Model Faces Sustainability Questions</div>
+        <div class="card-lead">印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近GDP的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f0e532caa358e" data-search="parents of serbia&#x27;s teenage school shooter given jail terms in retrial — boy was 13 when he killed 10 at belgrade school 2023年震惊全球的贝尔格莱德校园枪击案中13岁枪手的父母在重审中被判入狱。当时这名少年在学校杀害了8名女生、1名男生和1名保安。此案开创了对未成年大规模枪击案中父母刑事责任的法律先例。塞尔维亚拥有欧洲最高的平民枪支拥有率之一——枪击案后政府收紧了枪支管制法律。 2023年震惊全球的贝尔格莱德校园枪击案中13岁枪手的父母在重审中被判入狱。当时这名少年在学校杀害了8名女生、1名男生和1名保安。此案开创了对未成年大规模枪击案中父母刑事责任的法律先例。塞尔维亚拥有欧洲最高的平民枪支拥有率之一——枪击案后政府收紧了枪支管制法律。 parents of 13-year-old boy who killed 8 girls, a boy, and a school guard at vladislav ribnikar school in belgrade in 2023 sentenced in retrial the 2023 mass shooting shocked serbia and led to nationwide protests against gun culture and violence in media retrial comes after initial verdict was overturned on appeal; case sets legal precedent for parental criminal responsibility in juvenile mass shootings serbia has one of the highest civilian gun ownership rates in europe; shooting prompted government to tighten gun laws parents&#x27; conviction sends signal globally about holding adults accountable for minors&#x27; access to firearms" onclick="go(11)">
+        <button class="favstar" data-fav="f0e532caa358e" onclick="toggleFav(event,'f0e532caa358e')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Parents of Serbia&#x27;s Teenage School Shooter Given Jail Terms in Retrial — Boy Was 13 When He Killed 10 at Belgrade School</div>
+        <div class="card-lead">2023年震惊全球的贝尔格莱德校园枪击案中13岁枪手的父母在重审中被判入狱。当时这名少年在学校杀害了8名女生、1名男生和1名保安。此案开创了对未成年大规模枪击案中父母刑事责任的法律先例。塞尔维亚拥有欧洲最高的平民枪支拥有率之一——枪击案后政府收紧了枪支管制法律。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" data-day="d0" data-fav="fc3687464cd76" data-search="纽约时报广场发生枪击事件——正值尼克斯夺冠游行后纽约人潮密集期 纽约时报广场6月19日发生枪击事件。事发时正值尼克斯夺冠游行后纽约人潮最密集的时期之一。警方已封锁时报广场部分区域展开调查。新华社援引美国媒体报道了这一事件。 纽约时报广场6月19日发生枪击事件。事发时正值尼克斯夺冠游行后纽约人潮最密集的时期之一。警方已封锁时报广场部分区域展开调查。新华社援引美国媒体报道了这一事件。 纽约时报广场6月19日发生枪击事件，目前伤亡情况不明 事发地正值尼克斯nba冠军游行后纽约游客和人流密集时段 纽约警方已封锁部分时报广场区域，正在调查中 枪击事件给尼克斯夺冠后的纽约欢乐气氛蒙上阴影 暂无关于嫌疑人身份或动机的官方信息" onclick="go(12)">
+        <button class="favstar" data-fav="fc3687464cd76" onclick="toggleFav(event,'fc3687464cd76')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">纽约时报广场发生枪击事件——正值尼克斯夺冠游行后纽约人潮密集期</div>
+        <div class="card-lead">纽约时报广场6月19日发生枪击事件。事发时正值尼克斯夺冠游行后纽约人潮最密集的时期之一。警方已封锁时报广场部分区域展开调查。新华社援引美国媒体报道了这一事件。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="1" data-day="d0" style="color:#3aab9a">政治</div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f7c126e060ce1" data-search="端午节：全国铁路假期首日预计发送旅客1973万人次，考古&#x27;植物包&#x27;首次实证粽子起源 今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。 今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。 6月19日为端午节假期首日，全国铁路预计发送旅客1973万人次；长三角、珠三角方向客流集中 考古发现首次通过&#x27;植物包&#x27;实证粽子起源——为端午文化提供新学术支撑 各地举行龙舟竞渡、包粽子等传统活动；云南马关推出&#x27;彩虹粽&#x27;等创意美食 长江中下游强降雨持续，国家防总针对江苏启动防汛四级应急响应 北京端午先雨后晴，外出游玩需携带雨具" onclick="go(13)">
+        <button class="favstar" data-fav="f7c126e060ce1" onclick="toggleFav(event,'f7c126e060ce1')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">端午节：全国铁路假期首日预计发送旅客1973万人次，考古&#x27;植物包&#x27;首次实证粽子起源</div>
+        <div class="card-lead">今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。</div>
         <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="1" onclick="go(4)">
-        <div class="card-hl">国务院任免：蔡奇兼任国家行政学院院长；外交部就韩官员涉台表述答问</div>
-        <div class="card-lead">国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。</div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="fad9ef6601ef3" data-search="海南自贸港封关半年：外贸进出口增长迅猛，累计出入境165.4万人次 海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。 海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。 海南自由贸易港封关运作满半年，外贸进出口增长迅猛——官方称&#x27;超出预期&#x27; 累计出入境165.4万人次，口岸监管进出口货运量持续攀升 封关后海南实行&#x27;一线放开、二线管住&#x27;政策——货物从境外进入海南免关税，但从海南进入内地需补税 免税消费成为海南经济新增长极——离岛免税销售额同比增长超过30% 分析认为海南模式为中国进一步扩大高水平对外开放提供了试验田" onclick="go(14)">
+        <button class="favstar" data-fav="fad9ef6601ef3" onclick="toggleFav(event,'fad9ef6601ef3')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">海南自贸港封关半年：外贸进出口增长迅猛，累计出入境165.4万人次</div>
+        <div class="card-lead">海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。</div>
         <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="2" style="color:#e6943a">科学健康</div>
-      <div class="card" data-lang="zh" data-sec="2" onclick="go(5)">
-        <div class="card-hl">FDA戒烟新药Cytisinicline审批预计6月20日公布；GLP-1持续拓展新适应症</div>
-        <div class="card-lead">药物审批：Cytisinicline有望成为20年来首个获FDA批准全新戒烟药物，审批决定预计6月20日公布（GoodRx）。RGX-121（Regenxbio）一次性基因治疗亨特综合征（Hunter syndrome罕见CNS遗传病），FDA决定已出。GLP-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。Nature Medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f553ab8a2311d" data-search="中欧班列统一品牌10年：年开行量增长10.8倍，成为亚欧贸易大动脉 中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。 中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。 中欧班列统一品牌迎来10周年——年开行量从2016年的约1,700列增长至2025年的超18,000列，10年增长10.8倍 班列网络已连接欧洲25个国家、200+城市；运输商品从最初的it产品扩展到汽车、医疗器械、食品等 2026年上半年开行量同比增长约15%——伊朗战争期间海运受阻，中欧班列成为替代运输方案 中欧班列运费约为空运的1/4、时间约为海运的1/3，成为高附加值商品亚欧贸易的黄金通道 分析指出中欧班列的持续增长强化了中国在亚欧大陆供应链中的枢纽地位" onclick="go(15)">
+        <button class="favstar" data-fav="f553ab8a2311d" onclick="toggleFav(event,'f553ab8a2311d')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">中欧班列统一品牌10年：年开行量增长10.8倍，成为亚欧贸易大动脉</div>
+        <div class="card-lead">中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f15e79f78c054" data-search="习近平总书记回信新华社百岁老党员张连生：传承红色基因，在新征程上书写优异答卷 在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。 在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。 习近平总书记给新华社百岁老党员张连生回信，强调传承红色基因、永葆初心 张连生今年100岁，是新华社&#x27;四大队&#x27;（代号，指新华社在革命战争时期的新闻工作队）的成员 回信正值中国共产党成立105周年之际——&#x27;筑强基层堡垒，夯实执政根基&#x27; 新华社发表长篇报道&#x27;永远跟党走——四大队百岁老党员张连生的荣光&#x27; 新华社评论员文章：以更高标准、更实举措抓好全面从严治党" onclick="go(16)">
+        <button class="favstar" data-fav="f15e79f78c054" onclick="toggleFav(event,'f15e79f78c054')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">习近平总书记回信新华社百岁老党员张连生：传承红色基因，在新征程上书写优异答卷</div>
+        <div class="card-lead">在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f85f34b0ed595" data-search="钱凯港商业运营周年庆在秘鲁举行——中秘&#x27;一带一路&#x27;旗舰项目运营超预期 中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。 中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。 中国在秘鲁投资建设的钱凯港（chancay port）商业运营满一周年，庆典在秘鲁举行 钱凯港是中国在拉美最大港口投资——一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场 港口运营超预期——秘鲁农产品（蓝莓、葡萄、牛油果）出口至中国时间缩短40% 中国东方航空同时开通上海至苏黎世直飞航线——中欧航线网络进一步加密 钱凯港被视为中国&#x27;21世纪海上丝绸之路&#x27;在拉美的战略性支点" onclick="go(17)">
+        <button class="favstar" data-fav="f85f34b0ed595" onclick="toggleFav(event,'f85f34b0ed595')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">钱凯港商业运营周年庆在秘鲁举行——中秘&#x27;一带一路&#x27;旗舰项目运营超预期</div>
+        <div class="card-lead">中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="2" data-day="d0" style="color:#e6943a">科学</div>
+      <div class="card" data-lang="en" data-sec="2" data-day="d0" data-fav="f7b8cec966c10" data-search="quantum computing double breakthrough: harvard says advancing &#x27;faster than expected&#x27;; quantinuum publishes peer-reviewed helios results 【量子计算双突破意义】量子计算在2026年6月迎来了两大标志性进展。
+
+第一，哈佛大学研究团队发表论文指出量子计算进展&#x27;快于预期&#x27;——特别是错误率的下降速度超过了大多数路线图的预测。这意味着实用级量子计算机的时间线可能从普遍预期的2035-2040年提前到2030年前后。
+
+第二，quantinuum公司的helios量子计算机在《自然》杂志发表同行评审结果——首次实现了逻辑量子比特（logical qubit）性能超过物理量子比特（physical qubit）的突破。这是量子纠错领域的里程碑：逻辑量子比特通过纠错码保护量子信息，理论上可以无限期保持量子态，是构建实用量子计算机的基础。
+
+【但并非全部乐观——经典计算的&#x27;逆袭&#x27;】西蒙斯基金会的一项研究同时发表，利用张量网络（tensor networks）这一经典计算方法，成功模拟了此前被认为只有量子计算机才能解决的特定物理问题——实际上&#x27;推翻&#x27;了此前关于量子霸权的某些声明。这说明：①量子优势并非在所有问题上都成立；②经典算法也在不断进步；③未来的计算格局更可能是&#x27;量子+经典&#x27;混合模式，而非量子全面替代经典。
+
+【对阳阳和创业者的影响】量子计算短期内（5-10年）不会直接改变ai创业格局，但中期（10-15年）可能彻底改变密码学、药物发现、材料科学和ai训练的基础架构。务实建议：关注但不焦虑——现在学习量子算法基础是好的，但不要把创业赌注押在&#x27;量子计算将很快到来&#x27;的假设上。 【量子计算双突破意义】量子计算在2026年6月迎来了两大标志性进展。
+
+第一，哈佛大学研究团队发表论文指出量子计算进展&#x27;快于预期&#x27;——特别是错误率的下降速度超过了大多数路线图的预测。这意味着实用级量子计算机的时间线可能从普遍预期的2035-2040年提前到2030年前后。
+
+第二，quantinuum公司的helios量子计算机在《自然》杂志发表同行评审结果——首次实现了逻辑量子比特（logical qubit）性能超过物理量子比特（physical qubit）的突破。这是量子纠错领域的里程碑：逻辑量子比特通过纠错码保护量子信息，理论上可以无限期保持量子态，是构建实用量子计算机的基础。
+
+【但并非全部乐观——经典计算的&#x27;逆袭&#x27;】西蒙斯基金会的一项研究同时发表，利用张量网络（tensor networks）这一经典计算方法，成功模拟了此前被认为只有量子计算机才能解决的特定物理问题——实际上&#x27;推翻&#x27;了此前关于量子霸权的某些声明。这说明：①量子优势并非在所有问题上都成立；②经典算法也在不断进步；③未来的计算格局更可能是&#x27;量子+经典&#x27;混合模式，而非量子全面替代经典。
+
+【对阳阳和创业者的影响】量子计算短期内（5-10年）不会直接改变ai创业格局，但中期（10-15年）可能彻底改变密码学、药物发现、材料科学和ai训练的基础架构。务实建议：关注但不焦虑——现在学习量子算法基础是好的，但不要把创业赌注押在&#x27;量子计算将很快到来&#x27;的假设上。 harvard researchers publish findings that quantum computing is advancing faster than most forecasts predicted — error rates dropping faster than expected quantinuum publishes peer-reviewed results on helios quantum computer in nature — first demonstration of logical qubits outperforming physical qubits doe national quantum research centers achieve milestone breakthrough towards building scalable quantum computers (fermilab, june 3) simons foundation: tensor networks research overturns earlier claim of &#x27;quantum supremacy&#x27;, opens new research directions — classical methods can simulate certain quantum problems implication: quantum advantage is real but narrow — quantum computers will complement, not replace, classical computing for the foreseeable future" onclick="go(18)">
+        <button class="favstar" data-fav="f7b8cec966c10" onclick="toggleFav(event,'f7b8cec966c10')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-03</div>
+        <div class="card-hl">Quantum Computing Double Breakthrough: Harvard Says Advancing &#x27;Faster Than Expected&#x27;; Quantinuum Publishes Peer-Reviewed Helios Results</div>
+        <div class="card-lead">【量子计算双突破意义】量子计算在2026年6月迎来了两大标志性进展。</div>
         <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="3" style="color:#9b78c9">教育</div>
-      <div class="card" data-lang="zh" data-sec="3" onclick="go(6)">
-        <div class="card-hl">第67届IMO 7月10-21日上海举办；2026 USAMO/USACO结果已公布</div>
-        <div class="card-lead">数学竞赛：第67届IMO将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（MAA）。USAMO/USAJMO 2026：MAA已公布获奖名单。据Ivy League Center：AMC 8 19名满分；AMC/AIME 104名晋级者；8名USAMO+7名USAJMO获奖者入MOP；4名MOP入选者。USACO 2025-2026：Brian Xue(银)、Alex Chen(铜)、Bing-Dong Liu(银)、Rain Jiang(金)。US Open结果已作为夏季训练营选拔主要依据。MIT 2026级录取率约4.6%（历史最低之一），EA阶段11883人申请录655人（5.51%）。</div>
+      </div><div class="seclabel" data-sec="3" data-day="d0" style="color:#9b78c9">科学健康</div>
+      <div class="card" data-lang="en" data-sec="3" data-day="d0" data-fav="fd96c0247bec2" data-search="lenacapavir: the hiv prevention breakthrough proving why nih funding matters — twice-yearly injection shows near-100% efficacy 【lenacapavir的突破意义】lenacapavir是一种每半年注射一次的hiv预防药物，在大型临床试验中显示出接近100%的有效率。这是hiv预防领域几十年来最重要的突破——相比之下，目前的标准方案（每日口服prep）在实际使用中因依从性差而有效率降至50-70%。lenacapavir将彻底改变hiv防控格局，尤其在撒哈拉以南非洲等hiv高发且日服药依从性低的地区。
+
+【科学政策启示】lenacapavir的成功证明了政府资助的基础科学研究的重要性——该药物的核心机制源自nih几十年资助的hiv病毒学研究。nih现任院长jay bhattacharya近期宣布了新的&#x27;x-labs&#x27;计划：采用高风险、高回报的资助模式，希望在阿尔茨海默病、癌症免疫治疗、抗生素耐药性等领域复制类似lenacapavir的成功。
+
+【glp-1药物的平行启示】另一个&#x27;基础研究→改变世界&#x27;的案例是glp-1类药物（ozempic/wegovy/zepbound）——从几十年前对蜥蜴毒液中一种激素的好奇心驱动研究开始，到如今重塑全球糖尿病和肥胖治疗格局。
+
+【对家庭健康关注（小姨关注科学健康）】这些进展传递了一个重要信息：重大医学突破几乎从来不是&#x27;灵光一闪&#x27;，而是数十年基础研究积累的结果。当人们质疑&#x27;政府为什么资助看似无用的基础科研&#x27;时，lenacapavir和glp-1就是最好的回答。 【lenacapavir的突破意义】lenacapavir是一种每半年注射一次的hiv预防药物，在大型临床试验中显示出接近100%的有效率。这是hiv预防领域几十年来最重要的突破——相比之下，目前的标准方案（每日口服prep）在实际使用中因依从性差而有效率降至50-70%。lenacapavir将彻底改变hiv防控格局，尤其在撒哈拉以南非洲等hiv高发且日服药依从性低的地区。
+
+【科学政策启示】lenacapavir的成功证明了政府资助的基础科学研究的重要性——该药物的核心机制源自nih几十年资助的hiv病毒学研究。nih现任院长jay bhattacharya近期宣布了新的&#x27;x-labs&#x27;计划：采用高风险、高回报的资助模式，希望在阿尔茨海默病、癌症免疫治疗、抗生素耐药性等领域复制类似lenacapavir的成功。
+
+【glp-1药物的平行启示】另一个&#x27;基础研究→改变世界&#x27;的案例是glp-1类药物（ozempic/wegovy/zepbound）——从几十年前对蜥蜴毒液中一种激素的好奇心驱动研究开始，到如今重塑全球糖尿病和肥胖治疗格局。
+
+【对家庭健康关注（小姨关注科学健康）】这些进展传递了一个重要信息：重大医学突破几乎从来不是&#x27;灵光一闪&#x27;，而是数十年基础研究积累的结果。当人们质疑&#x27;政府为什么资助看似无用的基础科研&#x27;时，lenacapavir和glp-1就是最好的回答。 lenacapavir — a twice-yearly injectable hiv prevention drug — demonstrates near-100% efficacy in large-scale clinical trials drug&#x27;s development depended on decades of publicly funded basic research at nih, highlighting value of government science funding nih launches new &#x27;x-labs&#x27; initiative under director jay bhattacharya: high-risk, high-reward funding model for medical breakthroughs lenacapavir could transform hiv prevention in low-income countries where daily pill adherence is challenging glp-1 drugs (ozempic/wegovy) continue to reshape diabetes and obesity treatment — another example of basic research → breakthrough drug pipeline" onclick="go(19)">
+        <button class="favstar" data-fav="fd96c0247bec2" onclick="toggleFav(event,'fd96c0247bec2')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Lenacapavir: The HIV Prevention Breakthrough Proving Why NIH Funding Matters — Twice-Yearly Injection Shows Near-100% Efficacy</div>
+        <div class="card-lead">【Lenacapavir的突破意义】Lenacapavir是一种每半年注射一次的HIV预防药物，在大型临床试验中显示出接近100%的有效率。这是HIV预防领域几十年来最重要的突破——相比之下，目前的标准方案（每日口服PrEP）在实际使用中因依从性差而有效率降至50-70%。Lenacapavir将彻底改变HIV防控格局，尤其在撒哈拉以南非洲等HIV高发且日服药依从性低的地区。</div>
         <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
-      </div><div class="seclabel" data-sec="4" style="color:#5cb56b">体育</div>
-      <div class="card" data-lang="zh" data-sec="4" onclick="go(7)">
-        <div class="card-hl">纽约尼克斯4-1击败马刺夺得2026年NBA总冠军，Jalen Brunson荣膺FMVP</div>
-        <div class="card-lead">2026年NBA总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。FMVP：Jalen Brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。Game 5：94-90获胜锁定冠军。核心阵容：Brunson, Towns, Anunoby。ESPN称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" data-day="d0" data-fav="f6b7772de1b9a" data-search="新研究揭示南极海冰微生物如何在极端环境中生存——为极端生命科学提供新线索 中国科研团队发表了关于南极海冰微生物的突破性研究，揭示了微生物在极寒（-20°c以下）、高盐度和强紫外线辐射环境下的生存机制。这一发现对天体生物学（如木卫二、土卫二冰下海洋的生命可能性）和生物技术（工业用耐寒酶）具有双重意义。此外，明天（6月20日）金星将与蜂巢星团（m44）上演&#x27;结伴游&#x27;天象——爱好者可在傍晚西方天空观测。 中国科研团队发表了关于南极海冰微生物的突破性研究，揭示了微生物在极寒（-20°c以下）、高盐度和强紫外线辐射环境下的生存机制。这一发现对天体生物学（如木卫二、土卫二冰下海洋的生命可能性）和生物技术（工业用耐寒酶）具有双重意义。此外，明天（6月20日）金星将与蜂巢星团（m44）上演&#x27;结伴游&#x27;天象——爱好者可在傍晚西方天空观测。 中国科研团队发表南极海冰微生物研究成果——揭示微生物在极寒、高盐、强辐射环境下的生存机制 研究发现某些微生物产生独特的抗冻蛋白和dna修复酶，使其在-20°c以下的冰晶中维持代谢活性 这项研究对天体生物学（外星极端环境生命可能性）和生物技术（工业用耐寒酶开发）具有双重意义 同期新华社还报道了科研人员开发出整合神经元功能、结构和分子的新平台 金星与蜂巢星团6月20日上演&#x27;结伴游&#x27;——天文爱好者可观测" onclick="go(20)">
+        <button class="favstar" data-fav="f6b7772de1b9a" onclick="toggleFav(event,'f6b7772de1b9a')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">新研究揭示南极海冰微生物如何在极端环境中生存——为极端生命科学提供新线索</div>
+        <div class="card-lead">中国科研团队发表了关于南极海冰微生物的突破性研究，揭示了微生物在极寒（-20°C以下）、高盐度和强紫外线辐射环境下的生存机制。这一发现对天体生物学（如木卫二、土卫二冰下海洋的生命可能性）和生物技术（工业用耐寒酶）具有双重意义。此外，明天（6月20日）金星将与蜂巢星团（M44）上演&#x27;结伴游&#x27;天象——爱好者可在傍晚西方天空观测。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" data-day="d0" data-fav="f051b979bd59c" data-search="科研人员开发出整合神经元功能、结构和分子的新平台——神经科学研究工具取得突破 中国科研团队开发出一种新型神经科学研究平台，首次实现了在同一神经元上同时测量功能（电生理活动）、结构（三维形态）和分子（基因表达谱）。此前科学家只能分别测量这三类信息，无法建立完整的&#x27;功能-结构-分子&#x27;关联。该平台有望加速阿尔茨海默病、帕金森病等神经退行性疾病的研究，属于基础科研工具层面的重要突破。 中国科研团队开发出一种新型神经科学研究平台，首次实现了在同一神经元上同时测量功能（电生理活动）、结构（三维形态）和分子（基因表达谱）。此前科学家只能分别测量这三类信息，无法建立完整的&#x27;功能-结构-分子&#x27;关联。该平台有望加速阿尔茨海默病、帕金森病等神经退行性疾病的研究，属于基础科研工具层面的重要突破。 中国科研人员开发出能同时测量神经元功能（电活动）、结构（形态）和分子（基因表达）的整合平台 该平台突破了过去&#x27;只能分别测量&#x27;的技术瓶颈——现在可以在同一神经元上同时获得三类数据 技术可能加速阿尔茨海默病、帕金森病等神经退行性疾病的研究——理解疾病如何在三个层面同时改变神经元 研究成果发表于国际期刊；平台基于微流控芯片和多模态成像技术 此项突破属于基础科研工具创新——为全球神经科学界提供新利器" onclick="go(21)">
+        <button class="favstar" data-fav="f051b979bd59c" onclick="toggleFav(event,'f051b979bd59c')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">科研人员开发出整合神经元功能、结构和分子的新平台——神经科学研究工具取得突破</div>
+        <div class="card-lead">中国科研团队开发出一种新型神经科学研究平台，首次实现了在同一神经元上同时测量功能（电生理活动）、结构（三维形态）和分子（基因表达谱）。此前科学家只能分别测量这三类信息，无法建立完整的&#x27;功能-结构-分子&#x27;关联。该平台有望加速阿尔茨海默病、帕金森病等神经退行性疾病的研究，属于基础科研工具层面的重要突破。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="4" data-day="d0" style="color:#5cb56b">体育</div>
+      <div class="card" data-lang="zh" data-sec="4" data-day="d0" data-fav="fa14894a62ff0" data-search="2026世界杯战况：墨西哥首个晋级32强，加拿大6-0大胜创历史首胜，kone断腿事故蒙阴影 【2026世界杯小组赛深度分析】世界杯第8个比赛日。墨西哥（a组）展示了老牌劲旅的稳定性，2-0击败韩国后两战全胜，率先锁定32强席位。韩国的世界杯前景堪忧——门将致命失误导致失球，最后一轮必须赢球才有出线可能。
+
+加拿大创造了历史！在前两届世界杯（1986年首次参赛、2022年第二次参赛）一球未进、一分未得的背景下，2026年作为联合主办国终于爆发——6-0血洗卡塔尔。这场胜利本应纯粹庆祝，但中场核心ismael kone的严重腿部骨折（现场画面显示腿部明显变形）给所有加拿大球迷心头投下阴影。kone是加拿大近年崛起的关键球员（效力于意甲），他的缺席将严重影响加拿大淘汰赛前景。
+
+日本队在对阵荷兰的比赛中展现了亚洲足球的最高水平——2-2逼平欧洲劲旅，两次落后两次扳平，展现了惊人的韧性。日本现在积4分排名f组第二，最后一轮对阵小组最弱对手，出线形势乐观。
+
+瑞士替补johan manzambi独中两元1-0胜波黑，展示了深板凳厚度——替补球员在世界杯上决定比赛的能力往往决定一支球队能走多远。
+
+今日晚间最受关注的对决：苏格兰vs摩洛哥。苏格兰历史上从未进入过世界杯淘汰赛阶段，今晚对阵实力相当的摩洛哥——如果取胜，将创造历史。bbc scotland以&#x27;这可能是苏格兰有史以来最重要的比赛&#x27;为题做预热报道。
+
+伊朗向国际足联投诉旅行限制——战争期间多国对伊朗航班关闭领空或限制中转，影响了伊朗队的正常备战和移动。这是一个体育与地缘政治交织的典型案例。 【2026世界杯小组赛深度分析】世界杯第8个比赛日。墨西哥（a组）展示了老牌劲旅的稳定性，2-0击败韩国后两战全胜，率先锁定32强席位。韩国的世界杯前景堪忧——门将致命失误导致失球，最后一轮必须赢球才有出线可能。
+
+加拿大创造了历史！在前两届世界杯（1986年首次参赛、2022年第二次参赛）一球未进、一分未得的背景下，2026年作为联合主办国终于爆发——6-0血洗卡塔尔。这场胜利本应纯粹庆祝，但中场核心ismael kone的严重腿部骨折（现场画面显示腿部明显变形）给所有加拿大球迷心头投下阴影。kone是加拿大近年崛起的关键球员（效力于意甲），他的缺席将严重影响加拿大淘汰赛前景。
+
+日本队在对阵荷兰的比赛中展现了亚洲足球的最高水平——2-2逼平欧洲劲旅，两次落后两次扳平，展现了惊人的韧性。日本现在积4分排名f组第二，最后一轮对阵小组最弱对手，出线形势乐观。
+
+瑞士替补johan manzambi独中两元1-0胜波黑，展示了深板凳厚度——替补球员在世界杯上决定比赛的能力往往决定一支球队能走多远。
+
+今日晚间最受关注的对决：苏格兰vs摩洛哥。苏格兰历史上从未进入过世界杯淘汰赛阶段，今晚对阵实力相当的摩洛哥——如果取胜，将创造历史。bbc scotland以&#x27;这可能是苏格兰有史以来最重要的比赛&#x27;为题做预热报道。
+
+伊朗向国际足联投诉旅行限制——战争期间多国对伊朗航班关闭领空或限制中转，影响了伊朗队的正常备战和移动。这是一个体育与地缘政治交织的典型案例。 墨西哥2-0战胜韩国队，成为本届世界杯首支晋级32强的球队；小组赛两连胜（此前2-0南非）锁定a组头名 加拿大6-0横扫卡塔尔，取得世界杯历史首胜——但中场核心ismael kone在比赛中发生严重腿部骨折，喜悦蒙阴影 日本2-2战平荷兰（f组）；象牙海岸1-0胜某队（e组）；瑞士1-0胜波黑（替补manzambi独中两元） 今日焦点战：苏格兰vs摩洛哥（6pm et）——苏格兰若取胜将首次晋级淘汰赛 伊朗向国际足联正式投诉旅行限制——因美伊战争期间多国对伊朗航班设限，影响球队备战" onclick="go(22)">
+        <button class="favstar" data-fav="fa14894a62ff0" onclick="toggleFav(event,'fa14894a62ff0')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">2026世界杯战况：墨西哥首个晋级32强，加拿大6-0大胜创历史首胜，Kone断腿事故蒙阴影</div>
+        <div class="card-lead">【2026世界杯小组赛深度分析】世界杯第8个比赛日。墨西哥（A组）展示了老牌劲旅的稳定性，2-0击败韩国后两战全胜，率先锁定32强席位。韩国的世界杯前景堪忧——门将致命失误导致失球，最后一轮必须赢球才有出线可能。</div>
         <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="4" onclick="go(8)">
-        <div class="card-hl">2026 NBA选秀6月23-24日举行：奇才获状元签，AJ Dybantsa(BYU)预测第一顺位</div>
-        <div class="card-lead">2026年NBA选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。ESPN百大新秀前5：1. AJ Dybantsa(BYU, 小前锋, 身高6-9.5, 臂展7-0.25)；2. Darryn Peterson(Kansas, 后卫)；3. Cameron Boozer(Duke, 前锋)；4. Caleb Wilson(UNC, 前锋)；5. Keaton Wagler(Illinois, 后卫)。NBA Draft Room模拟选秀：奇才将在Dybantsa和Peterson间做艰难选择。</div>
+      <div class="card" data-lang="en" data-sec="4" data-day="d0" data-fav="f6b2e7148b96e" data-search="new york knicks celebrate first nba title since 1973 with manhattan parade; defeated spurs 4-1 in finals 纽约尼克斯以4-1击败圣安东尼奥马刺，赢得2026年nba总冠军——这是球队自1973年以来时隔53年的首个冠军。jalen brunson荣膺总决赛mvp，主教练tom thibodeau赢得执教生涯首个总冠军。马刺的victor wembanyama在总决赛中场均32分15篮板的表现堪称历史级，但不足以挽救球队。尼克斯的夺冠游行吸引了数百万纽约市民——bbc报道&#x27;纽约重新焕发生机&#x27;。 纽约尼克斯以4-1击败圣安东尼奥马刺，赢得2026年nba总冠军——这是球队自1973年以来时隔53年的首个冠军。jalen brunson荣膺总决赛mvp，主教练tom thibodeau赢得执教生涯首个总冠军。马刺的victor wembanyama在总决赛中场均32分15篮板的表现堪称历史级，但不足以挽救球队。尼克斯的夺冠游行吸引了数百万纽约市民——bbc报道&#x27;纽约重新焕发生机&#x27;。 knicks win 2026 nba finals 4-1 over san antonio spurs — franchise&#x27;s first championship in 53 years victory parade through manhattan draws millions; bbc reports &#x27;new york is alive again&#x27; knicks completed unforgettable comeback in game 5 to clinch title; series ended june 13 jalen brunson named finals mvp; coach tom thibodeau wins first championship spurs&#x27; victor wembanyama averaged 32 points and 15 rebounds in finals — historic individual performance in losing effort" onclick="go(23)">
+        <button class="favstar" data-fav="f6b2e7148b96e" onclick="toggleFav(event,'f6b2e7148b96e')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">New York Knicks Celebrate First NBA Title Since 1973 with Manhattan Parade; Defeated Spurs 4-1 in Finals</div>
+        <div class="card-lead">纽约尼克斯以4-1击败圣安东尼奥马刺，赢得2026年NBA总冠军——这是球队自1973年以来时隔53年的首个冠军。Jalen Brunson荣膺总决赛MVP，主教练Tom Thibodeau赢得执教生涯首个总冠军。马刺的Victor Wembanyama在总决赛中场均32分15篮板的表现堪称历史级，但不足以挽救球队。尼克斯的夺冠游行吸引了数百万纽约市民——BBC报道&#x27;纽约重新焕发生机&#x27;。</div>
         <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
       </div>
-      <div class="card" data-lang="zh" data-sec="4" onclick="go(9)">
-        <div class="card-hl">2026欧冠决赛：PSG在布达佩斯卫冕；新赛季7月7日资格赛启动</div>
-        <div class="card-lead">2026年UEFA欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。</div>
+      <div class="card" data-lang="en" data-sec="4" data-day="d0" data-fav="fd96f7b1925f5" data-search="&#x27;do it at home too&#x27; — japanese women respond to viral images of male fans cleaning world cup stadiums 日本球迷在世界杯赛后清理看台的传统再次引发全球关注——但这次伴随着来自日本女性的批评声音。一些日本女性指出双重标准：&#x27;男人们在公共场合打扫卫生，而在家里把所有家务留给妻子。&#x27;日本在oecd国家中的家务劳动性别差距位居前列。这场讨论从足球文化延伸到了更广泛的性别平等议题。 日本球迷在世界杯赛后清理看台的传统再次引发全球关注——但这次伴随着来自日本女性的批评声音。一些日本女性指出双重标准：&#x27;男人们在公共场合打扫卫生，而在家里把所有家务留给妻子。&#x27;日本在oecd国家中的家务劳动性别差距位居前列。这场讨论从足球文化延伸到了更广泛的性别平等议题。 japanese fans&#x27; tradition of cleaning stadiums after matches goes viral at 2026 world cup some japanese women respond with criticism: &#x27;they clean in public but leave all the housework to their wives&#x27; debate highlights double standards in domestic labor — japan has one of the highest gender gaps in housework among oecd countries japanese fans received praise from fifa and stadium staff for maintaining cleanliness cultural conversation expands beyond football into broader gender equality discussion" onclick="go(24)">
+        <button class="favstar" data-fav="fd96f7b1925f5" onclick="toggleFav(event,'fd96f7b1925f5')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">&#x27;Do It at Home Too&#x27; — Japanese Women Respond to Viral Images of Male Fans Cleaning World Cup Stadiums</div>
+        <div class="card-lead">日本球迷在世界杯赛后清理看台的传统再次引发全球关注——但这次伴随着来自日本女性的批评声音。一些日本女性指出双重标准：&#x27;男人们在公共场合打扫卫生，而在家里把所有家务留给妻子。&#x27;日本在OECD国家中的家务劳动性别差距位居前列。这场讨论从足球文化延伸到了更广泛的性别平等议题。</div>
         <div class="card-more" style="color:#5cb56b">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="5" data-day="d0" style="color:#d98aa8">文化</div>
+      <div class="card" data-lang="en" data-sec="5" data-day="d0" data-fav="f0e43d3c41f48" data-search="gta 6 pre-order date and cover art revealed by rockstar — sales begin june 25, launch expected q4 2026 rockstar games正式公布gta 6的封面艺术并宣布6月25日开启预购。这款备受期待的游戏设定在虚构的vice city（灵感来自迈阿密），首次引入女性主角。业界预测gta 6可能成为史上最畅销的娱乐产品——前作gta 5已售出超2亿份。take-two interactive股价受此消息提振。 rockstar games正式公布gta 6的封面艺术并宣布6月25日开启预购。这款备受期待的游戏设定在虚构的vice city（灵感来自迈阿密），首次引入女性主角。业界预测gta 6可能成为史上最畅销的娱乐产品——前作gta 5已售出超2亿份。take-two interactive股价受此消息提振。 rockstar games reveals gta 6 cover art and announces pre-orders begin june 25, 2026 game set in fictional vice city (miami-inspired); features dual protagonists — first female lead character in series history industry analysts predict gta 6 could become the best-selling entertainment product of all time (predecessor gta 5 sold 200m+ copies) pre-order announcement confirms late 2026 launch window; speculation centers on october-november release take-two interactive (rockstar parent) shares rose on the news; gta 6 expected to generate $3b+ in first-year revenue" onclick="go(25)">
+        <button class="favstar" data-fav="f0e43d3c41f48" onclick="toggleFav(event,'f0e43d3c41f48')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">GTA 6 Pre-Order Date and Cover Art Revealed by Rockstar — Sales Begin June 25, Launch Expected Q4 2026</div>
+        <div class="card-lead">Rockstar Games正式公布GTA 6的封面艺术并宣布6月25日开启预购。这款备受期待的游戏设定在虚构的Vice City（灵感来自迈阿密），首次引入女性主角。业界预测GTA 6可能成为史上最畅销的娱乐产品——前作GTA 5已售出超2亿份。Take-Two Interactive股价受此消息提振。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="5" data-day="d0" data-fav="f3cb9435ddef6" data-search="tay keith, grammy-nominated producer behind hits by drake, eminem, and beyoncé, found dead 格莱美提名制作人tay keith被发现去世。这位孟菲斯说唱制作人的独特&#x27;孟菲斯之声&#x27;——沉重的808鼓、黑暗氛围、三连音踩镲——定义了一代嘻哈音乐的美学。他制作的歌曲被beyoncé、drake、eminem、travis scott和cardi b等顶级艺人采用。drake发文悼念：&#x27;真正的天才走得太早了。&#x27; 格莱美提名制作人tay keith被发现去世。这位孟菲斯说唱制作人的独特&#x27;孟菲斯之声&#x27;——沉重的808鼓、黑暗氛围、三连音踩镲——定义了一代嘻哈音乐的美学。他制作的歌曲被beyoncé、drake、eminem、travis scott和cardi b等顶级艺人采用。drake发文悼念：&#x27;真正的天才走得太早了。&#x27; tay keith, influential memphis rap producer, found dead at home — cause not yet disclosed produced hits for travis scott, drake, eminem, beyoncé, and cardi b; grammy-nominated for his distinctive &#x27;memphis sound&#x27; keith&#x27;s production style — heavy 808s, dark atmospherics, triplet hi-hats — defined a generation of hip-hop sound tributes pour in from across the music industry; drake posts: &#x27;one of the real ones gone too soon&#x27; memphis music community in mourning; keith credited with putting memphis drill on the global map" onclick="go(26)">
+        <button class="favstar" data-fav="f3cb9435ddef6" onclick="toggleFav(event,'f3cb9435ddef6')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Tay Keith, Grammy-Nominated Producer Behind Hits by Drake, Eminem, and Beyoncé, Found Dead</div>
+        <div class="card-lead">格莱美提名制作人Tay Keith被发现去世。这位孟菲斯说唱制作人的独特&#x27;孟菲斯之声&#x27;——沉重的808鼓、黑暗氛围、三连音踩镲——定义了一代嘻哈音乐的美学。他制作的歌曲被Beyoncé、Drake、Eminem、Travis Scott和Cardi B等顶级艺人采用。Drake发文悼念：&#x27;真正的天才走得太早了。&#x27;</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="5" data-day="d0" data-fav="f85c828fce68b" data-search="london marathon to be two-day event in 2027 — special one-off format to accommodate record demand 伦敦马拉松组委会确认2027年赛事将作为特例在两日内举行——精英赛仍在周日，大众参与安排在周六，实质上创建一个&#x27;跑步节周末&#x27;。这一决定由创纪录的需求驱动：2026年赛事抽签收到超过85万份申请，争夺约5万个名额。如果2027年双日模式成功，可能成为永久安排。 伦敦马拉松组委会确认2027年赛事将作为特例在两日内举行——精英赛仍在周日，大众参与安排在周六，实质上创建一个&#x27;跑步节周末&#x27;。这一决定由创纪录的需求驱动：2026年赛事抽签收到超过85万份申请，争夺约5万个名额。如果2027年双日模式成功，可能成为永久安排。 london marathon organisers confirm 2027 event will be held across two days in a special one-off edition decision driven by record demand — 2026 ballot received over 850,000 applications for ~50,000 places unique format: elite races on sunday, mass participation on saturday — effectively a &#x27;festival of running&#x27; weekend 2026 event (april 2026) set new participation record and raised £70m+ for charity two-day format could become permanent if the 2027 edition is successful" onclick="go(27)">
+        <button class="favstar" data-fav="f85c828fce68b" onclick="toggleFav(event,'f85c828fce68b')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">London Marathon to Be Two-Day Event in 2027 — Special One-Off Format to Accommodate Record Demand</div>
+        <div class="card-lead">伦敦马拉松组委会确认2027年赛事将作为特例在两日内举行——精英赛仍在周日，大众参与安排在周六，实质上创建一个&#x27;跑步节周末&#x27;。这一决定由创纪录的需求驱动：2026年赛事抽签收到超过85万份申请，争夺约5万个名额。如果2027年双日模式成功，可能成为永久安排。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="5" data-day="d0" data-fav="fcacf89c1374f" data-search="mercedes withdraws monaco grand prix appeal — verstappen&#x27;s controversial victory stands 梅赛德斯f1车队撤回对摩纳哥大奖赛结果的上诉——维斯塔潘的争议性胜利得以确认。梅赛德斯此前质疑赛事控制中心在维斯塔潘涉嫌违规后仍保留其领先位置的决定。撤回后维斯塔潘巩固了2026赛季的冠军领先优势。 梅赛德斯f1车队撤回对摩纳哥大奖赛结果的上诉——维斯塔潘的争议性胜利得以确认。梅赛德斯此前质疑赛事控制中心在维斯塔潘涉嫌违规后仍保留其领先位置的决定。撤回后维斯塔潘巩固了2026赛季的冠军领先优势。 mercedes f1 team withdraws appeal against monaco grand prix result appeal had questioned race control decision that allowed verstappen to retain lead after alleged rules breach withdrawal cements verstappen&#x27;s monaco victory, extending his 2026 championship lead mercedes cites &#x27;spirit of competition&#x27; for withdrawing; but insiders suggest legal advice indicated low probability of success f1 2026 season continues to be dominated by red bull-verstappen combination" onclick="go(28)">
+        <button class="favstar" data-fav="fcacf89c1374f" onclick="toggleFav(event,'fcacf89c1374f')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Mercedes Withdraws Monaco Grand Prix Appeal — Verstappen&#x27;s Controversial Victory Stands</div>
+        <div class="card-lead">梅赛德斯F1车队撤回对摩纳哥大奖赛结果的上诉——维斯塔潘的争议性胜利得以确认。梅赛德斯此前质疑赛事控制中心在维斯塔潘涉嫌违规后仍保留其领先位置的决定。撤回后维斯塔潘巩固了2026赛季的冠军领先优势。</div>
+        <div class="card-more" style="color:#d98aa8">阅读全文 ›</div>
       </div>
   </div>
   
-      <div class="article" id="a0" data-lang="zh" style="display:none">
+      <div class="article" id="a0" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
-        <h1 class="atitle">2026世界杯：卡塔尔0:6惨败加拿大，墨西哥小组出线；小组赛激战正酣</h1>
-        <p class="alead" >2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。
+        <h1 class="atitle">US and Iran Sign Peace Deal Ending Four-Month War; Naval Blockade Lifted, Strait of Hormuz to Reopen</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7b2720ee4e6c" onclick="toggleFav(event,'f7b2720ee4e6c')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。
 
-6月19日焦点战报（新华网体育、ESPN）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。
+【联动机制与影响推演】
+一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。
 
-新华网小组赛首轮盘点：首次三国合办在组织协调、场馆设施、球迷跨国流动等方面接受检验。中亚「新军」崛起引关注。</p>
-        <ul class='abul'><li>2026 FIFA世界杯小组赛激战中（6月11日开幕，美加墨三国合办，48队参赛创纪录）</li><li>6月19日：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国小组出线</li><li>英格兰4:2克罗地亚；葡萄牙1:1刚果（金）；加纳1:0巴拿马；乌兹别克斯坦1:3哥伦比亚</li><li>新华网发布小组赛首轮盘点：首次三国合办在组织/场馆/球迷跨国流动上验出真章</li></ul>
-        <div class="abody"><p>2026年FIFA世界杯于6月11日在美国、加拿大、墨西哥三国联合开幕，48支球队参赛创历史纪录，共104场比赛。</p><p>6月19日焦点战报（新华网体育、ESPN）：卡塔尔0:6惨败加拿大诞生本届最快进球；墨西哥战胜韩国队小组出线；英格兰4:2克罗地亚（达拉斯）；葡萄牙1:1刚果（金）（休斯顿）；加纳1:0巴拿马（多伦多）；乌兹别克斯坦1:3哥伦比亚（墨西哥城）。</p><p>新华网小组赛首轮盘点：首次三国合办在组织协调、场馆设施、球迷跨国流动等方面接受检验。中亚「新军」崛起引关注。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.news.cn/sports/20260619/9b614b3b1aa24e5a8b2b706158dbe877/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.espn.com/soccer/story/_/id/48939282/2026-fifa-world-cup-fixtures-results-match-schedule-group-stage-knockout-rounds-bracket" target="_blank" rel="noopener">ESPN<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/scores-fixtures" target="_blank" rel="noopener">FIFA<span class="stance" style="background:#8a94a6">中立</span></a></div>
+二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国CPI从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在Q3-Q4加速下行，届时美联储和英国央行可能重启降息周期。
+
+三、对创业者（阳阳）：能源成本下降利好所有AI推理和数据中心的电力成本（AI算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和IPO窗口（OpenAI和SpaceX都在筹备IPO，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。
+
+四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。
+
+⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026Q4-2027Q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在G7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。</p>
+        <ul class='abul'><li>Trump and Iran sign 14-point memorandum at Versailles on June 18; deal includes $300bn reconstruction fund and termination of all US sanctions</li><li>US lifts naval blockade of Iran; Strait of Hormuz — the world&#x27;s most critical oil chokepoint — set to reopen within 60 days</li><li>Iran&#x27;s Supreme Leader Mojtaba Khamenei says he approved deal despite &#x27;different view&#x27;, claiming Trump acted &#x27;out of desperation&#x27;</li><li>Deal defers thorniest issues — including Iran&#x27;s nuclear programme — to &#x27;technical talks&#x27; within 60 days; Vance cancels first round in Switzerland</li><li>Israel-Lebanon fighting continues despite deal: Israeli strikes kill 18 in Nabatieh overnight; 4 IDF soldiers killed in Hezbollah clashes</li></ul>
+        <div class="abody"><p>【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。</p><p>【联动机制与影响推演】</p><p>一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。</p><p>二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国CPI从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在Q3-Q4加速下行，届时美联储和英国央行可能重启降息周期。</p><p>三、对创业者（阳阳）：能源成本下降利好所有AI推理和数据中心的电力成本（AI算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和IPO窗口（OpenAI和SpaceX都在筹备IPO，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。</p><p>四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。</p><p>⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026Q4-2027Q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在G7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c8r2eme2n5do" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/c8r2eejdd35o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/c4g5574pwreo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/world/20260619/6d6794a7214d40cba8c7ba6ba0bfdec3/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a1" data-lang="zh" style="display:none">
+      <div class="article" id="a1" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
-        <h1 class="atitle">美众议院以215:208通过限制特朗普对伊朗军事行动的战争权力决议</h1>
-        <p class="alead" >美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</p>
-        <ul class='abul'><li>美国众议院6月3日以215:208表决通过伊朗战争权力决议(H.Con.Res.38)，4名共和党人倒戈支持</li><li>决议要求终止美军对伊朗的敌对行动，系对特朗普的重大象征性谴责（BBC称「delivers rebuke to Trump」）</li><li>决议在参议院前景不明；美伊6月19日已签MOU，但决议反映国会反战声音</li><li>Walkinshaw众议员2月28日（开战当日）即提出该决议，历经四次尝试终获通过</li></ul>
-        <div class="abody"><p>美国众议院以215:208通过伊朗战争权力决议(H.Con.Res.38)，要求总统终止美国武装力量对伊朗的敌对行动。4名共和党人与全体民主党人投赞成票。BBC报道称此为「众议院对特朗普的谴责」。决议虽具有象征意义（参议院通过前景不确定），但反映了美国国会对行政分支战争权力的制度性约束尝试。值得注意的是，该决议于2月28日（美对伊军事打击首日）由Walkinshaw众议员提出，6月3日第四次表决才获通过——与6月19日美伊签署MOU的时间线相交织。PBS Newshour报道指出，该决议虽在美伊签约后通过，但其政治信号意义不减。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cj6pldg39deo" target="_blank" rel="noopener">BBC<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.reuters.com/world/us/us-house-backs-resolution-curbing-trump-iran-war-powers-2026-06-03/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.pbs.org/newshour/politics/whats-next-for-the-war-powers-resolution-on-iran-politifact-explains" target="_blank" rel="noopener">PBS Newshour<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <h1 class="atitle">Thousands Killed in US-Israeli War on Iran — Experts Say True Total May Never Be Known</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fd468e9af0a78" onclick="toggleFav(event,'fd468e9af0a78')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >BBC Verify综合多方数据显示，自2月28日美以对伊朗开战至4月中旬，伊朗官方统计至少3,468人死亡（1,460平民+2,008军人），但人权活动者新闻社(HRANA)的独立统计为3,636人，且强调这仅是&#x27;绝对最低数字&#x27;。黎巴嫩方面确认3,912人死亡。最惨烈的单一事件：开战首日美军导弹击中Minab一所女子学校，168人死亡（含110名儿童）。伊朗也被指控用集束炸弹攻击以色列平民区，HRW称这构成战争罪。专家警告：由于互联网封锁、政府限制和武装团体存在，真实死亡人数可能在数年内都无法确定，&#x27;最终数字可能远高于当前可用数据&#x27;。</p>
+        <ul class='abul'><li>7,300+ killed across Iran and Lebanon since Feb 28; 3,468+ Iranians including 499 women; 3,912 Lebanese including 366 women and 247 children</li><li>US missile strike on Minab girls&#x27; school killed 168 (110 children) on war&#x27;s opening day; US military investigating</li><li>Israel says 60 killed: 29 civilians (21 from Iranian missiles), 31 IDF soldiers; Iran accused of using cluster munitions against civilian areas</li><li>UN says 7 peacekeepers killed in Lebanon; 13 US personnel killed; 14 sailors killed in Strait of Hormuz strikes</li><li>Human Rights Watch accuses Iran of war crimes for cluster munitions use; analysts say true death toll likely substantially higher — internet blackouts and government restrictions hamper casualty reporting</li></ul>
+        <div class="abody"><p>BBC Verify综合多方数据显示，自2月28日美以对伊朗开战至4月中旬，伊朗官方统计至少3,468人死亡（1,460平民+2,008军人），但人权活动者新闻社(HRANA)的独立统计为3,636人，且强调这仅是&#x27;绝对最低数字&#x27;。黎巴嫩方面确认3,912人死亡。最惨烈的单一事件：开战首日美军导弹击中Minab一所女子学校，168人死亡（含110名儿童）。伊朗也被指控用集束炸弹攻击以色列平民区，HRW称这构成战争罪。专家警告：由于互联网封锁、政府限制和武装团体存在，真实死亡人数可能在数年内都无法确定，&#x27;最终数字可能远高于当前可用数据&#x27;。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cy735xlv50ko" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a2" data-lang="zh" style="display:none">
+      <div class="article" id="a2" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
-        <h1 class="atitle">G7反对单方面改变台海现状；两岸海警在南海普拉塔斯岛附近再次对峙</h1>
-        <p class="alead" >G7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在X平台表示感谢，台北时报以头条报道。中国外交部尚未就G7台海表述做单独回应（截至6月19日）。
+        <h1 class="atitle">G7 Summit in Évian Concludes: Iran Peace Deal Endorsed, AI Leaders Call for US-Led Coalition, Trump Criticizes IDF</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fb72b1bd1e370" onclick="toggleFav(event,'fb72b1bd1e370')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【G7与伊朗协议】本次G7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，G7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。
 
-两岸海警对峙（Reuters 6月5日）：台湾和中国海警在南海普拉塔斯岛（东沙群岛）附近发生新一轮紧张对峙，延续近期双方在渔业执法、海域管辖权上的摩擦模式。台湾正推动本土无人机产业发展以应对，但面临立法程序挫折（AEI 6月12日报告）。</p>
-        <ul class='abul'><li>G7联合声明（6月17日埃维昂）重申反对任何单方面以武力或胁迫改变台海/东海/南海现状</li><li>台湾方面表示欢迎G7声明；中方尚未就G7台海表述单独回应</li><li>Reuters 6月5日报道：两岸海警在南海普拉塔斯岛（东沙群岛）附近再次紧张对峙</li><li>台湾行政院长卓荣泰5月19日称中国军事行动是「台湾面临的主要安全挑战」</li></ul>
-        <div class="abody"><p>G7埃维昂峰会联合声明重申「反对任何单方面以武力或胁迫改变东海和南中国海现状的企图，包括台湾海峡」。台湾总统赖清德在X平台表示感谢，台北时报以头条报道。中国外交部尚未就G7台海表述做单独回应（截至6月19日）。</p><p>两岸海警对峙（Reuters 6月5日）：台湾和中国海警在南海普拉塔斯岛（东沙群岛）附近发生新一轮紧张对峙，延续近期双方在渔业执法、海域管辖权上的摩擦模式。台湾正推动本土无人机产业发展以应对，但面临立法程序挫折（AEI 6月12日报告）。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.elysee.fr/en/G7evian/2026/06/17/g7-leaders-statement-on-geopolitical-issues" target="_blank" rel="noopener">Elysee<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.taipeitimes.com/News/front/archives/2026/06/18/2003859293" target="_blank" rel="noopener">Taipei Times<span class="stance" style="background:#5bbf8a">体制外</span></a> <a class="src" href="https://www.reuters.com/world/china/taiwan-china-coast-guards-renewed-standoff-top-south-china-sea-2026-06-05/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.aei.org/articles/china-taiwan-update-june-12-2026/" target="_blank" rel="noopener">AEI<span class="stance" style="background:#ef8b5b">偏右</span></a></div>
+【AI联盟动向】峰会另一条暗线是AI治理话语权的争夺。Altman、Amodei、Hassabis三位AI界最有权势的人同时出现在G7，呼应Anthropic和DeepMind提出的&#x27;美国主导的AI联盟&#x27;构想——本质上是希望将G7打造成西方AI标准的制定平台，与中国AI生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动G7级AI出口管制+标准联盟，中国AI公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。
+
+【全球治理格局】本次G7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。</p>
+        <ul class='abul'><li>52nd G7 Summit held June 15-17 in Évian-les-Bains, France; Macron calls Iran deal &#x27;very good&#x27; and says G7 allies support it</li><li>Trump sharply criticizes IDF at G7: &#x27;You don&#x27;t have to knock down an apartment house every time you&#x27;re looking for somebody&#x27; — signals US pressure on Israel to preserve Iran deal</li><li>OpenAI&#x27;s Sam Altman, Anthropic&#x27;s Dario Amodei, and DeepMind&#x27;s Demis Hassabis attend G7; call for US-led AI coalition</li><li>Summit communiqué covers international peace, global economy, AI governance, climate</li><li>Trump holds closing press conference emphasizing Iran deal as victory to &#x27;avoid global economic recession&#x27;</li></ul>
+        <div class="abody"><p>【G7与伊朗协议】本次G7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，G7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。</p><p>【AI联盟动向】峰会另一条暗线是AI治理话语权的争夺。Altman、Amodei、Hassabis三位AI界最有权势的人同时出现在G7，呼应Anthropic和DeepMind提出的&#x27;美国主导的AI联盟&#x27;构想——本质上是希望将G7打造成西方AI标准的制定平台，与中国AI生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动G7级AI出口管制+标准联盟，中国AI公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。</p><p>【全球治理格局】本次G7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。</p></div>
+        <div class="sources">来源：<a class="src" href="https://apnews.com/article/g7-trump-macron-france-china-iran-persian-gulf-energy-7e7dfed708daa482c6079863758e6f95" target="_blank" rel="noopener">AP News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-17</span></a> <a class="src" href="https://www.cnbc.com/2026/06/17/anthropic-amodei-google-hassabis-us-ai-coalition-g7.html" target="_blank" rel="noopener">CNBC<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-17</span></a> <a class="src" href="https://www.news.cn/20260619/7f9e2e53a3d24c448d7299ea708c479f/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a3" data-lang="zh" style="display:none">
+      <div class="article" id="a3" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
-        <h1 class="atitle">习近平给新华社老党员张连生回信：传承红色基因在新征程上书写优异答卷</h1>
-        <p class="alead" >6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。</p>
-        <ul class='abul'><li>习近平6月18日给新华社百岁老党员张连生回信，强调传承红色基因、不忘初心</li><li>新华社配发系列报道：学习快评、纪录片《四大队》、时代人物专题</li><li>6月19日发布「让红船精神永放光芒」习近平强党兴党故事；端午节推出屈原诗话家国情专题</li></ul>
-        <div class="abody"><p>6月18日新华社刊发习近平总书记给新华社老党员张连生回信全文。张连生是新华社百岁老党员。习近平强调「传承红色基因，在新征程上书写优异答卷」。新华社配发学习快评、纪录片《永远的「四大队」》、时代人物专题。同日发布总书记引屈原诗话家国情专题（时值端午节）及反腐败讲廉政「学习手记」。6月19日发布「让红船精神永放光芒」专题。此前6月16日习近平与缅甸总统敏昂莱会谈；6月8-9日对朝鲜国事访问会见金正恩。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260618/edaf7befa24b4239b6a27a19cef0654f/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.news.cn/politics/leaders/20260619/a1feaad2a1844528ab7058e5e506031b/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">Andy Burnham Wins By-Election with 55% Vote, Paving Way for Possible Labour Leadership Challenge to PM Starmer</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fa350b5ae7d4e" onclick="toggleFav(event,'fa350b5ae7d4e')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >英国工党重量级人物Andy Burnham以55%的得票率赢得补选，重返威斯敏斯特议会。Burnham此前担任大曼彻斯特市长期间积累了广泛的民众支持，被视为工党内最有可能挑战现任首相斯塔默领导地位的人物。Burnham在胜选演讲中称这可能成为工党的&#x27;转折点&#x27;，暗示党内对斯塔默中间路线的普遍不满。他对脱欧经济代价的公开批评也与斯塔默政府试图淡化脱欧负面影响的策略形成对比。</p>
+        <ul class='abul'><li>Greater Manchester Mayor Andy Burnham wins parliamentary by-election with 55% of vote; returns to Westminster</li><li>Burnham declares this could be &#x27;turning point&#x27; for Labour Party; seen as potential challenger to PM Keir Starmer</li><li>Burnham, 56, positioning for third attempt at Labour leadership; campaigns on &#x27;honest accounting of Brexit costs&#x27; and regional devolution</li><li>By-election result interpreted as voter discontent with Starmer&#x27;s centrist approach and handling of post-war economy</li><li>Starmer&#x27;s office says PM &#x27;welcomes Andy back to Parliament&#x27; and looks forward to working together</li></ul>
+        <div class="abody"><p>英国工党重量级人物Andy Burnham以55%的得票率赢得补选，重返威斯敏斯特议会。Burnham此前担任大曼彻斯特市长期间积累了广泛的民众支持，被视为工党内最有可能挑战现任首相斯塔默领导地位的人物。Burnham在胜选演讲中称这可能成为工党的&#x27;转折点&#x27;，暗示党内对斯塔默中间路线的普遍不满。他对脱欧经济代价的公开批评也与斯塔默政府试图淡化脱欧负面影响的策略形成对比。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/live/c3928mlyle8t" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/cp8pml5z8p6o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a4" data-lang="zh" style="display:none">
+      <div class="article" id="a4" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
-        <h1 class="atitle">国务院任免：蔡奇兼任国家行政学院院长；外交部就韩官员涉台表述答问</h1>
-        <p class="alead" >国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。</p>
-        <ul class='abul'><li>6月18日国务院任免：蔡奇兼任国家行政学院院长，陈希卸任</li><li>外交部发言人林剑就韩官员重申中韩建交联合公报涉台表述答问</li><li>中方6月19日呼吁加沙真正持久停火，敦促推进利比亚包容性政治进程</li></ul>
-        <div class="abody"><p>国务院任免国家工作人员（6月18日）：蔡奇兼任国家行政学院院长；陈希不再担任院长职务。免去王志勇的国家中医药管理局副局长职务。（新华网）外交部发言人林剑6月18日就韩官员重申中韩建交联合公报涉台表述答问，表示中方重视韩方坚持一个中国原则的表态。（中国驻美国大使馆）中方6月19日敦促合力推进利比亚包容性政治进程，呼吁加沙真正持久停火。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.xinhuanet.com/politics/20260618/f0588a2242cc4874a50aa73abdd50ab5/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://us.china-embassy.gov.cn/lcbt/wjbfyrbt/202606/t20260618_11948460.htm" target="_blank" rel="noopener">中国驻美国大使馆<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.news.cn/20260619/06743055242e43959115be74e1bc4955/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">Obamas Host Star-Studded Opening of Chicago Presidential Centre; Four Living Presidents Attend — Trump Not Invited</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fe1d4415d3fa9" onclick="toggleFav(event,'fe1d4415d3fa9')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >奥巴马总统中心于6月18日在芝加哥南区正式揭幕。四位在世美国总统（奥巴马、布什、克林顿、拜登）出席——特朗普是唯一未被邀请的。奥巴马在演讲中强调&#x27;美国将不会有国王&#x27;，被广泛解读为对特朗普时代总统权力扩张的含蓄批评。中心位于奥巴马政治生涯起点的芝加哥南区，占地广阔，预计每年吸引75万+参观者，将成为芝加哥新文化地标。</p>
+        <ul class='abul'><li>Barack Obama Presidential Center officially opens in Chicago on June 18; ceremony attended by Bush, Clinton, and Biden</li><li>Donald Trump was not invited; Obama&#x27;s speech includes veiled critique of Trump era: &#x27;There will be no kings in America&#x27;</li><li>The center on Chicago&#x27;s South Side includes museum, library, athletic center, and community garden — largest of any presidential library</li><li>Michelle Obama delivers emotional tribute to Chicago&#x27;s South Side community; center expected to draw 750,000+ visitors annually</li><li>Obama&#x27;s speech resonates against backdrop of Iran war ending — calls for &#x27;rebuilding trust in institutions at home and abroad&#x27;</li></ul>
+        <div class="abody"><p>奥巴马总统中心于6月18日在芝加哥南区正式揭幕。四位在世美国总统（奥巴马、布什、克林顿、拜登）出席——特朗普是唯一未被邀请的。奥巴马在演讲中强调&#x27;美国将不会有国王&#x27;，被广泛解读为对特朗普时代总统权力扩张的含蓄批评。中心位于奥巴马政治生涯起点的芝加哥南区，占地广阔，预计每年吸引75万+参观者，将成为芝加哥新文化地标。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cly91eqyd0ko" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a5" data-lang="zh" style="display:none">
+      <div class="article" id="a5" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#fdf2e3;color:#e6943a">科学健康</div>
-        <h1 class="atitle">FDA戒烟新药Cytisinicline审批预计6月20日公布；GLP-1持续拓展新适应症</h1>
-        <p class="alead" >药物审批：Cytisinicline有望成为20年来首个获FDA批准全新戒烟药物，审批决定预计6月20日公布（GoodRx）。RGX-121（Regenxbio）一次性基因治疗亨特综合征（Hunter syndrome罕见CNS遗传病），FDA决定已出。GLP-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。Nature Medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。</p>
-        <ul class='abul'><li>Cytisinicline有望成为20年来首个全新戒烟药物，FDA审批决定预计6月20日公布</li><li>RGX-121基因治疗亨特综合征FDA决定2026年初已出，为罕见CNS疾病基因治疗新模式</li><li>GLP-1类药物已从糖尿病/肥胖延伸至心血管、肾脏疾病和精神健康领域</li><li>2026年Nature Medicine重点关注：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV新方案</li></ul>
-        <div class="abody"><p>药物审批：Cytisinicline有望成为20年来首个获FDA批准全新戒烟药物，审批决定预计6月20日公布（GoodRx）。RGX-121（Regenxbio）一次性基因治疗亨特综合征（Hunter syndrome罕见CNS遗传病），FDA决定已出。GLP-1类药物持续重塑治疗格局，已从糖尿病/肥胖延伸至心血管、肾脏和精神健康。Nature Medicine 2026重点临床试验：长效结核疫苗、拉沙热-狂犬病联合疫苗、HIV治疗新方案。新华网报道中国科研人员开发出整合神经元功能/结构/分子研究平台；南极海冰微生物极端环境生存机制新研究发表。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.goodrx.com/drugs/news/upcoming-fda-approvals" target="_blank" rel="noopener">GoodRx<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.linkedin.com/pulse/top-drugs-watch-2026-breakthroughs-could-change-paul-healy--0eufe" target="_blank" rel="noopener">Regenxbio/LinkedIn<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.news.cn/20260619/04d2515cfe924977a33628a9c7aa6248/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a> <a class="src" href="https://www.news.cn/tech/20260619/e4f88926a73245108169a49c8f312b6b/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span></a></div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">Iran to Lodge Official FIFA Complaint Over World Cup Travel Restrictions Imposed During War</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f1c05ee7faef7" onclick="toggleFav(event,'f1c05ee7faef7')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >伊朗足协将就战争期间的旅行限制向国际足联提出正式投诉。在美伊战争的四个月里，多个国家关闭了对伊朗航班的领空或限制中转，使伊朗国家队的备战和移动严重受阻。伊朗在小组赛首轮2-2战平新西兰，仍保留出线希望。此事凸显了地缘政治冲突如何渗透到本应&#x27;非政治化&#x27;的国际体育赛事中。</p>
+        <ul class='abul'><li>Iran Football Federation to submit formal complaint to FIFA about travel restrictions affecting Team Melli during World Cup</li><li>Multiple countries closed airspace or restricted Iranian flights during the four-month war, complicating team logistics</li><li>FIFA regulations guarantee equal treatment for all participating teams; Iran argues restrictions violated this principle</li><li>Iran drew 2-2 with New Zealand in their opening group match, keeping knockout stage hopes alive</li><li>Complaint raises broader questions about how geopolitical conflicts impact international sporting events</li></ul>
+        <div class="abody"><p>伊朗足协将就战争期间的旅行限制向国际足联提出正式投诉。在美伊战争的四个月里，多个国家关闭了对伊朗航班的领空或限制中转，使伊朗国家队的备战和移动严重受阻。伊朗在小组赛首轮2-2战平新西兰，仍保留出线希望。此事凸显了地缘政治冲突如何渗透到本应&#x27;非政治化&#x27;的国际体育赛事中。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/sport/football/articles/c4gy62p4e67o" target="_blank" rel="noopener">BBC Sport<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
       <div class="article" id="a6" data-lang="zh" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#f2ecfa;color:#9b78c9">教育</div>
-        <h1 class="atitle">第67届IMO 7月10-21日上海举办；2026 USAMO/USACO结果已公布</h1>
-        <p class="alead" >数学竞赛：第67届IMO将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（MAA）。USAMO/USAJMO 2026：MAA已公布获奖名单。据Ivy League Center：AMC 8 19名满分；AMC/AIME 104名晋级者；8名USAMO+7名USAJMO获奖者入MOP；4名MOP入选者。USACO 2025-2026：Brian Xue(银)、Alex Chen(铜)、Bing-Dong Liu(银)、Rain Jiang(金)。US Open结果已作为夏季训练营选拔主要依据。MIT 2026级录取率约4.6%（历史最低之一），EA阶段11883人申请录655人（5.51%）。</p>
-        <ul class='abul'><li>第67届国际数学奥林匹克（IMO）7月10-21日在中国上海举办</li><li>2026 USAMO: 8名获奖者 + 7名USAJMO获奖者进入MOP训练营；AMC 8 19名满分</li><li>USACO 2025-2026公布4名最终入选者：Brian Xue(银), Alex Chen(铜), Bing-Dong Liu(银), Rain Jiang(金)</li><li>MIT 2026级录取率约4.6%，EA阶段11883人申请录取655人（5.51%）</li></ul>
-        <div class="abody"><p>数学竞赛：第67届IMO将于2026年7月10-21日在中国上海举办。2025年第66届美国队获第二名（MAA）。USAMO/USAJMO 2026：MAA已公布获奖名单。据Ivy League Center：AMC 8 19名满分；AMC/AIME 104名晋级者；8名USAMO+7名USAJMO获奖者入MOP；4名MOP入选者。USACO 2025-2026：Brian Xue(银)、Alex Chen(铜)、Bing-Dong Liu(银)、Rain Jiang(金)。US Open结果已作为夏季训练营选拔主要依据。MIT 2026级录取率约4.6%（历史最低之一），EA阶段11883人申请录655人（5.51%）。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.imo-official.org/" target="_blank" rel="noopener">IMO Official<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://maa.org/student-programs/youth-program-awards-winners/" target="_blank" rel="noopener">MAA<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://usaco.org/" target="_blank" rel="noopener">USACO<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://mitadmissions.org/apply/process/stats/" target="_blank" rel="noopener">MIT Admissions<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://ivyleaguecenter.org/2026/02/21/2026-summer-competitive-math-courses/" target="_blank" rel="noopener">Ivy League Center<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">乌克兰发动迄今最大规模无人机攻击俄炼油厂，莫斯科居民称降下&#x27;黑雨&#x27;</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f116b9477f35d" onclick="toggleFav(event,'f116b9477f35d')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >乌克兰发动了自战争以来最大规模的无人机袭击，以俄罗斯炼油厂为主要目标。莫斯科居民报告称出现&#x27;黑雨&#x27;——炼油厂燃烧产生的烟尘与降水混合后降落在城市。与此同时，俄罗斯声称扎波罗热核电站每天遭受50次以上的袭击，核安全风险持续存在。BBC俄罗斯主编Steve Rosenberg分析认为普京可能改变战术应对乌克兰日益有效的无人机攻击。欧盟同步宣布了对俄罗斯的新一轮制裁，俄方誓言采取&#x27;强硬反制措施&#x27;。</p>
+        <ul class='abul'><li>乌克兰对俄罗斯发动战争中最大规模无人机袭击，主要目标为炼油设施</li><li>莫斯科居民报告&#x27;黑雨&#x27;现象——炼油厂被击中后燃烧产生的烟尘混合雨水降落</li><li>俄方称扎波罗热核电站日均遭受50次以上袭击，局势持续危急</li><li>普京可能改变战术应对乌无人机袭击——BBC俄 editor分析</li><li>欧盟宣布对俄罗斯新一轮制裁，俄外交部誓言&#x27;强硬反制&#x27;</li></ul>
+        <div class="abody"><p>乌克兰发动了自战争以来最大规模的无人机袭击，以俄罗斯炼油厂为主要目标。莫斯科居民报告称出现&#x27;黑雨&#x27;——炼油厂燃烧产生的烟尘与降水混合后降落在城市。与此同时，俄罗斯声称扎波罗热核电站每天遭受50次以上的袭击，核安全风险持续存在。BBC俄罗斯主编Steve Rosenberg分析认为普京可能改变战术应对乌克兰日益有效的无人机攻击。欧盟同步宣布了对俄罗斯的新一轮制裁，俄方誓言采取&#x27;强硬反制措施&#x27;。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c98291g5rr1o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.xinhuanet.com/20260619/4412551fe4be46b6b832aa92421c25a4/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.xinhuanet.com/20260619/49e3ade460a44d30aa88b1191ea6e29d/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a7" data-lang="zh" style="display:none">
+      <div class="article" id="a7" data-lang="en" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
-        <h1 class="atitle">纽约尼克斯4-1击败马刺夺得2026年NBA总冠军，Jalen Brunson荣膺FMVP</h1>
-        <p class="alead" >2026年NBA总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。FMVP：Jalen Brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。Game 5：94-90获胜锁定冠军。核心阵容：Brunson, Towns, Anunoby。ESPN称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。</p>
-        <ul class='abul'><li>尼克斯4-1战胜马刺夺队史第3冠（首冠自1973年，时隔53年）</li><li>Jalen Brunson获FMVP；尼克斯每场都曾落后10+分逆转，创1971年以来首次</li><li>Game 5决战：尼克斯94-90胜马刺锁定冠军；Karl-Anthony Towns和OG Anunoby关键贡献</li></ul>
-        <div class="abody"><p>2026年NBA总决赛：东部冠军尼克斯4-1击败西部冠军马刺，赢得队史第3座总冠军（自1973年首冠，53年等待）。FMVP：Jalen Brunson（尼克斯控卫）。尼克斯成为1971年以来首支每场总决赛都曾落后10+分后逆转夺冠的球队。Game 5：94-90获胜锁定冠军。核心阵容：Brunson, Towns, Anunoby。ESPN称此冠为「纽约体育界历史性时刻」。马刺年轻核心虽失利但展现西部长期竞争力。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.nba.com/playoffs/2026/nba-finals" target="_blank" rel="noopener">NBA.com<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.espn.com/nba/story/_/id/49055354/nba-finals-2026-knicks-spurs-title-53-years-making" target="_blank" rel="noopener">ESPN<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://en.wikipedia.org/wiki/2026_NBA_Finals" target="_blank" rel="noopener">Wikipedia<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">Thirty-Five Killed as Gunmen Attack Niger&#x27;s Biggest Airport — Latest in Decade-Long Islamist Insurgency</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f95781ccdc188" onclick="toggleFav(event,'f95781ccdc188')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >武装分子袭击了尼日尔首都尼亚美最大的迪奥里·哈马尼国际机场，造成35人死亡。这是同一机场今年第二次遭受袭击（1月也曾被疑似圣战分子袭击）。尼日尔作为西方在萨赫勒地区反恐的关键盟友（马里和布基纳法索军事政变后驱逐了法国和美国军队），此次袭击凸显了该地区安全形势的持续恶化。</p>
+        <ul class='abul'><li>35 killed in attack on Diori Hamani International Airport in Niamey, Niger&#x27;s capital</li><li>Gunmen stormed airport; attackers&#x27; affiliation unclear — Niger has been fighting militant Islamist insurgency for a decade</li><li>Same airport was targeted by suspected jihadists in January 2026; security concerns mounting</li><li>Niger is key Western ally in Sahel counterterrorism after military coups pushed France/US out of Mali and Burkina Faso</li><li>Attack comes amid broader deterioration of security across the Sahel region</li></ul>
+        <div class="abody"><p>武装分子袭击了尼日尔首都尼亚美最大的迪奥里·哈马尼国际机场，造成35人死亡。这是同一机场今年第二次遭受袭击（1月也曾被疑似圣战分子袭击）。尼日尔作为西方在萨赫勒地区反恐的关键盟友（马里和布基纳法索军事政变后驱逐了法国和美国军队），此次袭击凸显了该地区安全形势的持续恶化。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cdx7krkdqeno" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
       <div class="article" id="a8" data-lang="zh" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
-        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
-        <h1 class="atitle">2026 NBA选秀6月23-24日举行：奇才获状元签，AJ Dybantsa(BYU)预测第一顺位</h1>
-        <p class="alead" >2026年NBA选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。ESPN百大新秀前5：1. AJ Dybantsa(BYU, 小前锋, 身高6-9.5, 臂展7-0.25)；2. Darryn Peterson(Kansas, 后卫)；3. Cameron Boozer(Duke, 前锋)；4. Caleb Wilson(UNC, 前锋)；5. Keaton Wagler(Illinois, 后卫)。NBA Draft Room模拟选秀：奇才将在Dybantsa和Peterson间做艰难选择。</p>
-        <ul class='abul'><li>2026年NBA选秀6月23-24日举行，恢复60个选秀签位（自2021年以来首次）</li><li>华盛顿奇才赢得乐透抽签获状元签；AJ Dybantsa(BYU小前锋)为ESPN预测状元</li><li>ESPN百大新秀前5：Dybantsa(BYU)、D. Peterson(Kansas)、C. Boozer(Duke)、C. Wilson(UNC)、K. Wagler(Illinois)</li><li>选秀与自由市场将重塑新赛季联盟格局，尼克斯夺冠后东部竞争力受关注</li></ul>
-        <div class="abody"><p>2026年NBA选秀将于6月23-24日举行，恢复60个选秀签位（自2021年以来首次因无球队被罚没二轮签恢复满额）。华盛顿奇才赢得乐透抽签获状元签。ESPN百大新秀前5：1. AJ Dybantsa(BYU, 小前锋, 身高6-9.5, 臂展7-0.25)；2. Darryn Peterson(Kansas, 后卫)；3. Cameron Boozer(Duke, 前锋)；4. Caleb Wilson(UNC, 前锋)；5. Keaton Wagler(Illinois, 后卫)。NBA Draft Room模拟选秀：奇才将在Dybantsa和Peterson间做艰难选择。</p></div>
-        <div class="sources">来源：<a class="src" href="https://www.nba.com/draft/2026" target="_blank" rel="noopener">NBA.com<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.espn.com/nba/story/_/id/46886245/2026-nba-draft-big-board-rankings-top-100-prospects-players" target="_blank" rel="noopener">ESPN<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://nbadraftroom.com/2026-nba-mock-draft/" target="_blank" rel="noopener">NBA Draft Room<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">中方就韩官员重申中韩建交联合公报涉台表述答问——敦促韩方恪守一个中国原则</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f0517904bd3f3" onclick="toggleFav(event,'f0517904bd3f3')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。</p>
+        <ul class='abul'><li>韩国外交官员近期重申中韩建交联合公报中关于台湾问题的表述</li><li>中国外交部发言人就相关表态回答记者提问，敦促韩方恪守一个中国原则</li><li>中方也呼吁加沙实现真正持久停火、敦促国际社会合力推进利比亚包容性政治进程</li><li>中国外交部发言人还就利比亚问题表态，呼吁推进包容性政治进程</li><li>中国在联合国等多边场合持续就中东、非洲安全问题表达立场</li></ul>
+        <div class="abody"><p>中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/1973d19f3931492f80233f029eeb0f7f/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.xinhuanet.com/20260619/6f5bd56972984bac87f638c03080b475/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
-      <div class="article" id="a9" data-lang="zh" style="display:none">
+      <div class="article" id="a9" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">Pressure Mounts on Church of England to Ditch Slavery Reparations Plan Amid Shifting Political Winds</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7ca8aa057c23" onclick="toggleFav(event,'f7ca8aa057c23')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >英国国教会在2020年&#x27;黑人命也是命&#x27;运动高潮时承诺设立1亿英镑奴隶制赔偿基金，但如今在政治风向转变下面临放弃该计划的压力。这一争议反映了更广泛的全球性历史反思辩论——一些国家加速文物归还和赔偿进程，另一些则在政治变化中退缩。英国政府表示不会强制机构设立赔偿要求，教会保留自主决策权。</p>
+        <ul class='abul'><li>Church of England faces growing pressure to abandon its £100m slavery reparations fund commitment</li><li>Reparations plan — announced amid 2020 Black Lives Matter momentum — now faces political headwinds in post-Trump landscape</li><li>Critics argue the Church should focus on current community needs rather than historical wrongs; supporters say moral obligation remains</li><li>The debate reflects broader global reckoning with colonial history: some countries accelerate restitution, others retreat</li><li>UK government has signaled it will not impose reparations requirements on institutions; Church retains autonomy over its decision</li></ul>
+        <div class="abody"><p>英国国教会在2020年&#x27;黑人命也是命&#x27;运动高潮时承诺设立1亿英镑奴隶制赔偿基金，但如今在政治风向转变下面临放弃该计划的压力。这一争议反映了更广泛的全球性历史反思辩论——一些国家加速文物归还和赔偿进程，另一些则在政治变化中退缩。英国政府表示不会强制机构设立赔偿要求，教会保留自主决策权。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c5yz43n9513o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a10" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">India&#x27;s Cash Transfer Boom Gives Relief to the Poor but Strains Government Budgets — Welfare Model Faces Sustainability Questions</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f26087bbe1ed5" onclick="toggleFav(event,'f26087bbe1ed5')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近GDP的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。</p>
+        <ul class='abul'><li>India&#x27;s direct cash transfer schemes have expanded dramatically; millions of poor households now receive regular government payments</li><li>The model provides immediate poverty relief and financial inclusion — but comes at huge fiscal cost</li><li>Multiple Indian states now run cash transfer programs; combined cost approaching 2% of GDP in some states</li><li>Economists debate long-term efficacy: cash transfers alleviate acute poverty but don&#x27;t build productive capacity</li><li>India&#x27;s experience is being watched closely by other developing nations considering similar programs</li></ul>
+        <div class="abody"><p>印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近GDP的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c0jy8zyn663o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a11" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">Parents of Serbia&#x27;s Teenage School Shooter Given Jail Terms in Retrial — Boy Was 13 When He Killed 10 at Belgrade School</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f0e532caa358e" onclick="toggleFav(event,'f0e532caa358e')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >2023年震惊全球的贝尔格莱德校园枪击案中13岁枪手的父母在重审中被判入狱。当时这名少年在学校杀害了8名女生、1名男生和1名保安。此案开创了对未成年大规模枪击案中父母刑事责任的法律先例。塞尔维亚拥有欧洲最高的平民枪支拥有率之一——枪击案后政府收紧了枪支管制法律。</p>
+        <ul class='abul'><li>Parents of 13-year-old boy who killed 8 girls, a boy, and a school guard at Vladislav Ribnikar school in Belgrade in 2023 sentenced in retrial</li><li>The 2023 mass shooting shocked Serbia and led to nationwide protests against gun culture and violence in media</li><li>Retrial comes after initial verdict was overturned on appeal; case sets legal precedent for parental criminal responsibility in juvenile mass shootings</li><li>Serbia has one of the highest civilian gun ownership rates in Europe; shooting prompted government to tighten gun laws</li><li>Parents&#x27; conviction sends signal globally about holding adults accountable for minors&#x27; access to firearms</li></ul>
+        <div class="abody"><p>2023年震惊全球的贝尔格莱德校园枪击案中13岁枪手的父母在重审中被判入狱。当时这名少年在学校杀害了8名女生、1名男生和1名保安。此案开创了对未成年大规模枪击案中父母刑事责任的法律先例。塞尔维亚拥有欧洲最高的平民枪支拥有率之一——枪击案后政府收紧了枪支管制法律。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c14ykj2nr8lo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a12" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">纽约时报广场发生枪击事件——正值尼克斯夺冠游行后纽约人潮密集期</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fc3687464cd76" onclick="toggleFav(event,'fc3687464cd76')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >纽约时报广场6月19日发生枪击事件。事发时正值尼克斯夺冠游行后纽约人潮最密集的时期之一。警方已封锁时报广场部分区域展开调查。新华社援引美国媒体报道了这一事件。</p>
+        <ul class='abul'><li>纽约时报广场6月19日发生枪击事件，目前伤亡情况不明</li><li>事发地正值尼克斯NBA冠军游行后纽约游客和人流密集时段</li><li>纽约警方已封锁部分时报广场区域，正在调查中</li><li>枪击事件给尼克斯夺冠后的纽约欢乐气氛蒙上阴影</li><li>暂无关于嫌疑人身份或动机的官方信息</li></ul>
+        <div class="abody"><p>纽约时报广场6月19日发生枪击事件。事发时正值尼克斯夺冠游行后纽约人潮最密集的时期之一。警方已封锁时报广场部分区域展开调查。新华社援引美国媒体报道了这一事件。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.xinhuanet.com/20260619/132a6d59601e4d33a9b1b0363804f15a/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a13" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">端午节：全国铁路假期首日预计发送旅客1973万人次，考古&#x27;植物包&#x27;首次实证粽子起源</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7c126e060ce1" onclick="toggleFav(event,'f7c126e060ce1')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。</p>
+        <ul class='abul'><li>6月19日为端午节假期首日，全国铁路预计发送旅客1973万人次；长三角、珠三角方向客流集中</li><li>考古发现首次通过&#x27;植物包&#x27;实证粽子起源——为端午文化提供新学术支撑</li><li>各地举行龙舟竞渡、包粽子等传统活动；云南马关推出&#x27;彩虹粽&#x27;等创意美食</li><li>长江中下游强降雨持续，国家防总针对江苏启动防汛四级应急响应</li><li>北京端午先雨后晴，外出游玩需携带雨具</li></ul>
+        <div class="abody"><p>今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/084c18dfec23405e8ecce39314987b6e/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/tech/20260619/e177c1f39ea44effbf19bae3c73199e1/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a14" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">海南自贸港封关半年：外贸进出口增长迅猛，累计出入境165.4万人次</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fad9ef6601ef3" onclick="toggleFav(event,'fad9ef6601ef3')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。</p>
+        <ul class='abul'><li>海南自由贸易港封关运作满半年，外贸进出口增长迅猛——官方称&#x27;超出预期&#x27;</li><li>累计出入境165.4万人次，口岸监管进出口货运量持续攀升</li><li>封关后海南实行&#x27;一线放开、二线管住&#x27;政策——货物从境外进入海南免关税，但从海南进入内地需补税</li><li>免税消费成为海南经济新增长极——离岛免税销售额同比增长超过30%</li><li>分析认为海南模式为中国进一步扩大高水平对外开放提供了试验田</li></ul>
+        <div class="abody"><p>海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/photo/20260619/853539d80fec461d89f7f47646564388/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a15" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">中欧班列统一品牌10年：年开行量增长10.8倍，成为亚欧贸易大动脉</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f553ab8a2311d" onclick="toggleFav(event,'f553ab8a2311d')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。</p>
+        <ul class='abul'><li>中欧班列统一品牌迎来10周年——年开行量从2016年的约1,700列增长至2025年的超18,000列，10年增长10.8倍</li><li>班列网络已连接欧洲25个国家、200+城市；运输商品从最初的IT产品扩展到汽车、医疗器械、食品等</li><li>2026年上半年开行量同比增长约15%——伊朗战争期间海运受阻，中欧班列成为替代运输方案</li><li>中欧班列运费约为空运的1/4、时间约为海运的1/3，成为高附加值商品亚欧贸易的黄金通道</li><li>分析指出中欧班列的持续增长强化了中国在亚欧大陆供应链中的枢纽地位</li></ul>
+        <div class="abody"><p>中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/fortune/20260619/2c61bebd5eca4cd79b459ce0b54dc15a/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a16" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">习近平总书记回信新华社百岁老党员张连生：传承红色基因，在新征程上书写优异答卷</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f15e79f78c054" onclick="toggleFav(event,'f15e79f78c054')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。</p>
+        <ul class='abul'><li>习近平总书记给新华社百岁老党员张连生回信，强调传承红色基因、永葆初心</li><li>张连生今年100岁，是新华社&#x27;四大队&#x27;（代号，指新华社在革命战争时期的新闻工作队）的成员</li><li>回信正值中国共产党成立105周年之际——&#x27;筑强基层堡垒，夯实执政根基&#x27;</li><li>新华社发表长篇报道&#x27;永远跟党走——四大队百岁老党员张连生的荣光&#x27;</li><li>新华社评论员文章：以更高标准、更实举措抓好全面从严治党</li></ul>
+        <div class="abody"><p>在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260618/c3838643e385480d91c383d8d9e73e48/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/politics/leaders/20260619/a709dc2a2d8248109ded01a1ad2d36f8/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a17" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">钱凯港商业运营周年庆在秘鲁举行——中秘&#x27;一带一路&#x27;旗舰项目运营超预期</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f85f34b0ed595" onclick="toggleFav(event,'f85f34b0ed595')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。</p>
+        <ul class='abul'><li>中国在秘鲁投资建设的钱凯港（Chancay Port）商业运营满一周年，庆典在秘鲁举行</li><li>钱凯港是中国在拉美最大港口投资——一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场</li><li>港口运营超预期——秘鲁农产品（蓝莓、葡萄、牛油果）出口至中国时间缩短40%</li><li>中国东方航空同时开通上海至苏黎世直飞航线——中欧航线网络进一步加密</li><li>钱凯港被视为中国&#x27;21世纪海上丝绸之路&#x27;在拉美的战略性支点</li></ul>
+        <div class="abody"><p>中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/579193160dcd495fbbf715934faedb29/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a18" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">科学</div>
+        <h1 class="atitle">Quantum Computing Double Breakthrough: Harvard Says Advancing &#x27;Faster Than Expected&#x27;; Quantinuum Publishes Peer-Reviewed Helios Results</h1>
+        <div class="adate">2026-06-03</div>
+        <button class="favbtn" data-fav="f7b8cec966c10" onclick="toggleFav(event,'f7b8cec966c10')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【量子计算双突破意义】量子计算在2026年6月迎来了两大标志性进展。
+
+第一，哈佛大学研究团队发表论文指出量子计算进展&#x27;快于预期&#x27;——特别是错误率的下降速度超过了大多数路线图的预测。这意味着实用级量子计算机的时间线可能从普遍预期的2035-2040年提前到2030年前后。
+
+第二，Quantinuum公司的Helios量子计算机在《自然》杂志发表同行评审结果——首次实现了逻辑量子比特（logical qubit）性能超过物理量子比特（physical qubit）的突破。这是量子纠错领域的里程碑：逻辑量子比特通过纠错码保护量子信息，理论上可以无限期保持量子态，是构建实用量子计算机的基础。
+
+【但并非全部乐观——经典计算的&#x27;逆袭&#x27;】西蒙斯基金会的一项研究同时发表，利用张量网络（tensor networks）这一经典计算方法，成功模拟了此前被认为只有量子计算机才能解决的特定物理问题——实际上&#x27;推翻&#x27;了此前关于量子霸权的某些声明。这说明：①量子优势并非在所有问题上都成立；②经典算法也在不断进步；③未来的计算格局更可能是&#x27;量子+经典&#x27;混合模式，而非量子全面替代经典。
+
+【对阳阳和创业者的影响】量子计算短期内（5-10年）不会直接改变AI创业格局，但中期（10-15年）可能彻底改变密码学、药物发现、材料科学和AI训练的基础架构。务实建议：关注但不焦虑——现在学习量子算法基础是好的，但不要把创业赌注押在&#x27;量子计算将很快到来&#x27;的假设上。</p>
+        <ul class='abul'><li>Harvard researchers publish findings that quantum computing is advancing faster than most forecasts predicted — error rates dropping faster than expected</li><li>Quantinuum publishes peer-reviewed results on Helios quantum computer in Nature — first demonstration of logical qubits outperforming physical qubits</li><li>DOE national quantum research centers achieve milestone breakthrough towards building scalable quantum computers (Fermilab, June 3)</li><li>Simons Foundation: tensor networks research overturns earlier claim of &#x27;quantum supremacy&#x27;, opens new research directions — classical methods can simulate certain quantum problems</li><li>Implication: quantum advantage is real but narrow — quantum computers will complement, not replace, classical computing for the foreseeable future</li></ul>
+        <div class="abody"><p>【量子计算双突破意义】量子计算在2026年6月迎来了两大标志性进展。</p><p>第一，哈佛大学研究团队发表论文指出量子计算进展&#x27;快于预期&#x27;——特别是错误率的下降速度超过了大多数路线图的预测。这意味着实用级量子计算机的时间线可能从普遍预期的2035-2040年提前到2030年前后。</p><p>第二，Quantinuum公司的Helios量子计算机在《自然》杂志发表同行评审结果——首次实现了逻辑量子比特（logical qubit）性能超过物理量子比特（physical qubit）的突破。这是量子纠错领域的里程碑：逻辑量子比特通过纠错码保护量子信息，理论上可以无限期保持量子态，是构建实用量子计算机的基础。</p><p>【但并非全部乐观——经典计算的&#x27;逆袭&#x27;】西蒙斯基金会的一项研究同时发表，利用张量网络（tensor networks）这一经典计算方法，成功模拟了此前被认为只有量子计算机才能解决的特定物理问题——实际上&#x27;推翻&#x27;了此前关于量子霸权的某些声明。这说明：①量子优势并非在所有问题上都成立；②经典算法也在不断进步；③未来的计算格局更可能是&#x27;量子+经典&#x27;混合模式，而非量子全面替代经典。</p><p>【对阳阳和创业者的影响】量子计算短期内（5-10年）不会直接改变AI创业格局，但中期（10-15年）可能彻底改变密码学、药物发现、材料科学和AI训练的基础架构。务实建议：关注但不焦虑——现在学习量子算法基础是好的，但不要把创业赌注押在&#x27;量子计算将很快到来&#x27;的假设上。</p></div>
+        <div class="sources">来源：<a class="src" href="https://news.fnal.gov/2026/02/doe-national-quantum-research-centers-reach-milestone-breakthrough-towards-building-scalable-quantum-computers/" target="_blank" rel="noopener">Fermilab<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-03</span></a> <a class="src" href="https://www.simonsfoundation.org/2026/05/21/quantum-dynamics-breakthrough-overturns-claim-of-quantum-supremacy-opens-new-research-directions/" target="_blank" rel="noopener">Simons Foundation<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-05-21</span></a> <a class="src" href="https://thequantuminsider.com/2026/05/04/harvard-researchers-quantum-computing-advancing-faster-than-expected/" target="_blank" rel="noopener">The Quantum Insider<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-05-04</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a19" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">科学健康</div>
+        <h1 class="atitle">Lenacapavir: The HIV Prevention Breakthrough Proving Why NIH Funding Matters — Twice-Yearly Injection Shows Near-100% Efficacy</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fd96c0247bec2" onclick="toggleFav(event,'fd96c0247bec2')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【Lenacapavir的突破意义】Lenacapavir是一种每半年注射一次的HIV预防药物，在大型临床试验中显示出接近100%的有效率。这是HIV预防领域几十年来最重要的突破——相比之下，目前的标准方案（每日口服PrEP）在实际使用中因依从性差而有效率降至50-70%。Lenacapavir将彻底改变HIV防控格局，尤其在撒哈拉以南非洲等HIV高发且日服药依从性低的地区。
+
+【科学政策启示】Lenacapavir的成功证明了政府资助的基础科学研究的重要性——该药物的核心机制源自NIH几十年资助的HIV病毒学研究。NIH现任院长Jay Bhattacharya近期宣布了新的&#x27;X-Labs&#x27;计划：采用高风险、高回报的资助模式，希望在阿尔茨海默病、癌症免疫治疗、抗生素耐药性等领域复制类似Lenacapavir的成功。
+
+【GLP-1药物的平行启示】另一个&#x27;基础研究→改变世界&#x27;的案例是GLP-1类药物（Ozempic/Wegovy/Zepbound）——从几十年前对蜥蜴毒液中一种激素的好奇心驱动研究开始，到如今重塑全球糖尿病和肥胖治疗格局。
+
+【对家庭健康关注（小姨关注科学健康）】这些进展传递了一个重要信息：重大医学突破几乎从来不是&#x27;灵光一闪&#x27;，而是数十年基础研究积累的结果。当人们质疑&#x27;政府为什么资助看似无用的基础科研&#x27;时，Lenacapavir和GLP-1就是最好的回答。</p>
+        <ul class='abul'><li>Lenacapavir — a twice-yearly injectable HIV prevention drug — demonstrates near-100% efficacy in large-scale clinical trials</li><li>Drug&#x27;s development depended on decades of publicly funded basic research at NIH, highlighting value of government science funding</li><li>NIH launches new &#x27;X-Labs&#x27; initiative under Director Jay Bhattacharya: high-risk, high-reward funding model for medical breakthroughs</li><li>Lenacapavir could transform HIV prevention in low-income countries where daily pill adherence is challenging</li><li>GLP-1 drugs (Ozempic/Wegovy) continue to reshape diabetes and obesity treatment — another example of basic research → breakthrough drug pipeline</li></ul>
+        <div class="abody"><p>【Lenacapavir的突破意义】Lenacapavir是一种每半年注射一次的HIV预防药物，在大型临床试验中显示出接近100%的有效率。这是HIV预防领域几十年来最重要的突破——相比之下，目前的标准方案（每日口服PrEP）在实际使用中因依从性差而有效率降至50-70%。Lenacapavir将彻底改变HIV防控格局，尤其在撒哈拉以南非洲等HIV高发且日服药依从性低的地区。</p><p>【科学政策启示】Lenacapavir的成功证明了政府资助的基础科学研究的重要性——该药物的核心机制源自NIH几十年资助的HIV病毒学研究。NIH现任院长Jay Bhattacharya近期宣布了新的&#x27;X-Labs&#x27;计划：采用高风险、高回报的资助模式，希望在阿尔茨海默病、癌症免疫治疗、抗生素耐药性等领域复制类似Lenacapavir的成功。</p><p>【GLP-1药物的平行启示】另一个&#x27;基础研究→改变世界&#x27;的案例是GLP-1类药物（Ozempic/Wegovy/Zepbound）——从几十年前对蜥蜴毒液中一种激素的好奇心驱动研究开始，到如今重塑全球糖尿病和肥胖治疗格局。</p><p>【对家庭健康关注（小姨关注科学健康）】这些进展传递了一个重要信息：重大医学突破几乎从来不是&#x27;灵光一闪&#x27;，而是数十年基础研究积累的结果。当人们质疑&#x27;政府为什么资助看似无用的基础科研&#x27;时，Lenacapavir和GLP-1就是最好的回答。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.thinkglobalhealth.org/article/lenacapavir-the-hiv-breakthrough-proving-why-nih-funding-matters" target="_blank" rel="noopener">Think Global Health<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.nih.gov/about-nih/impact-nih-research" target="_blank" rel="noopener">NIH<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a20" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">科学健康</div>
+        <h1 class="atitle">新研究揭示南极海冰微生物如何在极端环境中生存——为极端生命科学提供新线索</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f6b7772de1b9a" onclick="toggleFav(event,'f6b7772de1b9a')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国科研团队发表了关于南极海冰微生物的突破性研究，揭示了微生物在极寒（-20°C以下）、高盐度和强紫外线辐射环境下的生存机制。这一发现对天体生物学（如木卫二、土卫二冰下海洋的生命可能性）和生物技术（工业用耐寒酶）具有双重意义。此外，明天（6月20日）金星将与蜂巢星团（M44）上演&#x27;结伴游&#x27;天象——爱好者可在傍晚西方天空观测。</p>
+        <ul class='abul'><li>中国科研团队发表南极海冰微生物研究成果——揭示微生物在极寒、高盐、强辐射环境下的生存机制</li><li>研究发现某些微生物产生独特的抗冻蛋白和DNA修复酶，使其在-20°C以下的冰晶中维持代谢活性</li><li>这项研究对天体生物学（外星极端环境生命可能性）和生物技术（工业用耐寒酶开发）具有双重意义</li><li>同期新华社还报道了科研人员开发出整合神经元功能、结构和分子的新平台</li><li>金星与蜂巢星团6月20日上演&#x27;结伴游&#x27;——天文爱好者可观测</li></ul>
+        <div class="abody"><p>中国科研团队发表了关于南极海冰微生物的突破性研究，揭示了微生物在极寒（-20°C以下）、高盐度和强紫外线辐射环境下的生存机制。这一发现对天体生物学（如木卫二、土卫二冰下海洋的生命可能性）和生物技术（工业用耐寒酶）具有双重意义。此外，明天（6月20日）金星将与蜂巢星团（M44）上演&#x27;结伴游&#x27;天象——爱好者可在傍晚西方天空观测。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/tech/20260619/e4f88926a73245108169a49c8f312b6b/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/tech/20260619/428abe00aa5a4df39bde13e98fca1ae4/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a21" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">科学健康</div>
+        <h1 class="atitle">科研人员开发出整合神经元功能、结构和分子的新平台——神经科学研究工具取得突破</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f051b979bd59c" onclick="toggleFav(event,'f051b979bd59c')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国科研团队开发出一种新型神经科学研究平台，首次实现了在同一神经元上同时测量功能（电生理活动）、结构（三维形态）和分子（基因表达谱）。此前科学家只能分别测量这三类信息，无法建立完整的&#x27;功能-结构-分子&#x27;关联。该平台有望加速阿尔茨海默病、帕金森病等神经退行性疾病的研究，属于基础科研工具层面的重要突破。</p>
+        <ul class='abul'><li>中国科研人员开发出能同时测量神经元功能（电活动）、结构（形态）和分子（基因表达）的整合平台</li><li>该平台突破了过去&#x27;只能分别测量&#x27;的技术瓶颈——现在可以在同一神经元上同时获得三类数据</li><li>技术可能加速阿尔茨海默病、帕金森病等神经退行性疾病的研究——理解疾病如何在三个层面同时改变神经元</li><li>研究成果发表于国际期刊；平台基于微流控芯片和多模态成像技术</li><li>此项突破属于基础科研工具创新——为全球神经科学界提供新利器</li></ul>
+        <div class="abody"><p>中国科研团队开发出一种新型神经科学研究平台，首次实现了在同一神经元上同时测量功能（电生理活动）、结构（三维形态）和分子（基因表达谱）。此前科学家只能分别测量这三类信息，无法建立完整的&#x27;功能-结构-分子&#x27;关联。该平台有望加速阿尔茨海默病、帕金森病等神经退行性疾病的研究，属于基础科研工具层面的重要突破。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/04d2515cfe924977a33628a9c7aa6248/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a22" data-lang="zh" style="display:none">
         <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
         <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
-        <h1 class="atitle">2026欧冠决赛：PSG在布达佩斯卫冕；新赛季7月7日资格赛启动</h1>
-        <p class="alead" >2026年UEFA欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。</p>
-        <ul class='abul'><li>2026年5月30日欧冠决赛：卫冕冠军巴黎圣日耳曼在布达佩斯普斯卡什竞技场成功卫冕</li><li>2026-27赛季欧冠资格赛7月7日开打，联赛阶段9月8日启动（延续瑞士轮赛制）</li><li>同期2026世界杯小组赛正在美加墨进行中，足球日程空前密集</li></ul>
-        <div class="abody"><p>2026年UEFA欧冠决赛5月30日在匈牙利布达佩斯普斯卡什竞技场举行。卫冕冠军巴黎圣日耳曼对阵英格兰俱乐部并成功卫冕。新赛季：2026-27赛季欧冠资格赛7月7日开始，联赛阶段9月8日启动，延续瑞士轮赛制。2026世界杯同步在美加墨进行中，足球界迎来史上最密集赛程。</p></div>
-        <div class="sources">来源：<a class="src" href="https://en.wikipedia.org/wiki/2026_UEFA_Champions_League_final" target="_blank" rel="noopener">Wikipedia<span class="stance" style="background:#8a94a6">中立</span></a> <a class="src" href="https://www.uefa.com/uefachampionsleague/fixtures-results/" target="_blank" rel="noopener">UEFA<span class="stance" style="background:#8a94a6">中立</span></a></div>
+        <h1 class="atitle">2026世界杯战况：墨西哥首个晋级32强，加拿大6-0大胜创历史首胜，Kone断腿事故蒙阴影</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fa14894a62ff0" onclick="toggleFav(event,'fa14894a62ff0')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【2026世界杯小组赛深度分析】世界杯第8个比赛日。墨西哥（A组）展示了老牌劲旅的稳定性，2-0击败韩国后两战全胜，率先锁定32强席位。韩国的世界杯前景堪忧——门将致命失误导致失球，最后一轮必须赢球才有出线可能。
+
+加拿大创造了历史！在前两届世界杯（1986年首次参赛、2022年第二次参赛）一球未进、一分未得的背景下，2026年作为联合主办国终于爆发——6-0血洗卡塔尔。这场胜利本应纯粹庆祝，但中场核心Ismael Kone的严重腿部骨折（现场画面显示腿部明显变形）给所有加拿大球迷心头投下阴影。Kone是加拿大近年崛起的关键球员（效力于意甲），他的缺席将严重影响加拿大淘汰赛前景。
+
+日本队在对阵荷兰的比赛中展现了亚洲足球的最高水平——2-2逼平欧洲劲旅，两次落后两次扳平，展现了惊人的韧性。日本现在积4分排名F组第二，最后一轮对阵小组最弱对手，出线形势乐观。
+
+瑞士替补Johan Manzambi独中两元1-0胜波黑，展示了深板凳厚度——替补球员在世界杯上决定比赛的能力往往决定一支球队能走多远。
+
+今日晚间最受关注的对决：苏格兰vs摩洛哥。苏格兰历史上从未进入过世界杯淘汰赛阶段，今晚对阵实力相当的摩洛哥——如果取胜，将创造历史。BBC Scotland以&#x27;这可能是苏格兰有史以来最重要的比赛&#x27;为题做预热报道。
+
+伊朗向国际足联投诉旅行限制——战争期间多国对伊朗航班关闭领空或限制中转，影响了伊朗队的正常备战和移动。这是一个体育与地缘政治交织的典型案例。</p>
+        <ul class='abul'><li>墨西哥2-0战胜韩国队，成为本届世界杯首支晋级32强的球队；小组赛两连胜（此前2-0南非）锁定A组头名</li><li>加拿大6-0横扫卡塔尔，取得世界杯历史首胜——但中场核心Ismael Kone在比赛中发生严重腿部骨折，喜悦蒙阴影</li><li>日本2-2战平荷兰（F组）；象牙海岸1-0胜某队（E组）；瑞士1-0胜波黑（替补Manzambi独中两元）</li><li>今日焦点战：苏格兰vs摩洛哥（6PM ET）——苏格兰若取胜将首次晋级淘汰赛</li><li>伊朗向国际足联正式投诉旅行限制——因美伊战争期间多国对伊朗航班设限，影响球队备战</li></ul>
+        <div class="abody"><p>【2026世界杯小组赛深度分析】世界杯第8个比赛日。墨西哥（A组）展示了老牌劲旅的稳定性，2-0击败韩国后两战全胜，率先锁定32强席位。韩国的世界杯前景堪忧——门将致命失误导致失球，最后一轮必须赢球才有出线可能。</p><p>加拿大创造了历史！在前两届世界杯（1986年首次参赛、2022年第二次参赛）一球未进、一分未得的背景下，2026年作为联合主办国终于爆发——6-0血洗卡塔尔。这场胜利本应纯粹庆祝，但中场核心Ismael Kone的严重腿部骨折（现场画面显示腿部明显变形）给所有加拿大球迷心头投下阴影。Kone是加拿大近年崛起的关键球员（效力于意甲），他的缺席将严重影响加拿大淘汰赛前景。</p><p>日本队在对阵荷兰的比赛中展现了亚洲足球的最高水平——2-2逼平欧洲劲旅，两次落后两次扳平，展现了惊人的韧性。日本现在积4分排名F组第二，最后一轮对阵小组最弱对手，出线形势乐观。</p><p>瑞士替补Johan Manzambi独中两元1-0胜波黑，展示了深板凳厚度——替补球员在世界杯上决定比赛的能力往往决定一支球队能走多远。</p><p>今日晚间最受关注的对决：苏格兰vs摩洛哥。苏格兰历史上从未进入过世界杯淘汰赛阶段，今晚对阵实力相当的摩洛哥——如果取胜，将创造历史。BBC Scotland以&#x27;这可能是苏格兰有史以来最重要的比赛&#x27;为题做预热报道。</p><p>伊朗向国际足联投诉旅行限制——战争期间多国对伊朗航班关闭领空或限制中转，影响了伊朗队的正常备战和移动。这是一个体育与地缘政治交织的典型案例。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/sports/20260619/e77b47116db0488c8e67e9dd2f0cc8ec/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/sports/20260619/9b614b3b1aa24e5a8b2b706158dbe877/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/sport/football/articles/cly7r1zjmmlo" target="_blank" rel="noopener">BBC Sport<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/sport/football/live/cr47z6re5lpt" target="_blank" rel="noopener">BBC Sport<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.fifa.com/en/tournaments/mens/worldcup/canadamexicousa2026/standings" target="_blank" rel="noopener">FIFA<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a23" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
+        <h1 class="atitle">New York Knicks Celebrate First NBA Title Since 1973 with Manhattan Parade; Defeated Spurs 4-1 in Finals</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f6b2e7148b96e" onclick="toggleFav(event,'f6b2e7148b96e')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >纽约尼克斯以4-1击败圣安东尼奥马刺，赢得2026年NBA总冠军——这是球队自1973年以来时隔53年的首个冠军。Jalen Brunson荣膺总决赛MVP，主教练Tom Thibodeau赢得执教生涯首个总冠军。马刺的Victor Wembanyama在总决赛中场均32分15篮板的表现堪称历史级，但不足以挽救球队。尼克斯的夺冠游行吸引了数百万纽约市民——BBC报道&#x27;纽约重新焕发生机&#x27;。</p>
+        <ul class='abul'><li>Knicks win 2026 NBA Finals 4-1 over San Antonio Spurs — franchise&#x27;s first championship in 53 years</li><li>Victory parade through Manhattan draws millions; BBC reports &#x27;New York is alive again&#x27;</li><li>Knicks completed unforgettable comeback in Game 5 to clinch title; series ended June 13</li><li>Jalen Brunson named Finals MVP; coach Tom Thibodeau wins first championship</li><li>Spurs&#x27; Victor Wembanyama averaged 32 points and 15 rebounds in Finals — historic individual performance in losing effort</li></ul>
+        <div class="abody"><p>纽约尼克斯以4-1击败圣安东尼奥马刺，赢得2026年NBA总冠军——这是球队自1973年以来时隔53年的首个冠军。Jalen Brunson荣膺总决赛MVP，主教练Tom Thibodeau赢得执教生涯首个总冠军。马刺的Victor Wembanyama在总决赛中场均32分15篮板的表现堪称历史级，但不足以挽救球队。尼克斯的夺冠游行吸引了数百万纽约市民——BBC报道&#x27;纽约重新焕发生机&#x27;。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.nba.com/playoffs/2026/nba-finals" target="_blank" rel="noopener">NBA.com<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/videos/cz9lyy93engo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a24" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#ebf8ed;color:#5cb56b">体育</div>
+        <h1 class="atitle">&#x27;Do It at Home Too&#x27; — Japanese Women Respond to Viral Images of Male Fans Cleaning World Cup Stadiums</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fd96f7b1925f5" onclick="toggleFav(event,'fd96f7b1925f5')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >日本球迷在世界杯赛后清理看台的传统再次引发全球关注——但这次伴随着来自日本女性的批评声音。一些日本女性指出双重标准：&#x27;男人们在公共场合打扫卫生，而在家里把所有家务留给妻子。&#x27;日本在OECD国家中的家务劳动性别差距位居前列。这场讨论从足球文化延伸到了更广泛的性别平等议题。</p>
+        <ul class='abul'><li>Japanese fans&#x27; tradition of cleaning stadiums after matches goes viral at 2026 World Cup</li><li>Some Japanese women respond with criticism: &#x27;They clean in public but leave all the housework to their wives&#x27;</li><li>Debate highlights double standards in domestic labor — Japan has one of the highest gender gaps in housework among OECD countries</li><li>Japanese fans received praise from FIFA and stadium staff for maintaining cleanliness</li><li>Cultural conversation expands beyond football into broader gender equality discussion</li></ul>
+        <div class="abody"><p>日本球迷在世界杯赛后清理看台的传统再次引发全球关注——但这次伴随着来自日本女性的批评声音。一些日本女性指出双重标准：&#x27;男人们在公共场合打扫卫生，而在家里把所有家务留给妻子。&#x27;日本在OECD国家中的家务劳动性别差距位居前列。这场讨论从足球文化延伸到了更广泛的性别平等议题。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/crel9xlp8r1o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a25" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">文化</div>
+        <h1 class="atitle">GTA 6 Pre-Order Date and Cover Art Revealed by Rockstar — Sales Begin June 25, Launch Expected Q4 2026</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f0e43d3c41f48" onclick="toggleFav(event,'f0e43d3c41f48')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >Rockstar Games正式公布GTA 6的封面艺术并宣布6月25日开启预购。这款备受期待的游戏设定在虚构的Vice City（灵感来自迈阿密），首次引入女性主角。业界预测GTA 6可能成为史上最畅销的娱乐产品——前作GTA 5已售出超2亿份。Take-Two Interactive股价受此消息提振。</p>
+        <ul class='abul'><li>Rockstar Games reveals GTA 6 cover art and announces pre-orders begin June 25, 2026</li><li>Game set in fictional Vice City (Miami-inspired); features dual protagonists — first female lead character in series history</li><li>Industry analysts predict GTA 6 could become the best-selling entertainment product of all time (predecessor GTA 5 sold 200M+ copies)</li><li>Pre-order announcement confirms late 2026 launch window; speculation centers on October-November release</li><li>Take-Two Interactive (Rockstar parent) shares rose on the news; GTA 6 expected to generate $3B+ in first-year revenue</li></ul>
+        <div class="abody"><p>Rockstar Games正式公布GTA 6的封面艺术并宣布6月25日开启预购。这款备受期待的游戏设定在虚构的Vice City（灵感来自迈阿密），首次引入女性主角。业界预测GTA 6可能成为史上最畅销的娱乐产品——前作GTA 5已售出超2亿份。Take-Two Interactive股价受此消息提振。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/ce8j1yj64g3o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a26" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">文化</div>
+        <h1 class="atitle">Tay Keith, Grammy-Nominated Producer Behind Hits by Drake, Eminem, and Beyoncé, Found Dead</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f3cb9435ddef6" onclick="toggleFav(event,'f3cb9435ddef6')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >格莱美提名制作人Tay Keith被发现去世。这位孟菲斯说唱制作人的独特&#x27;孟菲斯之声&#x27;——沉重的808鼓、黑暗氛围、三连音踩镲——定义了一代嘻哈音乐的美学。他制作的歌曲被Beyoncé、Drake、Eminem、Travis Scott和Cardi B等顶级艺人采用。Drake发文悼念：&#x27;真正的天才走得太早了。&#x27;</p>
+        <ul class='abul'><li>Tay Keith, influential Memphis rap producer, found dead at home — cause not yet disclosed</li><li>Produced hits for Travis Scott, Drake, Eminem, Beyoncé, and Cardi B; Grammy-nominated for his distinctive &#x27;Memphis sound&#x27;</li><li>Keith&#x27;s production style — heavy 808s, dark atmospherics, triplet hi-hats — defined a generation of hip-hop sound</li><li>Tributes pour in from across the music industry; Drake posts: &#x27;One of the real ones gone too soon&#x27;</li><li>Memphis music community in mourning; Keith credited with putting Memphis drill on the global map</li></ul>
+        <div class="abody"><p>格莱美提名制作人Tay Keith被发现去世。这位孟菲斯说唱制作人的独特&#x27;孟菲斯之声&#x27;——沉重的808鼓、黑暗氛围、三连音踩镲——定义了一代嘻哈音乐的美学。他制作的歌曲被Beyoncé、Drake、Eminem、Travis Scott和Cardi B等顶级艺人采用。Drake发文悼念：&#x27;真正的天才走得太早了。&#x27;</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cpv3k037lj0o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a27" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">文化</div>
+        <h1 class="atitle">London Marathon to Be Two-Day Event in 2027 — Special One-Off Format to Accommodate Record Demand</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f85c828fce68b" onclick="toggleFav(event,'f85c828fce68b')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >伦敦马拉松组委会确认2027年赛事将作为特例在两日内举行——精英赛仍在周日，大众参与安排在周六，实质上创建一个&#x27;跑步节周末&#x27;。这一决定由创纪录的需求驱动：2026年赛事抽签收到超过85万份申请，争夺约5万个名额。如果2027年双日模式成功，可能成为永久安排。</p>
+        <ul class='abul'><li>London Marathon organisers confirm 2027 event will be held across two days in a special one-off edition</li><li>Decision driven by record demand — 2026 ballot received over 850,000 applications for ~50,000 places</li><li>Unique format: elite races on Sunday, mass participation on Saturday — effectively a &#x27;festival of running&#x27; weekend</li><li>2026 event (April 2026) set new participation record and raised £70m+ for charity</li><li>Two-day format could become permanent if the 2027 edition is successful</li></ul>
+        <div class="abody"><p>伦敦马拉松组委会确认2027年赛事将作为特例在两日内举行——精英赛仍在周日，大众参与安排在周六，实质上创建一个&#x27;跑步节周末&#x27;。这一决定由创纪录的需求驱动：2026年赛事抽签收到超过85万份申请，争夺约5万个名额。如果2027年双日模式成功，可能成为永久安排。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/sport/athletics/articles/c892p7d0kk8o" target="_blank" rel="noopener">BBC Sport<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a28" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fbeef3;color:#d98aa8">文化</div>
+        <h1 class="atitle">Mercedes Withdraws Monaco Grand Prix Appeal — Verstappen&#x27;s Controversial Victory Stands</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fcacf89c1374f" onclick="toggleFav(event,'fcacf89c1374f')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >梅赛德斯F1车队撤回对摩纳哥大奖赛结果的上诉——维斯塔潘的争议性胜利得以确认。梅赛德斯此前质疑赛事控制中心在维斯塔潘涉嫌违规后仍保留其领先位置的决定。撤回后维斯塔潘巩固了2026赛季的冠军领先优势。</p>
+        <ul class='abul'><li>Mercedes F1 team withdraws appeal against Monaco Grand Prix result</li><li>Appeal had questioned race control decision that allowed Verstappen to retain lead after alleged rules breach</li><li>Withdrawal cements Verstappen&#x27;s Monaco victory, extending his 2026 championship lead</li><li>Mercedes cites &#x27;spirit of competition&#x27; for withdrawing; but insiders suggest legal advice indicated low probability of success</li><li>F1 2026 season continues to be dominated by Red Bull-Verstappen combination</li></ul>
+        <div class="abody"><p>梅赛德斯F1车队撤回对摩纳哥大奖赛结果的上诉——维斯塔潘的争议性胜利得以确认。梅赛德斯此前质疑赛事控制中心在维斯塔潘涉嫌违规后仍保留其领先位置的决定。撤回后维斯塔潘巩固了2026赛季的冠军领先优势。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/sport/formula1/articles/ce8k0wxlwe2o" target="_blank" rel="noopener">BBC Sport<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
         <button class="back btm" onclick="home()">‹ 返回列表</button>
       </div>
 
@@ -276,40 +879,144 @@
     var sl=document.getElementsByClassName('fsr-art'); for(var i=0;i<sl.length;i++){ sl[i].value=v; }
     var nb=document.getElementsByClassName('fsv-art'); for(var j=0;j<nb.length;j++){ nb[j].textContent=v; }
   }
-  // —— 中/英/自动 语言切换 (David 2026-06-19): 中=只看中文原文, ENG=只看英文原文, 自动=各显其原文语言(全显示) ——
-  var savedLang = localStorage.getItem('himi_lang') || 'zh';   // 默认中文
+  // —— 中/英/自动 语言切换 + 搜索 + 空块隐藏, 统一过滤 (David 2026-06-19) ——
+  // 锁定语言(如姥爷页='zh'): 强制此语言, 忽略并清除localStorage记忆, 隐藏切换按钮 (David 2026-06-19)
+  var LOCKLANG = '';
+  var savedLang = LOCKLANG || (localStorage.getItem('himi_lang') || 'zh');   // 锁定优先; 否则记忆; 默认中文
+  var curQuery = '';
   function setLang(L){
-    localStorage.setItem('himi_lang', L);
-    // 按钮高亮
+    if(LOCKLANG){ L=LOCKLANG; }                 // 锁定页: 切换无效, 永远锁定语言
+    else { localStorage.setItem('himi_lang', L); }
     var btns=document.getElementsByClassName('langbtn');
     for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i].getAttribute('data-lang')===L); }
-    // 过滤卡片: 自动=全显示; 中/英=只显示对应原文语言
+    applyFilters();
+  }
+  function curLang(){ return LOCKLANG || (localStorage.getItem('himi_lang') || 'zh'); }
+  function doSearch(q){
+    curQuery=(q||'').trim().toLowerCase();
+    var clr=document.getElementById('searchclear');
+    if(clr) clr.style.display=(document.getElementById('searchbox').value)?'':'none';
+    applyFilters();
+  }
+  function clearSearch(){
+    var sb=document.getElementById('searchbox'); if(sb) sb.value='';
+    doSearch('');
+    if(sb) sb.focus();
+  }
+  function applyFilters(){
+    var L=curLang();
+    var favs=getFavs(), favView=isFavView();
+    // 1) 每张卡片: 语言 AND 搜索 AND (收藏视图时仅显示已收藏) 都过
     var cards=document.querySelectorAll('#list .card');
     for(var j=0;j<cards.length;j++){
       var cl=cards[j].getAttribute('data-lang');
-      cards[j].style.display=(L==='auto'||cl===L)?'':'none';
+      var okLang=(L==='auto'||cl===L);
+      var okQ=(!curQuery) || (cards[j].getAttribute('data-search')||'').indexOf(curQuery)>=0;
+      var okFav=(!favView) || favs[cards[j].getAttribute('data-fav')];
+      cards[j].style.display=(okLang&&okQ&&okFav)?'':'none';
     }
-    // 板块小标: 本板块过滤后若一条新闻都不剩, 就隐藏该板块标题
+    // 2) 板块小标: 本(天,板块)若无可见卡片就隐藏
     var labels=document.querySelectorAll('#list .seclabel');
     for(var k=0;k<labels.length;k++){
       var si=labels[k].getAttribute('data-sec');
       var any=document.querySelectorAll('#list .card[data-sec="'+si+'"]');
-      var visible=0;
-      for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') visible++; }
-      labels[k].style.display=visible?'':'none';
+      var vis=0; for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') vis++; }
+      labels[k].style.display=vis?'':'none';
     }
-    // 列表空提示
+    // 3) 日期分隔线: 该天若无任何可见卡片就隐藏(整天被语言/搜索滤空)
+    var divs=document.querySelectorAll('#list .daydivider');
+    for(var d=0;d<divs.length;d++){
+      var dt=divs[d].getAttribute('data-day');
+      var dcards=document.querySelectorAll('#list .card[data-day="'+dt+'"]');
+      var dv=0; for(var n=0;n<dcards.length;n++){ if(dcards[n].style.display!=='none') dv++; }
+      divs[d].style.display=dv?'':'none';
+    }
+    // 4) 空提示
     var emptyId='langempty', old=document.getElementById(emptyId);
-    var listVisible=document.querySelectorAll('#list .card:not([style*="display: none"])').length;
     if(old) old.remove();
+    var listVisible=0, cc=document.querySelectorAll('#list .card');
+    for(var p=0;p<cc.length;p++){ if(cc[p].style.display!=='none') listVisible++; }
     if(listVisible===0){
       var tip=document.createElement('div'); tip.id=emptyId;
       tip.style.cssText='padding:40px 16px;text-align:center;color:#aaa;font-size:15px;';
-      tip.textContent=(L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻';
+      tip.textContent=favView ? '还没有收藏 · 点新闻右上角的 ☆ 收藏'
+                      : (curQuery ? ('没有找到“'+curQuery+'”相关新闻')
+                      : ((L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻'));
       document.getElementById('list').appendChild(tip);
     }
   }
-  setLang(savedLang);   // 进页面应用记忆的语言
+  // 锁定语言页(姥爷): 隐藏整个中/英/自动切换条 — 不让长辈误碰 (David 2026-06-19)
+  if(LOCKLANG){ var lsw=document.getElementById('langsw'); if(lsw) lsw.style.display='none'; }
+  setLang(savedLang);   // 进页面应用记忆(或锁定)的语言
+  // —— 收藏功能 (David 2026-06-19): 本地localStorage; 按"谁的页"分键存(各人收藏互不污染); 全部页禁收藏 ——
+  var FAVSCOPE='xiaoyi';                 // 各人页=拼音名(如laoye); 全部页/公共页='' → 禁收藏
+  var FAVKEY='himi_favs_'+FAVSCOPE;
+  var FAVVIEWKEY='himi_favview_'+FAVSCOPE;
+  function getFavs(){ try{ return JSON.parse(localStorage.getItem(FAVKEY)||'{}'); }catch(e){ return {}; } }
+  function saveFavs(o){ localStorage.setItem(FAVKEY, JSON.stringify(o)); }
+  function isFavView(){ return localStorage.getItem(FAVVIEWKEY)==='1'; }
+  function toggleFav(ev, fid){
+    if(ev){ ev.stopPropagation(); ev.preventDefault(); }   // 不触发卡片点开
+    if(!FAVSCOPE) return;                       // 公共页(全部)禁收藏
+    var f=getFavs();
+    if(f[fid]) delete f[fid]; else f[fid]=1;
+    saveFavs(f);
+    refreshFavStars();
+    if(isFavView()) applyFilters();   // 收藏视图下取消收藏要即时移除
+  }
+  function refreshFavStars(){
+    var f=getFavs();
+    // 卡片右上角星
+    var stars=document.querySelectorAll('.favstar');
+    for(var i=0;i<stars.length;i++){
+      var on=!!f[stars[i].getAttribute('data-fav')];
+      stars[i].classList.toggle('on', on);
+      stars[i].textContent=on?'★':'☆';
+    }
+    // 详情页收藏按钮
+    var btns=document.querySelectorAll('.favbtn');
+    for(var k=0;k<btns.length;k++){
+      var bon=!!f[btns[k].getAttribute('data-fav')];
+      btns[k].classList.toggle('on', bon);
+      var ic=btns[k].querySelector('.favbtn-ic'), tx=btns[k].querySelector('.favbtn-tx');
+      if(ic) ic.textContent=bon?'★':'☆';
+      if(tx) tx.textContent=bon?'已收藏':'收藏';
+    }
+  }
+  function toggleFavView(){
+    if(!FAVSCOPE) return;                        // 公共页无收藏视图
+    var nv=isFavView()?'0':'1';
+    localStorage.setItem(FAVVIEWKEY, nv);
+    var btn=document.getElementById('favtoggle');
+    if(btn){ btn.classList.toggle('on', nv==='1'); btn.textContent=(nv==='1')?'★ 我的收藏':'☆ 我的收藏'; }
+    applyFilters();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  // 全部页(公共, FAVSCOPE='')：彻底移除收藏星+收藏按钮(避免人人点污染) (David 2026-06-19)
+  if(!FAVSCOPE){
+    document.querySelectorAll('.favstar, .favbtn').forEach(function(e){ e.style.display='none'; });
+    var ft=document.getElementById('favtoggle'); if(ft) ft.style.display='none';
+  }
+  // 初始化: 星标态 + 收藏切换按钮态
+  refreshFavStars();
+  (function(){ var btn=document.getElementById('favtoggle'); if(btn && isFavView()){ btn.classList.add('on'); btn.textContent='★ 我的收藏'; } })();
+  if(isFavView()) applyFilters();
+  // 日期跳转: 页内滚到该天的分隔线 (往下滚=往回翻时间); __top__=回到最新(顶部) (David 2026-06-19)
+  function jumpDay(token){
+    if(!token) return;
+    if(token==='__top__'){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+    var el=document.getElementById('day_'+token);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  // 回到顶部箭头: 滚动超1.5屏出现, 点了平滑回最新(顶) (David 2026-06-19)
+  function scrollTopSmooth(){ window.scrollTo({top:0, behavior:'smooth'}); }
+  window.addEventListener('scroll', function(){
+    var btn=document.getElementById('totop'); if(!btn) return;
+    // 只在列表页(非文章页)且滚动超1.5屏时显示
+    var inArticle=document.getElementById('backfix').style.display==='block';
+    var y=window.scrollY||window.pageYOffset||0;
+    btn.style.display=(!inArticle && y > window.innerHeight*1.5)?'block':'none';
+  }, {passive:true});
   // —— iOS最稳: 用浏览器原生历史导航, 不碰任何自定义触摸手势 (David 2026-06-19 v3) ——
   // go() 用 history.pushState 进文章; 系统自带的"左边缘右滑返回"=浏览器后退=自动触发home, 原生苹果动画
   // 文章是正常文档流 → iOS原生半透明滚动条自动出现; 返回键是纯click最顶层 → 永不被吃
@@ -319,6 +1026,11 @@
     listScroll=window.scrollY||window.pageYOffset||0;
     document.getElementById('list').style.display='none';
     document.getElementById('fsbar').style.display='none';
+    var ph=document.getElementById('pagehead'); if(ph) ph.style.display='none';
+    var sb=document.getElementById('searchbar'); if(sb) sb.style.display='none';
+    var dn=document.getElementById('datenav'); if(dn) dn.style.display='none';
+    var hb=document.getElementById('homebtn'); if(hb) hb.style.display='none';
+    var tt=document.getElementById('totop'); if(tt) tt.style.display='none';
     document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
     a.style.display='block';
     a.classList.remove('slidein'); void a.offsetWidth; a.classList.add('slidein');  // 重触发滑入动画
@@ -329,6 +1041,10 @@
     document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
     document.getElementById('list').style.display='block';
     document.getElementById('fsbar').style.display='';
+    var ph=document.getElementById('pagehead'); if(ph) ph.style.display='';
+    var sb=document.getElementById('searchbar'); if(sb) sb.style.display='';
+    var dn=document.getElementById('datenav'); if(dn) dn.style.display='';
+    var hb=document.getElementById('homebtn'); if(hb) hb.style.display='';
     document.getElementById('backfix').style.display='none';
     window.scrollTo(0,listScroll);   // 返回列表原位置, 不跳顶
   }
