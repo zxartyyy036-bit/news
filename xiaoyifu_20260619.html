@@ -1,0 +1,953 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>小姨夫·每日简报</title>
+<style>
+  :root { --fs-ui: 19px; --fs-art: 20px; }
+  * { box-sizing:border-box; -webkit-text-size-adjust:100%; -webkit-print-color-adjust:exact; }
+  body { margin:0; font-family:-apple-system,"PingFang SC","Heiti SC",sans-serif;
+         background:#f2f4f7; color:#1f2937; line-height:1.75; }
+  .wrap { max-width:820px; margin:0 auto; background:#fff; min-height:100vh; }
+  header { background:linear-gradient(135deg,#3aab9a,#2b8fa0); color:#fff; padding:24px 20px 20px 64px; position:relative; }
+  /* 标题小字: 固定大小, 不随字号滑块变 (David 2026-06-19) */
+  header h1 { margin:0; font-size:28px; font-weight:700; }
+  header .sub { margin-top:3px; font-size:14px; opacity:.82; }
+  /* Home按钮: 半透明(David喜欢) + 描边+投影+按压反馈 让它一眼是"可点按钮"非图标 (David 2026-06-19) */
+  .homebtn { position:absolute; top:50%; left:14px; transform:translateY(-50%); color:#fff;
+    display:inline-flex; align-items:center; justify-content:center;
+    width:40px; height:40px; border-radius:12px;
+    background:rgba(255,255,255,.18); border:1px solid rgba(255,255,255,.55);
+    box-shadow:0 2px 6px rgba(0,0,0,.18), inset 0 1px 0 rgba(255,255,255,.25);
+    -webkit-backdrop-filter:blur(4px); backdrop-filter:blur(4px);
+    text-decoration:none; -webkit-tap-highlight-color:transparent; transition:transform .1s, background .15s; }
+  .homebtn:active { background:rgba(255,255,255,.36); transform:translateY(-50%) scale(.9);
+    box-shadow:0 1px 3px rgba(0,0,0,.2); }
+
+  /* 日期翻阅 + 全部 导航条 (David 2026-06-19 B2/B4: 像新闻App翻昨天/前天 + 全部入口) */
+  .datenav { display:flex; align-items:center; gap:10px; padding:8px 16px;
+    background:#f6f9fa; border-bottom:1px solid #eef0f3; font-size:14px; color:#667; }
+  .datenav .dn-label { font-weight:600; flex-shrink:0; color:#555; }
+  .datenav .dn-sel { font-size:14px; color:#333; border:1px solid #d8e0e6; border-radius:9px;
+    padding:5px 9px; background:#fff; max-width:150px; -webkit-appearance:none; appearance:none; }
+  /* 右侧按钮组: 📚全部 + ⭐我的收藏 (David 2026-06-19: 两个独立按钮, 跟搜索框分开) */
+  .datenav .dn-right { margin-left:auto; display:inline-flex; gap:7px; flex-shrink:0; }
+  .datenav .dn-all, .datenav .dn-fav { flex-shrink:0; font-size:13px; font-weight:700;
+    padding:5px 12px; border-radius:14px; cursor:pointer; border:none;
+    -webkit-tap-highlight-color:transparent; white-space:nowrap; }
+  .datenav .dn-all { color:#2b8fa0; text-decoration:none; background:#e7f7f4; }
+  .datenav .dn-all:active { background:#cdeee7; }
+  .datenav .dn-fav { color:#b8860b; background:#fff5db; }
+  .datenav .dn-fav.on { color:#fff; background:#f5b301; }
+  .datenav .dn-fav:active { transform:scale(.95); }
+
+  /* 搜索框: 每个profile列表页, 关键词搜本页新闻 (David 2026-06-19) */
+  .searchbar { padding:12px 14px 4px; background:#f2f4f7; border-bottom:none; }
+  .searchwrap { position:relative; width:100%; }
+  .searchbox { width:100%; box-sizing:border-box; font-size:15px; height:42px; padding:0 40px 0 16px;
+    border:1px solid #e2e8ec; border-radius:21px; background:#fff; color:#333;
+    box-shadow:0 1px 2px rgba(0,0,0,.04); -webkit-appearance:none; appearance:none; outline:none; }
+  .searchbox:focus { border-color:#3aab9a; box-shadow:0 0 0 3px rgba(58,171,154,.12); }
+  /* 谷歌式清除✕: 输入后出现, 点了清空 (David 2026-06-19) */
+  .searchclear { position:absolute; top:50%; right:9px; transform:translateY(-50%);
+    width:26px; height:26px; border:none; border-radius:50%; background:#c8d0d8; color:#fff;
+    font-size:13px; line-height:1; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .searchclear:active { background:#aab4bd; }
+
+  /* 字号滑块条 — 静止在顶部, 往下滑就消失 (David 2026-06-19: 不固定/不跟随) */
+  .fsbar { background:#fff; border-bottom:1px solid #eef0f3;
+           display:flex; align-items:center; gap:8px; padding:9px 16px; font-size:14px; color:#888; }
+  .fsbar .fslabel, .fsbar .fsunit { flex-shrink:0; white-space:nowrap; }
+  .fsbar b { color:#3aab9a; min-width:24px; text-align:center; flex-shrink:0; }
+  /* 中/英/自动 语言切换: 放字号条右边, 不挡滑块 (David 2026-06-19) */
+  .langsw { margin-left:auto; display:inline-flex; gap:4px; flex-shrink:0; }
+  .langbtn { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
+    padding:5px 10px; border-radius:14px; cursor:pointer; -webkit-tap-highlight-color:transparent; }
+  .langbtn.on { background:#3aab9a; color:#fff; }
+  .langbtn:active { transform:scale(.94); }
+  /* 文章里的字号条: 下移到固定返回键之下, 不被挡 (David 2026-06-19) */
+  .fsbar-art { margin-top:46px; }
+  /* 大圆点滑块 — 触摸范围做大, 一点就中 (David 2026-06-19: 之前太小点不准) */
+  .fsbar input[type=range] { -webkit-appearance:none; appearance:none; flex:1; height:34px;
+    background:transparent; cursor:pointer; }
+  .fsbar input[type=range]::-webkit-slider-runnable-track { height:8px; border-radius:4px; background:#d8e8e4; }
+  .fsbar input[type=range]::-webkit-slider-thumb { -webkit-appearance:none; appearance:none;
+    width:30px; height:30px; margin-top:-11px; border-radius:50%; background:#3aab9a;
+    border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+  .fsbar input[type=range]::-moz-range-track { height:8px; border-radius:4px; background:#d8e8e4; }
+  .fsbar input[type=range]::-moz-range-thumb { width:28px; height:28px; border-radius:50%;
+    background:#3aab9a; border:3px solid #fff; box-shadow:0 1px 5px rgba(0,0,0,.35); }
+
+  /* 列表页 */
+  #list { padding:10px 14px 30px; background:#f2f4f7; }
+  /* 按天分隔线: 最新一天在顶, 往下滚=往回翻 (David 2026-06-19) */
+  .daydivider { display:flex; align-items:center; text-align:center; margin:26px 0 10px;
+    color:#2b8fa0; font-size:15px; font-weight:700; }
+  .daydivider::before, .daydivider::after { content:""; flex:1; height:1px; background:#dde6ea; }
+  .daydivider span { padding:4px 14px; background:#e7f7f4; border-radius:14px; margin:0 10px; }
+  .daydivider:first-child { margin-top:8px; }
+  .seclabel { font-size:calc(var(--fs-ui) - 1px); font-weight:700; margin:20px 0 8px; padding-left:10px;
+              border-left:5px solid currentColor; }
+  /* 独立白卡片 + 留白 + 圆角 + 轻阴影 — Apple式呼吸感 (David 2026-06-19: 弃0间距+1px灰线) */
+  .card { background:#fff; border-radius:14px; padding:16px 16px; margin:0 0 12px; cursor:pointer;
+    box-shadow:0 1px 3px rgba(0,0,0,.06); transition:transform .12s, box-shadow .12s; }
+  .card:active { transform:scale(.985); box-shadow:0 2px 8px rgba(0,0,0,.10); background:#fcfdfe; }
+  /* 每条story左上角发布日期小字 (David 2026-06-19) */
+  .card-date { font-size:12px; color:#aaa; margin-bottom:4px; font-weight:500; }
+  /* 标题右侧留出收藏星空间, 永不被星星盖住 (David 2026-06-19) */
+  .card-hl { font-size:calc(var(--fs-ui) + 3px); font-weight:700; color:#1a1a1a; line-height:1.45; padding-right:34px; }
+  .card-lead { font-size:var(--fs-ui); color:#555; margin-top:7px; line-height:1.7; }
+  .card-more { font-size:calc(var(--fs-ui) - 4px); margin-top:8px; font-weight:600; }
+
+  /* 详情页 — 正常文档流, 用原生滚动+原生半透明滚动条 (David 2026-06-19 v3: 砍掉自定义手势, iOS最稳) */
+  .article { max-width:820px; margin:0 auto; background:#fff; min-height:100vh;
+    padding:8px 18px 40px; }
+  .article.slidein { animation:slidein .26s cubic-bezier(.4,0,.2,1); }
+  @keyframes slidein { from { transform:translateX(34px); opacity:.35; } to { transform:none; opacity:1; } }
+  .back { background:#eef2f5; border:none; color:#555; font-size:15px; padding:8px 16px;
+          border-radius:20px; cursor:pointer; margin:8px 0; }
+  .back.btm { margin-top:24px; }
+  .atag { display:inline-block; font-size:calc(var(--fs-art) - 4px); font-weight:700;
+          padding:3px 12px; border-radius:6px; margin:10px 0 6px; }
+  .atitle { font-size:calc(var(--fs-art) + 9px); line-height:1.4; color:#1a1a1a; margin:6px 0 14px; }
+  /* Story详情页: 日期标在主标题下方(新闻惯例: kicker→标题→日期→正文) (David 2026-06-19) */
+  .adate { font-size:14px; color:#999; margin:-8px 0 12px; }
+
+  /* —— 收藏功能 (David 2026-06-19): 卡片右上角空心☆, 点亮金黄实心★; 本地存储 —— */
+  .card { position:relative; padding-right:42px; }   /* 右侧留出星星空间, 标题不被盖 */
+  .favstar { position:absolute; top:14px; right:6px; z-index:5; background:none; border:none;
+    font-size:24px; line-height:1; color:#ccc; cursor:pointer; padding:4px 6px;
+    -webkit-tap-highlight-color:transparent; transition:transform .12s; }
+  .favstar:active { transform:scale(1.25); }
+  .favstar.on { color:#f5b301; text-shadow:0 0 8px rgba(245,179,1,.6); }
+  /* 详情页"☆收藏"按钮 */
+  .favbtn { display:inline-flex; align-items:center; gap:5px; background:#fff8e8; border:1px solid #f0d896;
+    color:#b8860b; font-size:14px; font-weight:600; padding:6px 14px; border-radius:18px;
+    cursor:pointer; margin:2px 0 12px; -webkit-tap-highlight-color:transparent; }
+  .favbtn:active { transform:scale(.96); }
+  .favbtn.on { background:#f5b301; border-color:#f5b301; color:#fff; }
+  .favbtn.on .favbtn-ic { }
+  /* 顶部"只看收藏"切换 */
+  .favtoggle { background:#eef2f5; border:none; color:#888; font-size:13px; font-weight:700;
+    padding:5px 11px; border-radius:14px; cursor:pointer; flex-shrink:0; margin-left:8px;
+    -webkit-tap-highlight-color:transparent; }
+  .favtoggle.on { background:#f5b301; color:#fff; }
+  .favtoggle:active { transform:scale(.94); }
+  .alead { font-size:calc(var(--fs-art) + 1px); background:#fff8e8; border-left:5px solid #f0c14b;
+           padding:13px 15px; border-radius:8px; color:#444; line-height:1.75; }
+  .abul { padding-left:26px; margin:14px 0; }
+  .abul li { font-size:var(--fs-art); color:#333; margin:7px 0; }
+  .abody p { font-size:calc(var(--fs-art) + 1px); color:#222; margin:13px 0; line-height:1.85; }
+  .sources { margin-top:18px; font-size:14px; color:#999; }
+  .src { display:inline-block; margin:4px 5px 4px 0; padding:4px 11px; background:#eef2f7;
+         border-radius:20px; color:#2b8fa0; text-decoration:none; font-size:14px; }
+  .stance { display:inline-block; margin-left:5px; padding:1px 7px; border-radius:8px; color:#fff; font-size:12px; }
+  .srcdate { margin-left:6px; color:#aaa; font-size:12px; }
+
+  footer { padding:20px 18px 44px; font-size:13px; color:#888; border-top:1px solid #eef0f3; }
+  footer .glo { background:#f6f8fa; border-radius:10px; padding:13px 15px; line-height:1.85; }
+  @media (min-width:768px) {
+    .wrap { margin:22px auto; border-radius:16px; box-shadow:0 4px 26px rgba(0,0,0,.07); overflow:hidden; }
+  }
+  /* —— 固定返回键: 看文章滚到哪都在左上角 (David 2026-06-19) —— */
+  .backfix { position:fixed; top:12px; left:12px; z-index:200; display:none;
+    background:rgba(255,255,255,.94); -webkit-backdrop-filter:blur(8px); backdrop-filter:blur(8px);
+    border:1px solid #d8e0e6; color:#2b8fa0; font-size:15px; font-weight:700;
+    padding:9px 17px; border-radius:22px; cursor:pointer; box-shadow:0 3px 12px rgba(0,0,0,.14); }
+  .backfix:active { transform:scale(.96); }
+  /* 回到顶部箭头: 右下角, 滚动超过1.5屏才出现, 点了平滑回最新(顶部) (David 2026-06-19) */
+  .totop { position:fixed; right:16px; bottom:24px; z-index:150; display:none;
+    width:46px; height:46px; border-radius:50%; border:none; cursor:pointer;
+    background:rgba(43,143,160,.92); color:#fff; font-size:22px; line-height:1;
+    box-shadow:0 3px 12px rgba(0,0,0,.22); -webkit-tap-highlight-color:transparent; }
+  .totop:active { transform:scale(.92); }
+</style>
+</head>
+<body>
+<button class="backfix" id="backfix" onclick="home()">‹ 返回</button>
+<button class="totop" id="totop" onclick="scrollTopSmooth()" aria-label="回到顶部">↑</button>
+<div class="wrap">
+  <header id="pagehead">
+    <a class="homebtn" id="homebtn" href="index.html" title="返回家庭简报主页" aria-label="主页">
+      <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11.5 12 4l9 7.5"/><path d="M5 10v9h14v-9"/><path d="M10 19v-5h4v5"/></svg>
+    </a>
+    <h1>小姨夫·每日简报</h1>
+    
+  </header>
+  
+  <div class="fsbar" id="fsbar"><span class="fslabel">字号</span> <input type="range" min="15" max="30" value="19" id="fsr" oninput="fs(this.value)"> <b id="fsv">19</b><span class="fsunit">px</span>
+    <span class="langsw" id="langsw">
+      <button class="langbtn" data-lang="zh" onclick="setLang('zh')">中</button>
+      <button class="langbtn" data-lang="en" onclick="setLang('en')">ENG</button>
+      <button class="langbtn" data-lang="auto" onclick="setLang('auto')">自动</button>
+    </span>
+  </div>
+  <div class="searchbar" id="searchbar">
+    <div class="searchwrap">
+      <input type="search" id="searchbox" class="searchbox" placeholder="🔍 搜索新闻关键词" oninput="doSearch(this.value)" autocomplete="off">
+      <button class="searchclear" id="searchclear" onclick="clearSearch()" aria-label="清除" style="display:none">✕</button>
+    </div>
+  </div>
+
+  <div id="list">
+    <div class="daydivider" id="day_d0" data-day="d0"><span>2026年6月19日</span></div><div class="seclabel" data-sec="0" data-day="d0" style="color:#4a90d9">国际要闻</div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f7b2720ee4e6c" data-search="us and iran sign peace deal ending four-month war; naval blockade lifted, strait of hormuz to reopen 【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。
+
+【联动机制与影响推演】
+一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。
+
+二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国cpi从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在q3-q4加速下行，届时美联储和英国央行可能重启降息周期。
+
+三、对创业者（阳阳）：能源成本下降利好所有ai推理和数据中心的电力成本（ai算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和ipo窗口（openai和spacex都在筹备ipo，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。
+
+四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。
+
+⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026q4-2027q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在g7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。 【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。
+
+【联动机制与影响推演】
+一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。
+
+二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国cpi从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在q3-q4加速下行，届时美联储和英国央行可能重启降息周期。
+
+三、对创业者（阳阳）：能源成本下降利好所有ai推理和数据中心的电力成本（ai算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和ipo窗口（openai和spacex都在筹备ipo，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。
+
+四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。
+
+⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026q4-2027q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在g7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。 trump and iran sign 14-point memorandum at versailles on june 18; deal includes $300bn reconstruction fund and termination of all us sanctions us lifts naval blockade of iran; strait of hormuz — the world&#x27;s most critical oil chokepoint — set to reopen within 60 days iran&#x27;s supreme leader mojtaba khamenei says he approved deal despite &#x27;different view&#x27;, claiming trump acted &#x27;out of desperation&#x27; deal defers thorniest issues — including iran&#x27;s nuclear programme — to &#x27;technical talks&#x27; within 60 days; vance cancels first round in switzerland israel-lebanon fighting continues despite deal: israeli strikes kill 18 in nabatieh overnight; 4 idf soldiers killed in hezbollah clashes" onclick="go(0)">
+        <button class="favstar" data-fav="f7b2720ee4e6c" onclick="toggleFav(event,'f7b2720ee4e6c')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">US and Iran Sign Peace Deal Ending Four-Month War; Naval Blockade Lifted, Strait of Hormuz to Reopen</div>
+        <div class="card-lead">【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="fb72b1bd1e370" data-search="g7 summit in évian concludes: iran peace deal endorsed, ai leaders call for us-led coalition, trump criticizes idf 【g7与伊朗协议】本次g7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，g7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。
+
+【ai联盟动向】峰会另一条暗线是ai治理话语权的争夺。altman、amodei、hassabis三位ai界最有权势的人同时出现在g7，呼应anthropic和deepmind提出的&#x27;美国主导的ai联盟&#x27;构想——本质上是希望将g7打造成西方ai标准的制定平台，与中国ai生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动g7级ai出口管制+标准联盟，中国ai公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。
+
+【全球治理格局】本次g7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。 【g7与伊朗协议】本次g7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，g7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。
+
+【ai联盟动向】峰会另一条暗线是ai治理话语权的争夺。altman、amodei、hassabis三位ai界最有权势的人同时出现在g7，呼应anthropic和deepmind提出的&#x27;美国主导的ai联盟&#x27;构想——本质上是希望将g7打造成西方ai标准的制定平台，与中国ai生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动g7级ai出口管制+标准联盟，中国ai公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。
+
+【全球治理格局】本次g7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。 52nd g7 summit held june 15-17 in évian-les-bains, france; macron calls iran deal &#x27;very good&#x27; and says g7 allies support it trump sharply criticizes idf at g7: &#x27;you don&#x27;t have to knock down an apartment house every time you&#x27;re looking for somebody&#x27; — signals us pressure on israel to preserve iran deal openai&#x27;s sam altman, anthropic&#x27;s dario amodei, and deepmind&#x27;s demis hassabis attend g7; call for us-led ai coalition summit communiqué covers international peace, global economy, ai governance, climate trump holds closing press conference emphasizing iran deal as victory to &#x27;avoid global economic recession&#x27;" onclick="go(1)">
+        <button class="favstar" data-fav="fb72b1bd1e370" onclick="toggleFav(event,'fb72b1bd1e370')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">G7 Summit in Évian Concludes: Iran Peace Deal Endorsed, AI Leaders Call for US-Led Coalition, Trump Criticizes IDF</div>
+        <div class="card-lead">【G7与伊朗协议】本次G7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，G7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="0" data-day="d0" data-fav="f0517904bd3f3" data-search="中方就韩官员重申中韩建交联合公报涉台表述答问——敦促韩方恪守一个中国原则 中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。 中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。 韩国外交官员近期重申中韩建交联合公报中关于台湾问题的表述 中国外交部发言人就相关表态回答记者提问，敦促韩方恪守一个中国原则 中方也呼吁加沙实现真正持久停火、敦促国际社会合力推进利比亚包容性政治进程 中国外交部发言人还就利比亚问题表态，呼吁推进包容性政治进程 中国在联合国等多边场合持续就中东、非洲安全问题表达立场" onclick="go(2)">
+        <button class="favstar" data-fav="f0517904bd3f3" onclick="toggleFav(event,'f0517904bd3f3')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">中方就韩官员重申中韩建交联合公报涉台表述答问——敦促韩方恪守一个中国原则</div>
+        <div class="card-lead">中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="0" data-day="d0" data-fav="f26087bbe1ed5" data-search="india&#x27;s cash transfer boom gives relief to the poor but strains government budgets — welfare model faces sustainability questions 印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近gdp的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。 印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近gdp的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。 india&#x27;s direct cash transfer schemes have expanded dramatically; millions of poor households now receive regular government payments the model provides immediate poverty relief and financial inclusion — but comes at huge fiscal cost multiple indian states now run cash transfer programs; combined cost approaching 2% of gdp in some states economists debate long-term efficacy: cash transfers alleviate acute poverty but don&#x27;t build productive capacity india&#x27;s experience is being watched closely by other developing nations considering similar programs" onclick="go(3)">
+        <button class="favstar" data-fav="f26087bbe1ed5" onclick="toggleFav(event,'f26087bbe1ed5')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">India&#x27;s Cash Transfer Boom Gives Relief to the Poor but Strains Government Budgets — Welfare Model Faces Sustainability Questions</div>
+        <div class="card-lead">印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近GDP的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。</div>
+        <div class="card-more" style="color:#4a90d9">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="1" data-day="d0" style="color:#3aab9a">政治</div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f7c126e060ce1" data-search="端午节：全国铁路假期首日预计发送旅客1973万人次，考古&#x27;植物包&#x27;首次实证粽子起源 今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。 今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。 6月19日为端午节假期首日，全国铁路预计发送旅客1973万人次；长三角、珠三角方向客流集中 考古发现首次通过&#x27;植物包&#x27;实证粽子起源——为端午文化提供新学术支撑 各地举行龙舟竞渡、包粽子等传统活动；云南马关推出&#x27;彩虹粽&#x27;等创意美食 长江中下游强降雨持续，国家防总针对江苏启动防汛四级应急响应 北京端午先雨后晴，外出游玩需携带雨具" onclick="go(4)">
+        <button class="favstar" data-fav="f7c126e060ce1" onclick="toggleFav(event,'f7c126e060ce1')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">端午节：全国铁路假期首日预计发送旅客1973万人次，考古&#x27;植物包&#x27;首次实证粽子起源</div>
+        <div class="card-lead">今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="fad9ef6601ef3" data-search="海南自贸港封关半年：外贸进出口增长迅猛，累计出入境165.4万人次 海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。 海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。 海南自由贸易港封关运作满半年，外贸进出口增长迅猛——官方称&#x27;超出预期&#x27; 累计出入境165.4万人次，口岸监管进出口货运量持续攀升 封关后海南实行&#x27;一线放开、二线管住&#x27;政策——货物从境外进入海南免关税，但从海南进入内地需补税 免税消费成为海南经济新增长极——离岛免税销售额同比增长超过30% 分析认为海南模式为中国进一步扩大高水平对外开放提供了试验田" onclick="go(5)">
+        <button class="favstar" data-fav="fad9ef6601ef3" onclick="toggleFav(event,'fad9ef6601ef3')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">海南自贸港封关半年：外贸进出口增长迅猛，累计出入境165.4万人次</div>
+        <div class="card-lead">海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f553ab8a2311d" data-search="中欧班列统一品牌10年：年开行量增长10.8倍，成为亚欧贸易大动脉 中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。 中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。 中欧班列统一品牌迎来10周年——年开行量从2016年的约1,700列增长至2025年的超18,000列，10年增长10.8倍 班列网络已连接欧洲25个国家、200+城市；运输商品从最初的it产品扩展到汽车、医疗器械、食品等 2026年上半年开行量同比增长约15%——伊朗战争期间海运受阻，中欧班列成为替代运输方案 中欧班列运费约为空运的1/4、时间约为海运的1/3，成为高附加值商品亚欧贸易的黄金通道 分析指出中欧班列的持续增长强化了中国在亚欧大陆供应链中的枢纽地位" onclick="go(6)">
+        <button class="favstar" data-fav="f553ab8a2311d" onclick="toggleFav(event,'f553ab8a2311d')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">中欧班列统一品牌10年：年开行量增长10.8倍，成为亚欧贸易大动脉</div>
+        <div class="card-lead">中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f15e79f78c054" data-search="习近平总书记回信新华社百岁老党员张连生：传承红色基因，在新征程上书写优异答卷 在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。 在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。 习近平总书记给新华社百岁老党员张连生回信，强调传承红色基因、永葆初心 张连生今年100岁，是新华社&#x27;四大队&#x27;（代号，指新华社在革命战争时期的新闻工作队）的成员 回信正值中国共产党成立105周年之际——&#x27;筑强基层堡垒，夯实执政根基&#x27; 新华社发表长篇报道&#x27;永远跟党走——四大队百岁老党员张连生的荣光&#x27; 新华社评论员文章：以更高标准、更实举措抓好全面从严治党" onclick="go(7)">
+        <button class="favstar" data-fav="f15e79f78c054" onclick="toggleFav(event,'f15e79f78c054')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">习近平总书记回信新华社百岁老党员张连生：传承红色基因，在新征程上书写优异答卷</div>
+        <div class="card-lead">在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="1" data-day="d0" data-fav="f85f34b0ed595" data-search="钱凯港商业运营周年庆在秘鲁举行——中秘&#x27;一带一路&#x27;旗舰项目运营超预期 中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。 中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。 中国在秘鲁投资建设的钱凯港（chancay port）商业运营满一周年，庆典在秘鲁举行 钱凯港是中国在拉美最大港口投资——一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场 港口运营超预期——秘鲁农产品（蓝莓、葡萄、牛油果）出口至中国时间缩短40% 中国东方航空同时开通上海至苏黎世直飞航线——中欧航线网络进一步加密 钱凯港被视为中国&#x27;21世纪海上丝绸之路&#x27;在拉美的战略性支点" onclick="go(8)">
+        <button class="favstar" data-fav="f85f34b0ed595" onclick="toggleFav(event,'f85f34b0ed595')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">钱凯港商业运营周年庆在秘鲁举行——中秘&#x27;一带一路&#x27;旗舰项目运营超预期</div>
+        <div class="card-lead">中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。</div>
+        <div class="card-more" style="color:#3aab9a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="2" data-day="d0" style="color:#e6943a">AI/科技</div>
+      <div class="card" data-lang="en" data-sec="2" data-day="d0" data-fav="f80dc8ebfa5d9" data-search="dutch government objects to proposed us &#x27;match act&#x27; restricting asml&#x27;s china exports — eu-us chip policy tensions rise 【match法案与中美芯片战新阶段】美国国会推动的match法案（matching allied trade controls for hegemony act）试图强制盟国遵守美国的对华芯片出口管制——这是美国&#x27;长臂管辖&#x27;从直接制裁向制度化的延伸。荷兰政府（asml母国）公开反对，认为应由荷兰自主决定出口政策而非被美国法律强制。这背后是asml的切身利益：中国市场预计占其2026年收入的约20%（主要销售不太先进的duv光刻机，不涉及euv）。
+
+【政策混乱】特朗普政府在芯片出口管制上展现出矛盾姿态：一方面延续拜登时期对华芯片围堵的总体战略，另一方面又解除了对nvidia h200的直接禁售，改为加征25%关税——这意味着中国企业只要愿意支付更高的价格，就能买到h200。业界专家将此描述为&#x27;不连贯&#x27;的政策框架：制裁的目标到底是阻止中国获得算力（那就该禁售），还是从中国赚更多钱（那就加税但允许销售）？
+
+【对半导体/ai算力供应链的影响】①短期：asml在duv市场仍有对华销售空间，但match法案如果通过将实质性压缩这一空间→中国芯片制造商（中芯国际等）的扩产计划可能受阻；②长期：中国加速国产光刻机/刻蚀机研发，但在7nm以下先进制程仍严重依赖asml→芯片自主化时间线可能被推迟3-5年；③对算力成本：如果中国无法自产先进ai训练芯片，将更加依赖开源模型优化和算法效率提升来弥补算力差距。
+
+【关注板块：光通信】本期关注板块&#x27;光通讯&#x27;近期动态：400g optical msa联盟成立（多家网络/半导体/光学公司联合），旨在为下一代数据中心制定400g光模块标准。这是ai算力基础设施的关键环节——ai训练集群需要高速光互联来连接数千个gpu。lightcounting预测ai驱动的光模块市场2026年将增长40%+。 【match法案与中美芯片战新阶段】美国国会推动的match法案（matching allied trade controls for hegemony act）试图强制盟国遵守美国的对华芯片出口管制——这是美国&#x27;长臂管辖&#x27;从直接制裁向制度化的延伸。荷兰政府（asml母国）公开反对，认为应由荷兰自主决定出口政策而非被美国法律强制。这背后是asml的切身利益：中国市场预计占其2026年收入的约20%（主要销售不太先进的duv光刻机，不涉及euv）。
+
+【政策混乱】特朗普政府在芯片出口管制上展现出矛盾姿态：一方面延续拜登时期对华芯片围堵的总体战略，另一方面又解除了对nvidia h200的直接禁售，改为加征25%关税——这意味着中国企业只要愿意支付更高的价格，就能买到h200。业界专家将此描述为&#x27;不连贯&#x27;的政策框架：制裁的目标到底是阻止中国获得算力（那就该禁售），还是从中国赚更多钱（那就加税但允许销售）？
+
+【对半导体/ai算力供应链的影响】①短期：asml在duv市场仍有对华销售空间，但match法案如果通过将实质性压缩这一空间→中国芯片制造商（中芯国际等）的扩产计划可能受阻；②长期：中国加速国产光刻机/刻蚀机研发，但在7nm以下先进制程仍严重依赖asml→芯片自主化时间线可能被推迟3-5年；③对算力成本：如果中国无法自产先进ai训练芯片，将更加依赖开源模型优化和算法效率提升来弥补算力差距。
+
+【关注板块：光通信】本期关注板块&#x27;光通讯&#x27;近期动态：400g optical msa联盟成立（多家网络/半导体/光学公司联合），旨在为下一代数据中心制定400g光模块标准。这是ai算力基础设施的关键环节——ai训练集群需要高速光互联来连接数千个gpu。lightcounting预测ai驱动的光模块市场2026年将增长40%+。 proposed us match act seeks to force us allies (netherlands, japan) to follow washington&#x27;s export controls on chip equipment to china dutch government formally objects; asml shares fell on earlier proposed curbs — china accounts for ~20% of expected 2026 sales trump administration reversed outright h200 ban, replaced with 25% tariff — creating what experts call &#x27;incoherent&#x27; policy framework asml faces dual pressure: tighter china export restrictions vs. ai boom-driven demand for advanced lithography lightcounting/photonics spectra report: 400g optical msa formed by networking/semiconductor/optics companies for next-gen data center connectivity" onclick="go(9)">
+        <button class="favstar" data-fav="f80dc8ebfa5d9" onclick="toggleFav(event,'f80dc8ebfa5d9')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Dutch Government Objects to Proposed US &#x27;MATCH Act&#x27; Restricting ASML&#x27;s China Exports — EU-US Chip Policy Tensions Rise</div>
+        <div class="card-lead">【MATCH法案与中美芯片战新阶段】美国国会推动的MATCH法案（Matching Allied Trade Controls for Hegemony Act）试图强制盟国遵守美国的对华芯片出口管制——这是美国&#x27;长臂管辖&#x27;从直接制裁向制度化的延伸。荷兰政府（ASML母国）公开反对，认为应由荷兰自主决定出口政策而非被美国法律强制。这背后是ASML的切身利益：中国市场预计占其2026年收入的约20%（主要销售不太先进的DUV光刻机，不涉及EUV）。</div>
+        <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="2" data-day="d0" data-fav="f7ef165e5b0ce" data-search="400g optical msa formed; ai-driven optical module market to grow 40%+ in 2026 — optical communications is the &#x27;hidden infrastructure&#x27; of the ai boom 【关注板块：光通讯——ai的&#x27;隐形基础设施&#x27;】
+
+本日简报特别深挖david爸爸关注的光通讯板块。光通讯/光模块是ai算力基础设施中最关键但最不为大众所知的环节——当你在讨论gpu/npu算力时，连接成千上万个gpu的光纤收发器（optical transceiver）才是决定集群性能的&#x27;隐藏瓶颈&#x27;。
+
+【产业动态】①400g optical msa联盟成立——多家网络设备商（cisco/juniper）、半导体公司（broadcom/marvell）、光学器件商（lumentum/coherent）联合制定下一代数据中心400g光模块行业标准。标准化意味着成本下降和供应稳定——这对算力基础设施是利好。②ofc 2026大会展示了一系列突破：硅光子（silicon photonics）将光学器件直接集成到芯片上，共封装光学（co-packaged optics）将光模块和交换芯片封装在一起以降低功耗。③lightcounting预测2026年ai驱动的光模块市场增长40%+，其中800g和1.6t模块已进入量产阶段。
+
+【对投资的影响】光通信产业链的投资逻辑：①直接受益：中际旭创（中国光模块龙头）、coherent（美国激光器龙头）、lumentum；②间接受益：台积电（硅光芯片代工）、博通（交换芯片+共封装光学）；③长期趋势：800g→1.6t→3.2t的技术迭代将在未来5年持续推动行业增长——这是一个确定性较高的&#x27;卖铲人&#x27;投资逻辑（无论哪个ai模型赢，都需要更多光模块）。
+
+【加拿大视角（妈妈关注）】photonics north会议（6月2-5日在魁北克举办）展示了加拿大在光子学研发领域的日益重要的角色——多伦多大学、麦吉尔大学、渥太华大学在硅光子/量子光子研究方面有较强实力。加拿大光通信产业虽然规模不大，但在特定细分领域（如光子集成芯片设计）有独特优势。 【关注板块：光通讯——ai的&#x27;隐形基础设施&#x27;】
+
+本日简报特别深挖david爸爸关注的光通讯板块。光通讯/光模块是ai算力基础设施中最关键但最不为大众所知的环节——当你在讨论gpu/npu算力时，连接成千上万个gpu的光纤收发器（optical transceiver）才是决定集群性能的&#x27;隐藏瓶颈&#x27;。
+
+【产业动态】①400g optical msa联盟成立——多家网络设备商（cisco/juniper）、半导体公司（broadcom/marvell）、光学器件商（lumentum/coherent）联合制定下一代数据中心400g光模块行业标准。标准化意味着成本下降和供应稳定——这对算力基础设施是利好。②ofc 2026大会展示了一系列突破：硅光子（silicon photonics）将光学器件直接集成到芯片上，共封装光学（co-packaged optics）将光模块和交换芯片封装在一起以降低功耗。③lightcounting预测2026年ai驱动的光模块市场增长40%+，其中800g和1.6t模块已进入量产阶段。
+
+【对投资的影响】光通信产业链的投资逻辑：①直接受益：中际旭创（中国光模块龙头）、coherent（美国激光器龙头）、lumentum；②间接受益：台积电（硅光芯片代工）、博通（交换芯片+共封装光学）；③长期趋势：800g→1.6t→3.2t的技术迭代将在未来5年持续推动行业增长——这是一个确定性较高的&#x27;卖铲人&#x27;投资逻辑（无论哪个ai模型赢，都需要更多光模块）。
+
+【加拿大视角（妈妈关注）】photonics north会议（6月2-5日在魁北克举办）展示了加拿大在光子学研发领域的日益重要的角色——多伦多大学、麦吉尔大学、渥太华大学在硅光子/量子光子研究方面有较强实力。加拿大光通信产业虽然规模不大，但在特定细分领域（如光子集成芯片设计）有独特优势。 consortium of networking, semiconductor, and optics companies forms 400g optical msa (multi-source agreement) to standardize next-gen data center connectivity ofc 2026 (optical fiber communications conference) showcases breakthroughs: silicon photonics, co-packaged optics, 1.6t modules lightcounting projects ai-driven demand for optical modules to drive 40%+ market growth in 2026; 800g/1.6t modules entering mass production optica reports &#x27;ultrafast chip&#x27; breakthrough — neural network-designed photonic components reduce design time from weeks to hours photonics north conference (quebec, june 2-5) highlights canada&#x27;s growing role in photonics r&amp;d key driver: ai training clusters with 100,000+ gpus require massive optical interconnect bandwidth — optical transceivers are the bottleneck-turned-opportunity" onclick="go(10)">
+        <button class="favstar" data-fav="f7ef165e5b0ce" onclick="toggleFav(event,'f7ef165e5b0ce')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">400G Optical MSA Formed; AI-Driven Optical Module Market to Grow 40%+ in 2026 — Optical Communications Is the &#x27;Hidden Infrastructure&#x27; of the AI Boom</div>
+        <div class="card-lead">【关注板块：光通讯——AI的&#x27;隐形基础设施&#x27;】</div>
+        <div class="card-more" style="color:#e6943a">阅读全文 ›</div>
+      </div><div class="seclabel" data-sec="3" data-day="d0" style="color:#9b78c9">财经</div>
+      <div class="card" data-lang="en" data-sec="3" data-day="d0" data-fav="f3c1b49b9a954" data-search="five ways the iran peace deal could affect your money: petrol, heating, airfares, inflation, and interest rates 【联动机制】伊朗战争通过能源渠道向全球经济传导通胀：霍尔木兹海峡封锁→全球原油/lng供给收缩→能源价格飙升→交通/取暖/工业成本上升→cpi全面上行→央行被迫暂停降息甚至加息。这个传导链在2026年上半年完整演绎了一遍。
+
+【油价回落速度分析】rac政策主管simon williams指出关键问题：&#x27;批发价格回落能否像涨价时一样迅速传导到零售端？&#x27;历史上油价下跌时，零售汽油降价总是比涨价慢（所谓&#x27;火箭与羽毛&#x27;效应）。美国汽油从$4.05回落至$3.50可能需要2-3个月，英国汽油从155便士回落至140便士也需要时间。
+
+【通胀前景与央行路径】英国央行行长贝利本周表示油价近期下跌&#x27;令人鼓舞&#x27;，但战争中积累的高能源价格仍在管道中产生通胀压力。英国7月ofgem能源价格上限已锁定上涨13%（覆盖3300万户），这将直接推高7-8月cpi读数。美国5月cpi 4.2%中能源贡献了约1.5个百分点——若油价持续回落，q3 cpi可能降至3%以下。美联储和英国央行目前都处于&#x27;观望模式&#x27;，市场预计最早2027年初才会降息。
+
+【对创业者与家庭的影响】①航空出行：暑期机票价格仍将高于去年，但不会进一步暴涨；②取暖/用电：英国7月起家庭能源账单上涨，影响妈妈在加拿大的生活成本关注；③借贷成本：利率维持高位意味着房贷/企业贷款利率不会很快下降，阳阳创业融资成本仍高；④投资：通胀见顶+利率见顶=债券收益率可能已到周期高点，固定收益类资产吸引力上升。 【联动机制】伊朗战争通过能源渠道向全球经济传导通胀：霍尔木兹海峡封锁→全球原油/lng供给收缩→能源价格飙升→交通/取暖/工业成本上升→cpi全面上行→央行被迫暂停降息甚至加息。这个传导链在2026年上半年完整演绎了一遍。
+
+【油价回落速度分析】rac政策主管simon williams指出关键问题：&#x27;批发价格回落能否像涨价时一样迅速传导到零售端？&#x27;历史上油价下跌时，零售汽油降价总是比涨价慢（所谓&#x27;火箭与羽毛&#x27;效应）。美国汽油从$4.05回落至$3.50可能需要2-3个月，英国汽油从155便士回落至140便士也需要时间。
+
+【通胀前景与央行路径】英国央行行长贝利本周表示油价近期下跌&#x27;令人鼓舞&#x27;，但战争中积累的高能源价格仍在管道中产生通胀压力。英国7月ofgem能源价格上限已锁定上涨13%（覆盖3300万户），这将直接推高7-8月cpi读数。美国5月cpi 4.2%中能源贡献了约1.5个百分点——若油价持续回落，q3 cpi可能降至3%以下。美联储和英国央行目前都处于&#x27;观望模式&#x27;，市场预计最早2027年初才会降息。
+
+【对创业者与家庭的影响】①航空出行：暑期机票价格仍将高于去年，但不会进一步暴涨；②取暖/用电：英国7月起家庭能源账单上涨，影响妈妈在加拿大的生活成本关注；③借贷成本：利率维持高位意味着房贷/企业贷款利率不会很快下降，阳阳创业融资成本仍高；④投资：通胀见顶+利率见顶=债券收益率可能已到周期高点，固定收益类资产吸引力上升。 uk petrol 154.72p/l (up from 132.05p pre-war); us gasoline $4.05/gal (up from $2.94); rac says recent oil drop &#x27;if sustained&#x27; will lead to much lower pump prices uk gas price back to 98p/therm (was 157p in march, 80p pre-war); ofgem july price cap already set — average household +£221/yr (+13%) from july, cannot be changed jet fuel dropped from $1,838/tonne peak to $967; european airlines expected to have enough fuel for summer but prices stay above pre-war levels this year uk inflation 2.8% (may), us 4.2% (may), eu 3.3% (may) — all up from pre-war levels; energy price cap hike in july expected to add &#x27;sizeable&#x27; upward pressure on uk cpi boe held at 3.75% (4th meeting), fed held at 3.5-3.75%, ecb hiked to 2.25% — rates widely expected on hold for rest of 2026" onclick="go(11)">
+        <button class="favstar" data-fav="f3c1b49b9a954" onclick="toggleFav(event,'f3c1b49b9a954')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Five Ways the Iran Peace Deal Could Affect Your Money: Petrol, Heating, Airfares, Inflation, and Interest Rates</div>
+        <div class="card-lead">【联动机制】伊朗战争通过能源渠道向全球经济传导通胀：霍尔木兹海峡封锁→全球原油/LNG供给收缩→能源价格飙升→交通/取暖/工业成本上升→CPI全面上行→央行被迫暂停降息甚至加息。这个传导链在2026年上半年完整演绎了一遍。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="3" data-day="d0" data-fav="f8c7b2cafabc5" data-search="boe holds at 3.75%, fed at 3.5-3.75%, ecb surprises with first hike in three years to 2.25% — divergence reflects war&#x27;s asymmetric inflation impact 【三大央行政策路径分化】本周全球三大央行的利率决策清晰地展示了伊朗战争对发达经济体的不对称冲击：①美联储和英国央行选择&#x27;按兵不动&#x27;——虽然通胀仍高于目标（美国4.2%、英国2.8%），但战争结束预期已使油价回落，两家央行选择观望；②欧洲央行意外加息——欧元区对俄罗斯以外的能源进口依赖度高于美英，伊朗战争导致的能源冲击在欧洲的&#x27;二次传导&#x27;更严重（电价、工业用气、化工原料），ecb认为必须提前遏制通胀预期。
+
+【债市与利率联动】英国5月借款233亿英镑，同比增加近1/3，&#x27;脆弱&#x27;的公共财政意味着英国财政空间有限，无法通过减税或增加支出对冲高利率的紧缩效应。这对持有英镑资产的海外投资者（如妈妈关注的英国理财）意味着：英镑可能因财政担忧而承压，但高利率又提供利差支撑——形成&#x27;英镑区间震荡&#x27;格局。
+
+【对a股/港股的传导】全球利率见顶对新兴市场有利：①美元不再走强→新兴市场资金外流压力减轻；②美债收益率触顶→全球风险偏好回升→港股/中概股估值修复。但前提是伊朗协议不被破坏、油价不再二次冲高。
+
+【对创业融资】利率维持3.5-3.75%意味着风险投资的&#x27;无风险利率锚&#x27;仍高——vc的lp（有限合伙人）对回报率要求更高，种子轮/a轮估值被压缩。阳阳如果计划融资，需关注q4-q1可能出现的利率拐点带来的估值修复窗口。 【三大央行政策路径分化】本周全球三大央行的利率决策清晰地展示了伊朗战争对发达经济体的不对称冲击：①美联储和英国央行选择&#x27;按兵不动&#x27;——虽然通胀仍高于目标（美国4.2%、英国2.8%），但战争结束预期已使油价回落，两家央行选择观望；②欧洲央行意外加息——欧元区对俄罗斯以外的能源进口依赖度高于美英，伊朗战争导致的能源冲击在欧洲的&#x27;二次传导&#x27;更严重（电价、工业用气、化工原料），ecb认为必须提前遏制通胀预期。
+
+【债市与利率联动】英国5月借款233亿英镑，同比增加近1/3，&#x27;脆弱&#x27;的公共财政意味着英国财政空间有限，无法通过减税或增加支出对冲高利率的紧缩效应。这对持有英镑资产的海外投资者（如妈妈关注的英国理财）意味着：英镑可能因财政担忧而承压，但高利率又提供利差支撑——形成&#x27;英镑区间震荡&#x27;格局。
+
+【对a股/港股的传导】全球利率见顶对新兴市场有利：①美元不再走强→新兴市场资金外流压力减轻；②美债收益率触顶→全球风险偏好回升→港股/中概股估值修复。但前提是伊朗协议不被破坏、油价不再二次冲高。
+
+【对创业融资】利率维持3.5-3.75%意味着风险投资的&#x27;无风险利率锚&#x27;仍高——vc的lp（有限合伙人）对回报率要求更高，种子轮/a轮估值被压缩。阳阳如果计划融资，需关注q4-q1可能出现的利率拐点带来的估值修复窗口。 boe holds rates at 3.75% for 4th consecutive meeting; bailey says oil price drops &#x27;encouraging&#x27; but &#x27;inflationary pressure in the pipeline&#x27; fed holds at 3.5-3.75%, citing &#x27;elevated uncertainty&#x27; from middle east conflict; markets price no cuts until 2027 ecb hikes to 2.25% — first increase in nearly 3 years — noting iran war &#x27;generating inflation pressures&#x27; disproportionately on europe&#x27;s energy-dependent economy uk borrowing hits £23.3bn in may, up ~1/3 year-on-year; public finances described as &#x27;fragile&#x27; expectation: rates on hold through end of 2026; rate cuts possible in 2027 if iran deal holds and inflation recedes" onclick="go(12)">
+        <button class="favstar" data-fav="f8c7b2cafabc5" onclick="toggleFav(event,'f8c7b2cafabc5')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">BOE Holds at 3.75%, Fed at 3.5-3.75%, ECB Surprises with First Hike in Three Years to 2.25% — Divergence Reflects War&#x27;s Asymmetric Inflation Impact</div>
+        <div class="card-lead">【三大央行政策路径分化】本周全球三大央行的利率决策清晰地展示了伊朗战争对发达经济体的不对称冲击：①美联储和英国央行选择&#x27;按兵不动&#x27;——虽然通胀仍高于目标（美国4.2%、英国2.8%），但战争结束预期已使油价回落，两家央行选择观望；②欧洲央行意外加息——欧元区对俄罗斯以外的能源进口依赖度高于美英，伊朗战争导致的能源冲击在欧洲的&#x27;二次传导&#x27;更严重（电价、工业用气、化工原料），ECB认为必须提前遏制通胀预期。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="3" data-day="d0" data-fav="fc3e1224e1abc" data-search="s&amp;p 500 rallies 1.08% to 7,500.58 on iran peace deal optimism; dow, nasdaq also close higher 【板块轮动分析】6月18日美股的反弹主要由伊朗和平协议驱动，但板块表现分化明显：科技股（尤其是ai/半导体）经历了周二（6月17日）的大幅回调后企稳——纳斯达克周二跌1.34%后周三仅涨0.3%，说明资金并未大规模回流高估值科技股，而是转向周期和价值板块（道指涨0.7%领跑）。
+
+【spacex效应】spacex连续第三日上涨，公司近期完成了starship v3的试飞（5月22日），并在ipo前持续释放利好。spacex的ipo（连同openai）被市场视为2026年最重要的科技上市事件，其定价和首日表现将对整个ai/航天板块估值产生示范效应。
+
+【与a股的联动】6月18日上证综指收涨0.4%报4,108点，深证成指涨1.31%报15,881点，连续第三日上涨。a股在端午假期前（6月19-20日休市）出现了&#x27;节前翘尾&#x27;行情。6月19日a股/港股均休市（端午节），但6月18日的美股强势收盘为节后a股（6月23日复市）提供了积极的外部环境。
+
+【前瞻关注】下周（6月23日起）a股复市后，需关注：①沪指能否站稳4,100点上方并挑战4,200阻力位；②深证成指科技板块能否延续反弹；③港股恒生科技指数对美股ai板块的跟涨幅度。 【板块轮动分析】6月18日美股的反弹主要由伊朗和平协议驱动，但板块表现分化明显：科技股（尤其是ai/半导体）经历了周二（6月17日）的大幅回调后企稳——纳斯达克周二跌1.34%后周三仅涨0.3%，说明资金并未大规模回流高估值科技股，而是转向周期和价值板块（道指涨0.7%领跑）。
+
+【spacex效应】spacex连续第三日上涨，公司近期完成了starship v3的试飞（5月22日），并在ipo前持续释放利好。spacex的ipo（连同openai）被市场视为2026年最重要的科技上市事件，其定价和首日表现将对整个ai/航天板块估值产生示范效应。
+
+【与a股的联动】6月18日上证综指收涨0.4%报4,108点，深证成指涨1.31%报15,881点，连续第三日上涨。a股在端午假期前（6月19-20日休市）出现了&#x27;节前翘尾&#x27;行情。6月19日a股/港股均休市（端午节），但6月18日的美股强势收盘为节后a股（6月23日复市）提供了积极的外部环境。
+
+【前瞻关注】下周（6月23日起）a股复市后，需关注：①沪指能否站稳4,100点上方并挑战4,200阻力位；②深证成指科技板块能否延续反弹；③港股恒生科技指数对美股ai板块的跟涨幅度。 s&amp;p 500 closes at 7,500.58 (+1.08%) on june 18; dow adds 350+ points (+0.7%); nasdaq composite gains 0.3% markets rally on iran-us peace deal signing; energy stocks mixed — war premium unwinds but oil majors still supported by elevated crude spacex shares jump for third consecutive day ahead of highly anticipated ipo previous session (june 17): s&amp;p 500 at 7,420.10 (-1.21%); nasdaq dropped 354.69 points (-1.34%) on fed rate-hold uncertainty week-to-date: s&amp;p 500 +1.1%, dow +2.4%, nasdaq roughly flat after tuesday&#x27;s tech selloff" onclick="go(13)">
+        <button class="favstar" data-fav="fc3e1224e1abc" onclick="toggleFav(event,'fc3e1224e1abc')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">S&amp;P 500 Rallies 1.08% to 7,500.58 on Iran Peace Deal Optimism; Dow, Nasdaq Also Close Higher</div>
+        <div class="card-lead">【板块轮动分析】6月18日美股的反弹主要由伊朗和平协议驱动，但板块表现分化明显：科技股（尤其是AI/半导体）经历了周二（6月17日）的大幅回调后企稳——纳斯达克周二跌1.34%后周三仅涨0.3%，说明资金并未大规模回流高估值科技股，而是转向周期和价值板块（道指涨0.7%领跑）。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" data-day="d0" data-fav="f40cb097970e6" data-search="a股节前翘尾：沪指收涨0.4%报4108点，深成指涨1.31%——端午节休市两日 【事实信号】端午节假期前最后一个交易日（6月18日），a股三大指数集体收涨。上证综指上涨0.4%至4,108.07点，深证成指上涨1.31%至15,880.56点，创业板指上涨0.93%至15,675点。市场成交额维持万亿以上，北向资金净流入约45亿人民币，显示外资对节后行情偏乐观。板块方面，新能源汽车产业链领涨（柳州新能源车生产繁忙），中药创新受政策利好推动，消费电子因ai终端预期而活跃。港股6月18日亦同步收高，恒生指数涨0.7%报约21,800点，恒生科技指数涨1.2%。6月19日港股同样休市（端午节）。
+
+【联动机制分析——外资为何在节前加仓？】北向资金节前净流入45亿元，这一行为可以从多个维度理解：①伊朗和平协议的签署降低了全球地缘政治风险溢价，外资对新兴市场的风险偏好回升；②美联储6月维持利率不变，美元走弱预期增强了人民币资产的吸引力；③a股估值处于相对低位——上证综指4100点对应约12.5倍pe（ttm），低于历史均值14倍，对全球配置型资金具有估值吸引力。
+
+【节后a股走势推演】6月23日复市后，a股面临以下关键变量：①美股在a股休市期间的表现——6月18日s&amp;p500涨1.08%至7500点，若美股在6月19-20日继续走强，将对a股形成正向传导；②端午消费数据的发布——若&#x27;618&#x27;和端午假期消费数据超预期，消费板块可能获得催化；③政策面——李克强总理可能在节后释放更多稳增长信号。
+
+【对投资者的影响】①短期：节前翘尾行情若叠加节后利好，沪指有望挑战4,200-4,300区间——但需警惕4,200点是2026年内多次受阻的阻力位；②中期：二季度gdp数据将于7月中旬公布，若数据好于预期（市场预期5.5%左右），a股有望开启中期反弹；③板块配置：新能源汽车产业链（渗透率破50%+出口高增）和ai应用（&#x27;618&#x27;期间ai终端热销）是最确定的两条主线。
+
+⚠️前瞻推测：若伊朗协议60天窗口期内无重大变数、国内稳增长政策持续发力，上证综指有望在下半年挑战4,500点；但若全球通胀二次冲高或中美贸易摩擦升级，a股可能在4,000-4,200区间震荡整理。 【事实信号】端午节假期前最后一个交易日（6月18日），a股三大指数集体收涨。上证综指上涨0.4%至4,108.07点，深证成指上涨1.31%至15,880.56点，创业板指上涨0.93%至15,675点。市场成交额维持万亿以上，北向资金净流入约45亿人民币，显示外资对节后行情偏乐观。板块方面，新能源汽车产业链领涨（柳州新能源车生产繁忙），中药创新受政策利好推动，消费电子因ai终端预期而活跃。港股6月18日亦同步收高，恒生指数涨0.7%报约21,800点，恒生科技指数涨1.2%。6月19日港股同样休市（端午节）。
+
+【联动机制分析——外资为何在节前加仓？】北向资金节前净流入45亿元，这一行为可以从多个维度理解：①伊朗和平协议的签署降低了全球地缘政治风险溢价，外资对新兴市场的风险偏好回升；②美联储6月维持利率不变，美元走弱预期增强了人民币资产的吸引力；③a股估值处于相对低位——上证综指4100点对应约12.5倍pe（ttm），低于历史均值14倍，对全球配置型资金具有估值吸引力。
+
+【节后a股走势推演】6月23日复市后，a股面临以下关键变量：①美股在a股休市期间的表现——6月18日s&amp;p500涨1.08%至7500点，若美股在6月19-20日继续走强，将对a股形成正向传导；②端午消费数据的发布——若&#x27;618&#x27;和端午假期消费数据超预期，消费板块可能获得催化；③政策面——李克强总理可能在节后释放更多稳增长信号。
+
+【对投资者的影响】①短期：节前翘尾行情若叠加节后利好，沪指有望挑战4,200-4,300区间——但需警惕4,200点是2026年内多次受阻的阻力位；②中期：二季度gdp数据将于7月中旬公布，若数据好于预期（市场预期5.5%左右），a股有望开启中期反弹；③板块配置：新能源汽车产业链（渗透率破50%+出口高增）和ai应用（&#x27;618&#x27;期间ai终端热销）是最确定的两条主线。
+
+⚠️前瞻推测：若伊朗协议60天窗口期内无重大变数、国内稳增长政策持续发力，上证综指有望在下半年挑战4,500点；但若全球通胀二次冲高或中美贸易摩擦升级，a股可能在4,000-4,200区间震荡整理。 6月18日上证综指收涨0.4%报4,108点，深证成指涨1.31%报15,881点，连续第三日上涨 6月19-20日为端午节假期，沪深港通均休市；6月23日复市 6月18日领涨板块：新能源汽车、中药创新、消费电子 年中&#x27;618&#x27;促销数据初步显示消费结构升级：健康、智能家居、国潮品类增速领先 节后关注：沪指4100点能否站稳，深成指能否挑战16,200点前期高点" onclick="go(14)">
+        <button class="favstar" data-fav="f40cb097970e6" onclick="toggleFav(event,'f40cb097970e6')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">A股节前翘尾：沪指收涨0.4%报4108点，深成指涨1.31%——端午节休市两日</div>
+        <div class="card-lead">【事实信号】端午节假期前最后一个交易日（6月18日），A股三大指数集体收涨。上证综指上涨0.4%至4,108.07点，深证成指上涨1.31%至15,880.56点，创业板指上涨0.93%至15,675点。市场成交额维持万亿以上，北向资金净流入约45亿人民币，显示外资对节后行情偏乐观。板块方面，新能源汽车产业链领涨（柳州新能源车生产繁忙），中药创新受政策利好推动，消费电子因AI终端预期而活跃。港股6月18日亦同步收高，恒生指数涨0.7%报约21,800点，恒生科技指数涨1.2%。6月19日港股同样休市（端午节）。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="3" data-day="d0" data-fav="f7725893fc632" data-search="brexit cost 6% of uk economy, bank of england data suggests — analysis shows growth gap vs hypothetical eu-membership path 【英国脱欧经济损失量化】英国央行的一项新研究首次以公司层面数据量化了脱欧的长期经济代价。研究构建了一个&#x27;合成英国&#x27;反事实模型——假设英国未脱欧、继续保持与欧盟的贸易和投资关系——发现在此情景下英国gdp将比当前实际水平高出约6%。这6%的差距主要来自：①贸易壁垒导致英国出口竞争力下降（对欧盟出口减少约15%）；②外国直接投资(fdi)流入减少（跨国公司选择将欧洲总部设在法兰克福/巴黎/都柏林而非伦敦）；③劳动力市场灵活性下降（欧盟公民不再自由流动）。
+
+【政策含义】英国首相斯塔默面临越来越大的压力。刚赢得补选的andy burnham（目前被视为最可能的工党领导挑战者）正在利用脱欧经济代价这一议题攻击现政府。对家庭的影响：脱欧导致的实际收入损失约£1,200/人/年（据niesr估计），叠加伊朗战争导致的能源和食品价格上涨，英国家庭购买力持续承压。
+
+【对海外理财（妈妈关注）】如果你在考虑英国房产或英镑资产：脱欧对伦敦房地产市场的结构性负面影响仍在——虽经历了调整，但伦敦高端住宅相对巴黎/米兰的折价扩大。英镑长期均衡汇率可能低于脱欧前（当前gbp/usd约1.27，脱欧前为1.40-1.50）。但英国资产也有&#x27;便宜&#x27;的相对优势——如果英国和欧盟重新谈判贸易安排（burnham的竞选主张），英镑和ftse都可能迎来重估。 【英国脱欧经济损失量化】英国央行的一项新研究首次以公司层面数据量化了脱欧的长期经济代价。研究构建了一个&#x27;合成英国&#x27;反事实模型——假设英国未脱欧、继续保持与欧盟的贸易和投资关系——发现在此情景下英国gdp将比当前实际水平高出约6%。这6%的差距主要来自：①贸易壁垒导致英国出口竞争力下降（对欧盟出口减少约15%）；②外国直接投资(fdi)流入减少（跨国公司选择将欧洲总部设在法兰克福/巴黎/都柏林而非伦敦）；③劳动力市场灵活性下降（欧盟公民不再自由流动）。
+
+【政策含义】英国首相斯塔默面临越来越大的压力。刚赢得补选的andy burnham（目前被视为最可能的工党领导挑战者）正在利用脱欧经济代价这一议题攻击现政府。对家庭的影响：脱欧导致的实际收入损失约£1,200/人/年（据niesr估计），叠加伊朗战争导致的能源和食品价格上涨，英国家庭购买力持续承压。
+
+【对海外理财（妈妈关注）】如果你在考虑英国房产或英镑资产：脱欧对伦敦房地产市场的结构性负面影响仍在——虽经历了调整，但伦敦高端住宅相对巴黎/米兰的折价扩大。英镑长期均衡汇率可能低于脱欧前（当前gbp/usd约1.27，脱欧前为1.40-1.50）。但英国资产也有&#x27;便宜&#x27;的相对优势——如果英国和欧盟重新谈判贸易安排（burnham的竞选主张），英镑和ftse都可能迎来重估。 bank of england analysis suggests uk economy ~6% smaller than if it had remained in the eu study compares actual uk growth trajectory with synthetic counterfactual based on comparable eu economies findings fuel renewed political debate: labour&#x27;s burnham (who just won by-election) calls for &#x27;honest accounting of brexit&#x27;s costs&#x27; uk public finances described as &#x27;fragile&#x27; — may borrowing up ~1/3 year-on-year to £23.3bn timing significant as uk navigates post-iran-war economic recovery and trade reorientation" onclick="go(15)">
+        <button class="favstar" data-fav="f7725893fc632" onclick="toggleFav(event,'f7725893fc632')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">Brexit Cost 6% of UK Economy, Bank of England Data Suggests — Analysis Shows Growth Gap vs Hypothetical EU-Membership Path</div>
+        <div class="card-lead">【英国脱欧经济损失量化】英国央行的一项新研究首次以公司层面数据量化了脱欧的长期经济代价。研究构建了一个&#x27;合成英国&#x27;反事实模型——假设英国未脱欧、继续保持与欧盟的贸易和投资关系——发现在此情景下英国GDP将比当前实际水平高出约6%。这6%的差距主要来自：①贸易壁垒导致英国出口竞争力下降（对欧盟出口减少约15%）；②外国直接投资(FDI)流入减少（跨国公司选择将欧洲总部设在法兰克福/巴黎/都柏林而非伦敦）；③劳动力市场灵活性下降（欧盟公民不再自由流动）。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="zh" data-sec="3" data-day="d0" data-fav="f07492108a948" data-search="&#x27;618&#x27;折射消费新变化：健康、智能家居、国潮品类增速领先——消费升级结构性分化加剧 【消费结构性分化】2026年&#x27;618&#x27;购物节的数据清晰地显示了中国消费市场正在发生的结构性转变：总量增速放缓（整体gmv增速估计在5-8%之间），但品质升级和体验消费的增长远超大盘。健康品类（38%）、智能家居（26%）、国潮文创（33%）的高增速表明：中国消费者正在从&#x27;买更多&#x27;转向&#x27;买更好&#x27;。
+
+【新能源汽车加速渗透】&#x27;618&#x27;期间新能源汽车线上订单同比增45%，这个数据与今年以来新能源车渗透率突破50%的趋势一致。消费者通过线上渠道直接下单整车交付的模式正在成熟——特斯拉、蔚来、小鹏、比亚迪都在强化线上直销能力。
+
+【直播电商成为主渠道】直播电商gmv占比首次超过40%，意味着&#x27;看直播下单&#x27;已经从补充渠道升级为主流购物方式。这对创业者（阳阳）的启示：任何面向c端的ai产品，如果忽视短视频/直播的内容分发渠道，将失去最大的流量入口。
+
+【下沉市场崛起】三线及以下城市的消费增速首次反超高线城市，这是中国经济内循环战略下的一个重要信号——低线城市的消费升级正在从单纯的价格敏感转向品质追求。
+
+【对宏观经济和投资】&#x27;618&#x27;数据透露的宏观信号：①消费复苏仍在但更趋理性——&#x27;报复性消费&#x27;让位于&#x27;理性升级&#x27;；②品类分化剧烈——投资者应关注健康/智能/国潮赛道的上市公司；③平台经济竞争格局变化——拼多多/抖音电商份额扩大，传统电商（天猫/京东）承压。 【消费结构性分化】2026年&#x27;618&#x27;购物节的数据清晰地显示了中国消费市场正在发生的结构性转变：总量增速放缓（整体gmv增速估计在5-8%之间），但品质升级和体验消费的增长远超大盘。健康品类（38%）、智能家居（26%）、国潮文创（33%）的高增速表明：中国消费者正在从&#x27;买更多&#x27;转向&#x27;买更好&#x27;。
+
+【新能源汽车加速渗透】&#x27;618&#x27;期间新能源汽车线上订单同比增45%，这个数据与今年以来新能源车渗透率突破50%的趋势一致。消费者通过线上渠道直接下单整车交付的模式正在成熟——特斯拉、蔚来、小鹏、比亚迪都在强化线上直销能力。
+
+【直播电商成为主渠道】直播电商gmv占比首次超过40%，意味着&#x27;看直播下单&#x27;已经从补充渠道升级为主流购物方式。这对创业者（阳阳）的启示：任何面向c端的ai产品，如果忽视短视频/直播的内容分发渠道，将失去最大的流量入口。
+
+【下沉市场崛起】三线及以下城市的消费增速首次反超高线城市，这是中国经济内循环战略下的一个重要信号——低线城市的消费升级正在从单纯的价格敏感转向品质追求。
+
+【对宏观经济和投资】&#x27;618&#x27;数据透露的宏观信号：①消费复苏仍在但更趋理性——&#x27;报复性消费&#x27;让位于&#x27;理性升级&#x27;；②品类分化剧烈——投资者应关注健康/智能/国潮赛道的上市公司；③平台经济竞争格局变化——拼多多/抖音电商份额扩大，传统电商（天猫/京东）承压。 2026年&#x27;618&#x27;购物节收官：全网交易额同比增速放缓至个位数，但结构性亮点突出 健康品类增长38%、智能家居增长26%、国潮文创增长33%——体验型和品质型消费成主力 新能源汽车线上订单同比增45%，反映了新能源车渗透率加速提升 直播电商占&#x27;618&#x27;总交易额比例首次超过40%，内容驱动消费已成主流 低线城市（三线及以下）消费增速首次超过高线城市，下沉市场潜力释放" onclick="go(16)">
+        <button class="favstar" data-fav="f07492108a948" onclick="toggleFav(event,'f07492108a948')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">&#x27;618&#x27;折射消费新变化：健康、智能家居、国潮品类增速领先——消费升级结构性分化加剧</div>
+        <div class="card-lead">【消费结构性分化】2026年&#x27;618&#x27;购物节的数据清晰地显示了中国消费市场正在发生的结构性转变：总量增速放缓（整体GMV增速估计在5-8%之间），但品质升级和体验消费的增长远超大盘。健康品类（38%）、智能家居（26%）、国潮文创（33%）的高增速表明：中国消费者正在从&#x27;买更多&#x27;转向&#x27;买更好&#x27;。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+      <div class="card" data-lang="en" data-sec="3" data-day="d0" data-fav="fad03dff4bc63" data-search="ecb hikes to 2.25% — first increase in nearly three years — signals europe&#x27;s energy vulnerability is far from over 【欧洲央行逆势加息的结构性逻辑】欧洲央行在美联储和英国央行都按兵不动之际选择加息，表面上是&#x27;逆周期&#x27;操作，实际上反映了欧洲经济结构的深层脆弱：①欧洲对进口能源的依赖度（尤其是天然气）远高于美英——即使伊朗和平协议签署，欧洲仍需要时间来重建能源供应多元化；②欧元区劳动力市场紧张程度高于预期——服务业通胀黏性较强；③ecb担心如果现在不遏制通胀预期，未来需要更大力度的紧缩。
+
+【对全球资产配置的影响】ecb加息→欧元走强→美元走弱→利好新兴市场资本流入和大宗商品（以美元计价的黄金、铜等）。但同时，欧元走强会削弱欧洲出口竞争力（尤其是德国汽车和机械出口），进而影响欧洲股市的盈利前景。对于持有欧元资产的家庭——欧元存款和债券收益率上升，但欧洲股市面临逆风。
+
+【与中国的联动】欧元升值意味着人民币对欧元相对贬值——中国对欧出口竞争力增强。但欧洲加息也意味着欧洲需求可能走弱，对中国出口（尤其是机电产品和新能源车）的总量需求不利。 【欧洲央行逆势加息的结构性逻辑】欧洲央行在美联储和英国央行都按兵不动之际选择加息，表面上是&#x27;逆周期&#x27;操作，实际上反映了欧洲经济结构的深层脆弱：①欧洲对进口能源的依赖度（尤其是天然气）远高于美英——即使伊朗和平协议签署，欧洲仍需要时间来重建能源供应多元化；②欧元区劳动力市场紧张程度高于预期——服务业通胀黏性较强；③ecb担心如果现在不遏制通胀预期，未来需要更大力度的紧缩。
+
+【对全球资产配置的影响】ecb加息→欧元走强→美元走弱→利好新兴市场资本流入和大宗商品（以美元计价的黄金、铜等）。但同时，欧元走强会削弱欧洲出口竞争力（尤其是德国汽车和机械出口），进而影响欧洲股市的盈利前景。对于持有欧元资产的家庭——欧元存款和债券收益率上升，但欧洲股市面临逆风。
+
+【与中国的联动】欧元升值意味着人民币对欧元相对贬值——中国对欧出口竞争力增强。但欧洲加息也意味着欧洲需求可能走弱，对中国出口（尤其是机电产品和新能源车）的总量需求不利。 european central bank raises key rate to 2.25% — first hike in nearly three years; cites iran war generating persistent inflation pressures ecb decision diverges sharply from fed (hold) and boe (hold) — reflects europe&#x27;s greater exposure to energy price shocks eurozone inflation at 3.3% (may), up from 2.1% pre-war; energy component remains the primary driver ecb president christine lagarde warns that &#x27;the path ahead is uncertain&#x27; with iran deal still fragile euro strengthens against usd on rate differential — eur/usd rises above 1.12, adding headwinds for european exporters" onclick="go(17)">
+        <button class="favstar" data-fav="fad03dff4bc63" onclick="toggleFav(event,'fad03dff4bc63')" aria-label="收藏">☆</button>
+        <div class="card-date">2026-06-19</div>
+        <div class="card-hl">ECB Hikes to 2.25% — First Increase in Nearly Three Years — Signals Europe&#x27;s Energy Vulnerability Is Far From Over</div>
+        <div class="card-lead">【欧洲央行逆势加息的结构性逻辑】欧洲央行在美联储和英国央行都按兵不动之际选择加息，表面上是&#x27;逆周期&#x27;操作，实际上反映了欧洲经济结构的深层脆弱：①欧洲对进口能源的依赖度（尤其是天然气）远高于美英——即使伊朗和平协议签署，欧洲仍需要时间来重建能源供应多元化；②欧元区劳动力市场紧张程度高于预期——服务业通胀黏性较强；③ECB担心如果现在不遏制通胀预期，未来需要更大力度的紧缩。</div>
+        <div class="card-more" style="color:#9b78c9">阅读全文 ›</div>
+      </div>
+  </div>
+  
+      <div class="article" id="a0" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">US and Iran Sign Peace Deal Ending Four-Month War; Naval Blockade Lifted, Strait of Hormuz to Reopen</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7b2720ee4e6c" onclick="toggleFav(event,'f7b2720ee4e6c')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。
+
+【联动机制与影响推演】
+一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。
+
+二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国CPI从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在Q3-Q4加速下行，届时美联储和英国央行可能重启降息周期。
+
+三、对创业者（阳阳）：能源成本下降利好所有AI推理和数据中心的电力成本（AI算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和IPO窗口（OpenAI和SpaceX都在筹备IPO，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。
+
+四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。
+
+⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026Q4-2027Q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在G7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。</p>
+        <ul class='abul'><li>Trump and Iran sign 14-point memorandum at Versailles on June 18; deal includes $300bn reconstruction fund and termination of all US sanctions</li><li>US lifts naval blockade of Iran; Strait of Hormuz — the world&#x27;s most critical oil chokepoint — set to reopen within 60 days</li><li>Iran&#x27;s Supreme Leader Mojtaba Khamenei says he approved deal despite &#x27;different view&#x27;, claiming Trump acted &#x27;out of desperation&#x27;</li><li>Deal defers thorniest issues — including Iran&#x27;s nuclear programme — to &#x27;technical talks&#x27; within 60 days; Vance cancels first round in Switzerland</li><li>Israel-Lebanon fighting continues despite deal: Israeli strikes kill 18 in Nabatieh overnight; 4 IDF soldiers killed in Hezbollah clashes</li></ul>
+        <div class="abody"><p>【事实信号】2026年6月18日，美国总统特朗普与伊朗在法国凡尔赛宫签署了一份14点谅解备忘录，旨在结束自2月28日爆发的长达近4个月的美以对伊朗战争。备忘录核心条款包括：①美国解除对伊朗的全部制裁；②双方承诺在最多60天内达成最终协议（可协商延期）；③美国解除对伊朗的海上封锁，霍尔木兹海峡60天内恢复自由通行，且伊朗宣布60天内所有通过霍尔木兹海峡的船只免通行费；④设立3000亿美元伊朗&#x27;重建&#x27;基金；⑤伊朗承诺永不拥有核武器。</p><p>【联动机制与影响推演】</p><p>一、对全球经济：霍尔木兹海峡承载全球约1/5的石油运输，自2月底战争爆发以来，全球油价飙升（英国汽油从132便士/升涨至155便士/升，美国汽油从$2.94/加仑涨至$4.05/加仑）。海峡一旦真正恢复通行，全球原油供给瓶颈将解除——但市场存在分歧：部分分析师认为油价&#x27;战争溢价&#x27;已提前消化（近期油价已从3月峰值回落），但另一些认为伊朗石油要实质性重返市场仍需数月，且炼油厂重启需要时间，短期油价回落速度可能慢于预期。</p><p>二、对通胀与央行政策：伊朗战争是推高全球通胀的核心变量。美国CPI从战前2.4%飙升至5月的4.2%；英国从3%先升后降至2.8%；欧元区从2.1%升至3.3%。美联储6月18日维持利率3.5-3.75%不变，英国央行维持3.75%不变，但欧洲央行上周意外加息至2.25%（三年来首次），理由正是&#x27;冲突造成通胀压力&#x27;。若和平协议实质性落地、油价持续回落，全球通胀有望在Q3-Q4加速下行，届时美联储和英国央行可能重启降息周期。</p><p>三、对创业者（阳阳）：能源成本下降利好所有AI推理和数据中心的电力成本（AI算力的边际成本下降）；全球风险偏好回升有利于科技股估值修复和IPO窗口（OpenAI和SpaceX都在筹备IPO，市场情绪是关键变量）；但也需警惕：60天谈判期暗藏风险——若技术谈判破裂或以色列-真主党冲突升级导致协议实质上瓦解，油价可能二次冲高。</p><p>四、对家庭投资：美股能源板块可能面临回调（战争溢价消退），但科技/消费板块受益于利率见顶预期；港股/中概股受益于全球风险偏好回升和美元走弱预期；黄金作为避险资产可能短期承压。</p><p>⚠️前瞻推测：若60天内最终协议顺利签署且伊朗石油实质性回归，布伦特原油有望从当前约$85-90/桶回落至$65-75区间；全球央行可能在2026Q4-2027Q1进入降息通道。但以色列-真主党冲突是最大不确定性——特朗普在G7峰会上批评以色列&#x27;不需要每次找人就炸掉整栋公寓楼&#x27;，暗示美国可能对以色列施压以保全协议。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c8r2eme2n5do" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/c8r2eejdd35o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/c4g5574pwreo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/world/20260619/6d6794a7214d40cba8c7ba6ba0bfdec3/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a1" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">G7 Summit in Évian Concludes: Iran Peace Deal Endorsed, AI Leaders Call for US-Led Coalition, Trump Criticizes IDF</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fb72b1bd1e370" onclick="toggleFav(event,'fb72b1bd1e370')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【G7与伊朗协议】本次G7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，G7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。
+
+【AI联盟动向】峰会另一条暗线是AI治理话语权的争夺。Altman、Amodei、Hassabis三位AI界最有权势的人同时出现在G7，呼应Anthropic和DeepMind提出的&#x27;美国主导的AI联盟&#x27;构想——本质上是希望将G7打造成西方AI标准的制定平台，与中国AI生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动G7级AI出口管制+标准联盟，中国AI公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。
+
+【全球治理格局】本次G7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。</p>
+        <ul class='abul'><li>52nd G7 Summit held June 15-17 in Évian-les-Bains, France; Macron calls Iran deal &#x27;very good&#x27; and says G7 allies support it</li><li>Trump sharply criticizes IDF at G7: &#x27;You don&#x27;t have to knock down an apartment house every time you&#x27;re looking for somebody&#x27; — signals US pressure on Israel to preserve Iran deal</li><li>OpenAI&#x27;s Sam Altman, Anthropic&#x27;s Dario Amodei, and DeepMind&#x27;s Demis Hassabis attend G7; call for US-led AI coalition</li><li>Summit communiqué covers international peace, global economy, AI governance, climate</li><li>Trump holds closing press conference emphasizing Iran deal as victory to &#x27;avoid global economic recession&#x27;</li></ul>
+        <div class="abody"><p>【G7与伊朗协议】本次G7峰会的核心成果是对美伊协议的集体背书。法国总统马克龙称该协议为&#x27;一项非常好的协议&#x27;，G7盟国一致支持。但特朗普在峰会期间罕见公开批评以色列国防军的军事行动&#x27;造成太多平民死亡&#x27;，这一表态意在向以色列施压：美国希望以黎停火与美伊协议同步推进，防止以色列在黎巴嫩的军事行动破坏整个和平框架。</p><p>【AI联盟动向】峰会另一条暗线是AI治理话语权的争夺。Altman、Amodei、Hassabis三位AI界最有权势的人同时出现在G7，呼应Anthropic和DeepMind提出的&#x27;美国主导的AI联盟&#x27;构想——本质上是希望将G7打造成西方AI标准的制定平台，与中国AI生态形成制度性区隔。这对创业者（阳阳）的影响：如果美国推动G7级AI出口管制+标准联盟，中国AI公司在开源模型国际化和海外市场扩展方面将面临更大制度壁垒。</p><p>【全球治理格局】本次G7实质上变成了&#x27;伊朗和平峰会&#x27;，体现了西方试图通过多边框架锁定中东和平进程。但关键仍是60天谈判窗口——伊朗最高领袖虽然批准协议但明确表示&#x27;批准不等于接受敌人立场&#x27;，技术谈判随时可能因以色列/真主党冲突而破裂。</p></div>
+        <div class="sources">来源：<a class="src" href="https://apnews.com/article/g7-trump-macron-france-china-iran-persian-gulf-energy-7e7dfed708daa482c6079863758e6f95" target="_blank" rel="noopener">AP News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-17</span></a> <a class="src" href="https://www.cnbc.com/2026/06/17/anthropic-amodei-google-hassabis-us-ai-coalition-g7.html" target="_blank" rel="noopener">CNBC<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-17</span></a> <a class="src" href="https://www.news.cn/20260619/7f9e2e53a3d24c448d7299ea708c479f/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a2" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">中方就韩官员重申中韩建交联合公报涉台表述答问——敦促韩方恪守一个中国原则</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f0517904bd3f3" onclick="toggleFav(event,'f0517904bd3f3')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。</p>
+        <ul class='abul'><li>韩国外交官员近期重申中韩建交联合公报中关于台湾问题的表述</li><li>中国外交部发言人就相关表态回答记者提问，敦促韩方恪守一个中国原则</li><li>中方也呼吁加沙实现真正持久停火、敦促国际社会合力推进利比亚包容性政治进程</li><li>中国外交部发言人还就利比亚问题表态，呼吁推进包容性政治进程</li><li>中国在联合国等多边场合持续就中东、非洲安全问题表达立场</li></ul>
+        <div class="abody"><p>中国外交部发言人就韩国官员重申中韩建交联合公报涉台表述回答记者提问，敦促韩方恪守一个中国原则，不与台湾地区进行任何形式的官方往来。同日中方还就加沙停火和利比亚政治进程表达了立场。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/1973d19f3931492f80233f029eeb0f7f/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.xinhuanet.com/20260619/6f5bd56972984bac87f638c03080b475/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a3" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#eaf3fc;color:#4a90d9">国际要闻</div>
+        <h1 class="atitle">India&#x27;s Cash Transfer Boom Gives Relief to the Poor but Strains Government Budgets — Welfare Model Faces Sustainability Questions</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f26087bbe1ed5" onclick="toggleFav(event,'f26087bbe1ed5')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近GDP的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。</p>
+        <ul class='abul'><li>India&#x27;s direct cash transfer schemes have expanded dramatically; millions of poor households now receive regular government payments</li><li>The model provides immediate poverty relief and financial inclusion — but comes at huge fiscal cost</li><li>Multiple Indian states now run cash transfer programs; combined cost approaching 2% of GDP in some states</li><li>Economists debate long-term efficacy: cash transfers alleviate acute poverty but don&#x27;t build productive capacity</li><li>India&#x27;s experience is being watched closely by other developing nations considering similar programs</li></ul>
+        <div class="abody"><p>印度的直接现金转移计划大幅扩展，为数百万贫困家庭提供定期政府付款。这种模式在提供即时贫困救济和金融包容性方面效果显著，但财政成本巨大——部分邦的现金转移支出已接近GDP的2%。经济学家争论其长期效力：现金转移缓解了急性贫困，但不能构建生产能力。印度的经验正被其他考虑类似项目的发展中国家密切关注。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c0jy8zyn663o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a4" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">端午节：全国铁路假期首日预计发送旅客1973万人次，考古&#x27;植物包&#x27;首次实证粽子起源</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7c126e060ce1" onclick="toggleFav(event,'f7c126e060ce1')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。</p>
+        <ul class='abul'><li>6月19日为端午节假期首日，全国铁路预计发送旅客1973万人次；长三角、珠三角方向客流集中</li><li>考古发现首次通过&#x27;植物包&#x27;实证粽子起源——为端午文化提供新学术支撑</li><li>各地举行龙舟竞渡、包粽子等传统活动；云南马关推出&#x27;彩虹粽&#x27;等创意美食</li><li>长江中下游强降雨持续，国家防总针对江苏启动防汛四级应急响应</li><li>北京端午先雨后晴，外出游玩需携带雨具</li></ul>
+        <div class="abody"><p>今天是2026年端午节（农历五月初五），全国进入三天小长假（6月19-21日）。铁路部门预计假期首日发送旅客1973万人次。各地龙舟竞渡、粽子文化节等活动丰富多彩。考古学界发布了一项有趣的研究：通过&#x27;植物包&#x27;实物首次为粽子的起源提供了考古学实证。不过长江中下游地区的持续强降雨也为假期出行增添了变数——国家防总已针对江苏启动防汛四级应急响应。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/084c18dfec23405e8ecce39314987b6e/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/tech/20260619/e177c1f39ea44effbf19bae3c73199e1/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a5" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">海南自贸港封关半年：外贸进出口增长迅猛，累计出入境165.4万人次</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fad9ef6601ef3" onclick="toggleFav(event,'fad9ef6601ef3')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。</p>
+        <ul class='abul'><li>海南自由贸易港封关运作满半年，外贸进出口增长迅猛——官方称&#x27;超出预期&#x27;</li><li>累计出入境165.4万人次，口岸监管进出口货运量持续攀升</li><li>封关后海南实行&#x27;一线放开、二线管住&#x27;政策——货物从境外进入海南免关税，但从海南进入内地需补税</li><li>免税消费成为海南经济新增长极——离岛免税销售额同比增长超过30%</li><li>分析认为海南模式为中国进一步扩大高水平对外开放提供了试验田</li></ul>
+        <div class="abody"><p>海南自由贸易港自2025年底封关运作以来，已满半年。官方数据显示外贸进出口增长迅猛，累计出入境165.4万人次。封关政策的核心是&#x27;一线放开、二线管住&#x27;：境外货物进入海南免关税（一线放开），但从海南进入内地时需补缴关税（二线管住）。离岛免税消费同比增长超30%，成为海南经济新增长极。海南的试验为中国进一步扩大高水平对外开放提供了政策样本。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/photo/20260619/853539d80fec461d89f7f47646564388/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a6" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">中欧班列统一品牌10年：年开行量增长10.8倍，成为亚欧贸易大动脉</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f553ab8a2311d" onclick="toggleFav(event,'f553ab8a2311d')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。</p>
+        <ul class='abul'><li>中欧班列统一品牌迎来10周年——年开行量从2016年的约1,700列增长至2025年的超18,000列，10年增长10.8倍</li><li>班列网络已连接欧洲25个国家、200+城市；运输商品从最初的IT产品扩展到汽车、医疗器械、食品等</li><li>2026年上半年开行量同比增长约15%——伊朗战争期间海运受阻，中欧班列成为替代运输方案</li><li>中欧班列运费约为空运的1/4、时间约为海运的1/3，成为高附加值商品亚欧贸易的黄金通道</li><li>分析指出中欧班列的持续增长强化了中国在亚欧大陆供应链中的枢纽地位</li></ul>
+        <div class="abody"><p>中国与欧洲之间的铁路货运网络——中欧班列——统一品牌运营迎来10周年。10年间年开行量从约1,700列增长至超18,000列（10.8倍），连接欧洲25个国家、200多个城市。在2026年上半年伊朗战争导致海运受阻的背景下，中欧班列的替代运输价值进一步凸显。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/fortune/20260619/2c61bebd5eca4cd79b459ce0b54dc15a/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a7" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">习近平总书记回信新华社百岁老党员张连生：传承红色基因，在新征程上书写优异答卷</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f15e79f78c054" onclick="toggleFav(event,'f15e79f78c054')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。</p>
+        <ul class='abul'><li>习近平总书记给新华社百岁老党员张连生回信，强调传承红色基因、永葆初心</li><li>张连生今年100岁，是新华社&#x27;四大队&#x27;（代号，指新华社在革命战争时期的新闻工作队）的成员</li><li>回信正值中国共产党成立105周年之际——&#x27;筑强基层堡垒，夯实执政根基&#x27;</li><li>新华社发表长篇报道&#x27;永远跟党走——四大队百岁老党员张连生的荣光&#x27;</li><li>新华社评论员文章：以更高标准、更实举措抓好全面从严治党</li></ul>
+        <div class="abody"><p>在中国共产党成立105周年之际，习近平总书记给新华社百岁老党员张连生回信。张连生是新华社&#x27;四大队&#x27;（革命战争时期的新闻工作队代号）成员，曾在极端艰苦条件下从事党的新闻宣传工作。总书记在回信中强调要&#x27;传承红色基因，在新征程上书写优异答卷&#x27;。新华社同时播发了长篇人物报道和评论员文章，聚焦全面从严治党和基层党组织建设。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260618/c3838643e385480d91c383d8d9e73e48/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.news.cn/politics/leaders/20260619/a709dc2a2d8248109ded01a1ad2d36f8/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a8" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#e7f7f4;color:#3aab9a">政治</div>
+        <h1 class="atitle">钱凯港商业运营周年庆在秘鲁举行——中秘&#x27;一带一路&#x27;旗舰项目运营超预期</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f85f34b0ed595" onclick="toggleFav(event,'f85f34b0ed595')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。</p>
+        <ul class='abul'><li>中国在秘鲁投资建设的钱凯港（Chancay Port）商业运营满一周年，庆典在秘鲁举行</li><li>钱凯港是中国在拉美最大港口投资——一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场</li><li>港口运营超预期——秘鲁农产品（蓝莓、葡萄、牛油果）出口至中国时间缩短40%</li><li>中国东方航空同时开通上海至苏黎世直飞航线——中欧航线网络进一步加密</li><li>钱凯港被视为中国&#x27;21世纪海上丝绸之路&#x27;在拉美的战略性支点</li></ul>
+        <div class="abody"><p>中国在秘鲁投资建设的钱凯港（位于利马以北约80公里）商业运营满一周年。这个中国在拉丁美洲最大的港口投资项目一期年吞吐能力100万标准箱，直接连接秘鲁与亚洲市场，使秘鲁农产品（蓝莓、葡萄、牛油果等）出口至中国的时间缩短了40%。钱凯港被视为中国&#x27;一带一路&#x27;在拉美的战略性支点。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/20260619/579193160dcd495fbbf715934faedb29/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a9" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">AI/科技</div>
+        <h1 class="atitle">Dutch Government Objects to Proposed US &#x27;MATCH Act&#x27; Restricting ASML&#x27;s China Exports — EU-US Chip Policy Tensions Rise</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f80dc8ebfa5d9" onclick="toggleFav(event,'f80dc8ebfa5d9')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【MATCH法案与中美芯片战新阶段】美国国会推动的MATCH法案（Matching Allied Trade Controls for Hegemony Act）试图强制盟国遵守美国的对华芯片出口管制——这是美国&#x27;长臂管辖&#x27;从直接制裁向制度化的延伸。荷兰政府（ASML母国）公开反对，认为应由荷兰自主决定出口政策而非被美国法律强制。这背后是ASML的切身利益：中国市场预计占其2026年收入的约20%（主要销售不太先进的DUV光刻机，不涉及EUV）。
+
+【政策混乱】特朗普政府在芯片出口管制上展现出矛盾姿态：一方面延续拜登时期对华芯片围堵的总体战略，另一方面又解除了对NVIDIA H200的直接禁售，改为加征25%关税——这意味着中国企业只要愿意支付更高的价格，就能买到H200。业界专家将此描述为&#x27;不连贯&#x27;的政策框架：制裁的目标到底是阻止中国获得算力（那就该禁售），还是从中国赚更多钱（那就加税但允许销售）？
+
+【对半导体/AI算力供应链的影响】①短期：ASML在DUV市场仍有对华销售空间，但MATCH法案如果通过将实质性压缩这一空间→中国芯片制造商（中芯国际等）的扩产计划可能受阻；②长期：中国加速国产光刻机/刻蚀机研发，但在7nm以下先进制程仍严重依赖ASML→芯片自主化时间线可能被推迟3-5年；③对算力成本：如果中国无法自产先进AI训练芯片，将更加依赖开源模型优化和算法效率提升来弥补算力差距。
+
+【关注板块：光通信】本期关注板块&#x27;光通讯&#x27;近期动态：400G Optical MSA联盟成立（多家网络/半导体/光学公司联合），旨在为下一代数据中心制定400G光模块标准。这是AI算力基础设施的关键环节——AI训练集群需要高速光互联来连接数千个GPU。LightCounting预测AI驱动的光模块市场2026年将增长40%+。</p>
+        <ul class='abul'><li>Proposed US MATCH Act seeks to force US allies (Netherlands, Japan) to follow Washington&#x27;s export controls on chip equipment to China</li><li>Dutch government formally objects; ASML shares fell on earlier proposed curbs — China accounts for ~20% of expected 2026 sales</li><li>Trump administration reversed outright H200 ban, replaced with 25% tariff — creating what experts call &#x27;incoherent&#x27; policy framework</li><li>ASML faces dual pressure: tighter China export restrictions vs. AI boom-driven demand for advanced lithography</li><li>LightCounting/Photonics Spectra report: 400G Optical MSA formed by networking/semiconductor/optics companies for next-gen data center connectivity</li></ul>
+        <div class="abody"><p>【MATCH法案与中美芯片战新阶段】美国国会推动的MATCH法案（Matching Allied Trade Controls for Hegemony Act）试图强制盟国遵守美国的对华芯片出口管制——这是美国&#x27;长臂管辖&#x27;从直接制裁向制度化的延伸。荷兰政府（ASML母国）公开反对，认为应由荷兰自主决定出口政策而非被美国法律强制。这背后是ASML的切身利益：中国市场预计占其2026年收入的约20%（主要销售不太先进的DUV光刻机，不涉及EUV）。</p><p>【政策混乱】特朗普政府在芯片出口管制上展现出矛盾姿态：一方面延续拜登时期对华芯片围堵的总体战略，另一方面又解除了对NVIDIA H200的直接禁售，改为加征25%关税——这意味着中国企业只要愿意支付更高的价格，就能买到H200。业界专家将此描述为&#x27;不连贯&#x27;的政策框架：制裁的目标到底是阻止中国获得算力（那就该禁售），还是从中国赚更多钱（那就加税但允许销售）？</p><p>【对半导体/AI算力供应链的影响】①短期：ASML在DUV市场仍有对华销售空间，但MATCH法案如果通过将实质性压缩这一空间→中国芯片制造商（中芯国际等）的扩产计划可能受阻；②长期：中国加速国产光刻机/刻蚀机研发，但在7nm以下先进制程仍严重依赖ASML→芯片自主化时间线可能被推迟3-5年；③对算力成本：如果中国无法自产先进AI训练芯片，将更加依赖开源模型优化和算法效率提升来弥补算力差距。</p><p>【关注板块：光通信】本期关注板块&#x27;光通讯&#x27;近期动态：400G Optical MSA联盟成立（多家网络/半导体/光学公司联合），旨在为下一代数据中心制定400G光模块标准。这是AI算力基础设施的关键环节——AI训练集群需要高速光互联来连接数千个GPU。LightCounting预测AI驱动的光模块市场2026年将增长40%+。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.reuters.com/world/asia-pacific/dutch-government-objects-proposed-us-law-restricting-asmls-china-exports-2026-05-14/" target="_blank" rel="noopener">Reuters<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-05-14</span></a> <a class="src" href="https://www.photonics.com/Articles/OFC-2026-News-Roundup/a72074" target="_blank" rel="noopener">Photonics Spectra<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bloomberg.com/news/videos/2026-06-19/the-china-show-6-19-2026-video" target="_blank" rel="noopener">Bloomberg<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a10" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#fdf2e3;color:#e6943a">AI/科技</div>
+        <h1 class="atitle">400G Optical MSA Formed; AI-Driven Optical Module Market to Grow 40%+ in 2026 — Optical Communications Is the &#x27;Hidden Infrastructure&#x27; of the AI Boom</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7ef165e5b0ce" onclick="toggleFav(event,'f7ef165e5b0ce')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【关注板块：光通讯——AI的&#x27;隐形基础设施&#x27;】
+
+本日简报特别深挖David爸爸关注的光通讯板块。光通讯/光模块是AI算力基础设施中最关键但最不为大众所知的环节——当你在讨论GPU/NPU算力时，连接成千上万个GPU的光纤收发器（optical transceiver）才是决定集群性能的&#x27;隐藏瓶颈&#x27;。
+
+【产业动态】①400G Optical MSA联盟成立——多家网络设备商（Cisco/Juniper）、半导体公司（Broadcom/Marvell）、光学器件商（Lumentum/Coherent）联合制定下一代数据中心400G光模块行业标准。标准化意味着成本下降和供应稳定——这对算力基础设施是利好。②OFC 2026大会展示了一系列突破：硅光子（silicon photonics）将光学器件直接集成到芯片上，共封装光学（co-packaged optics）将光模块和交换芯片封装在一起以降低功耗。③LightCounting预测2026年AI驱动的光模块市场增长40%+，其中800G和1.6T模块已进入量产阶段。
+
+【对投资的影响】光通信产业链的投资逻辑：①直接受益：中际旭创（中国光模块龙头）、Coherent（美国激光器龙头）、Lumentum；②间接受益：台积电（硅光芯片代工）、博通（交换芯片+共封装光学）；③长期趋势：800G→1.6T→3.2T的技术迭代将在未来5年持续推动行业增长——这是一个确定性较高的&#x27;卖铲人&#x27;投资逻辑（无论哪个AI模型赢，都需要更多光模块）。
+
+【加拿大视角（妈妈关注）】Photonics North会议（6月2-5日在魁北克举办）展示了加拿大在光子学研发领域的日益重要的角色——多伦多大学、麦吉尔大学、渥太华大学在硅光子/量子光子研究方面有较强实力。加拿大光通信产业虽然规模不大，但在特定细分领域（如光子集成芯片设计）有独特优势。</p>
+        <ul class='abul'><li>Consortium of networking, semiconductor, and optics companies forms 400G Optical MSA (Multi-Source Agreement) to standardize next-gen data center connectivity</li><li>OFC 2026 (Optical Fiber Communications Conference) showcases breakthroughs: silicon photonics, co-packaged optics, 1.6T modules</li><li>LightCounting projects AI-driven demand for optical modules to drive 40%+ market growth in 2026; 800G/1.6T modules entering mass production</li><li>Optica reports &#x27;ultrafast chip&#x27; breakthrough — neural network-designed photonic components reduce design time from weeks to hours</li><li>Photonics North conference (Quebec, June 2-5) highlights Canada&#x27;s growing role in photonics R&amp;D</li><li>Key driver: AI training clusters with 100,000+ GPUs require massive optical interconnect bandwidth — optical transceivers are the bottleneck-turned-opportunity</li></ul>
+        <div class="abody"><p>【关注板块：光通讯——AI的&#x27;隐形基础设施&#x27;】</p><p>本日简报特别深挖David爸爸关注的光通讯板块。光通讯/光模块是AI算力基础设施中最关键但最不为大众所知的环节——当你在讨论GPU/NPU算力时，连接成千上万个GPU的光纤收发器（optical transceiver）才是决定集群性能的&#x27;隐藏瓶颈&#x27;。</p><p>【产业动态】①400G Optical MSA联盟成立——多家网络设备商（Cisco/Juniper）、半导体公司（Broadcom/Marvell）、光学器件商（Lumentum/Coherent）联合制定下一代数据中心400G光模块行业标准。标准化意味着成本下降和供应稳定——这对算力基础设施是利好。②OFC 2026大会展示了一系列突破：硅光子（silicon photonics）将光学器件直接集成到芯片上，共封装光学（co-packaged optics）将光模块和交换芯片封装在一起以降低功耗。③LightCounting预测2026年AI驱动的光模块市场增长40%+，其中800G和1.6T模块已进入量产阶段。</p><p>【对投资的影响】光通信产业链的投资逻辑：①直接受益：中际旭创（中国光模块龙头）、Coherent（美国激光器龙头）、Lumentum；②间接受益：台积电（硅光芯片代工）、博通（交换芯片+共封装光学）；③长期趋势：800G→1.6T→3.2T的技术迭代将在未来5年持续推动行业增长——这是一个确定性较高的&#x27;卖铲人&#x27;投资逻辑（无论哪个AI模型赢，都需要更多光模块）。</p><p>【加拿大视角（妈妈关注）】Photonics North会议（6月2-5日在魁北克举办）展示了加拿大在光子学研发领域的日益重要的角色——多伦多大学、麦吉尔大学、渥太华大学在硅光子/量子光子研究方面有较强实力。加拿大光通信产业虽然规模不大，但在特定细分领域（如光子集成芯片设计）有独特优势。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.photonics.com/Articles/OFC-2026-News-Roundup/a72074" target="_blank" rel="noopener">Photonics Spectra<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.optica-opn.org/home/" target="_blank" rel="noopener">Optica OPN<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-15</span></a> <a class="src" href="https://www.lightcounting.com/" target="_blank" rel="noopener">LightCounting<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a11" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">Five Ways the Iran Peace Deal Could Affect Your Money: Petrol, Heating, Airfares, Inflation, and Interest Rates</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f3c1b49b9a954" onclick="toggleFav(event,'f3c1b49b9a954')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【联动机制】伊朗战争通过能源渠道向全球经济传导通胀：霍尔木兹海峡封锁→全球原油/LNG供给收缩→能源价格飙升→交通/取暖/工业成本上升→CPI全面上行→央行被迫暂停降息甚至加息。这个传导链在2026年上半年完整演绎了一遍。
+
+【油价回落速度分析】RAC政策主管Simon Williams指出关键问题：&#x27;批发价格回落能否像涨价时一样迅速传导到零售端？&#x27;历史上油价下跌时，零售汽油降价总是比涨价慢（所谓&#x27;火箭与羽毛&#x27;效应）。美国汽油从$4.05回落至$3.50可能需要2-3个月，英国汽油从155便士回落至140便士也需要时间。
+
+【通胀前景与央行路径】英国央行行长贝利本周表示油价近期下跌&#x27;令人鼓舞&#x27;，但战争中积累的高能源价格仍在管道中产生通胀压力。英国7月Ofgem能源价格上限已锁定上涨13%（覆盖3300万户），这将直接推高7-8月CPI读数。美国5月CPI 4.2%中能源贡献了约1.5个百分点——若油价持续回落，Q3 CPI可能降至3%以下。美联储和英国央行目前都处于&#x27;观望模式&#x27;，市场预计最早2027年初才会降息。
+
+【对创业者与家庭的影响】①航空出行：暑期机票价格仍将高于去年，但不会进一步暴涨；②取暖/用电：英国7月起家庭能源账单上涨，影响妈妈在加拿大的生活成本关注；③借贷成本：利率维持高位意味着房贷/企业贷款利率不会很快下降，阳阳创业融资成本仍高；④投资：通胀见顶+利率见顶=债券收益率可能已到周期高点，固定收益类资产吸引力上升。</p>
+        <ul class='abul'><li>UK petrol 154.72p/L (up from 132.05p pre-war); US gasoline $4.05/gal (up from $2.94); RAC says recent oil drop &#x27;if sustained&#x27; will lead to much lower pump prices</li><li>UK gas price back to 98p/therm (was 157p in March, 80p pre-war); Ofgem July price cap already set — average household +£221/yr (+13%) from July, cannot be changed</li><li>Jet fuel dropped from $1,838/tonne peak to $967; European airlines expected to have enough fuel for summer but prices stay above pre-war levels this year</li><li>UK inflation 2.8% (May), US 4.2% (May), EU 3.3% (May) — all up from pre-war levels; energy price cap hike in July expected to add &#x27;sizeable&#x27; upward pressure on UK CPI</li><li>BOE held at 3.75% (4th meeting), Fed held at 3.5-3.75%, ECB hiked to 2.25% — rates widely expected on hold for rest of 2026</li></ul>
+        <div class="abody"><p>【联动机制】伊朗战争通过能源渠道向全球经济传导通胀：霍尔木兹海峡封锁→全球原油/LNG供给收缩→能源价格飙升→交通/取暖/工业成本上升→CPI全面上行→央行被迫暂停降息甚至加息。这个传导链在2026年上半年完整演绎了一遍。</p><p>【油价回落速度分析】RAC政策主管Simon Williams指出关键问题：&#x27;批发价格回落能否像涨价时一样迅速传导到零售端？&#x27;历史上油价下跌时，零售汽油降价总是比涨价慢（所谓&#x27;火箭与羽毛&#x27;效应）。美国汽油从$4.05回落至$3.50可能需要2-3个月，英国汽油从155便士回落至140便士也需要时间。</p><p>【通胀前景与央行路径】英国央行行长贝利本周表示油价近期下跌&#x27;令人鼓舞&#x27;，但战争中积累的高能源价格仍在管道中产生通胀压力。英国7月Ofgem能源价格上限已锁定上涨13%（覆盖3300万户），这将直接推高7-8月CPI读数。美国5月CPI 4.2%中能源贡献了约1.5个百分点——若油价持续回落，Q3 CPI可能降至3%以下。美联储和英国央行目前都处于&#x27;观望模式&#x27;，市场预计最早2027年初才会降息。</p><p>【对创业者与家庭的影响】①航空出行：暑期机票价格仍将高于去年，但不会进一步暴涨；②取暖/用电：英国7月起家庭能源账单上涨，影响妈妈在加拿大的生活成本关注；③借贷成本：利率维持高位意味着房贷/企业贷款利率不会很快下降，阳阳创业融资成本仍高；④投资：通胀见顶+利率见顶=债券收益率可能已到周期高点，固定收益类资产吸引力上升。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c4g5574pwreo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/c20zgjzz0e4o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a12" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">BOE Holds at 3.75%, Fed at 3.5-3.75%, ECB Surprises with First Hike in Three Years to 2.25% — Divergence Reflects War&#x27;s Asymmetric Inflation Impact</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f8c7b2cafabc5" onclick="toggleFav(event,'f8c7b2cafabc5')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【三大央行政策路径分化】本周全球三大央行的利率决策清晰地展示了伊朗战争对发达经济体的不对称冲击：①美联储和英国央行选择&#x27;按兵不动&#x27;——虽然通胀仍高于目标（美国4.2%、英国2.8%），但战争结束预期已使油价回落，两家央行选择观望；②欧洲央行意外加息——欧元区对俄罗斯以外的能源进口依赖度高于美英，伊朗战争导致的能源冲击在欧洲的&#x27;二次传导&#x27;更严重（电价、工业用气、化工原料），ECB认为必须提前遏制通胀预期。
+
+【债市与利率联动】英国5月借款233亿英镑，同比增加近1/3，&#x27;脆弱&#x27;的公共财政意味着英国财政空间有限，无法通过减税或增加支出对冲高利率的紧缩效应。这对持有英镑资产的海外投资者（如妈妈关注的英国理财）意味着：英镑可能因财政担忧而承压，但高利率又提供利差支撑——形成&#x27;英镑区间震荡&#x27;格局。
+
+【对A股/港股的传导】全球利率见顶对新兴市场有利：①美元不再走强→新兴市场资金外流压力减轻；②美债收益率触顶→全球风险偏好回升→港股/中概股估值修复。但前提是伊朗协议不被破坏、油价不再二次冲高。
+
+【对创业融资】利率维持3.5-3.75%意味着风险投资的&#x27;无风险利率锚&#x27;仍高——VC的LP（有限合伙人）对回报率要求更高，种子轮/A轮估值被压缩。阳阳如果计划融资，需关注Q4-Q1可能出现的利率拐点带来的估值修复窗口。</p>
+        <ul class='abul'><li>BOE holds rates at 3.75% for 4th consecutive meeting; Bailey says oil price drops &#x27;encouraging&#x27; but &#x27;inflationary pressure in the pipeline&#x27;</li><li>Fed holds at 3.5-3.75%, citing &#x27;elevated uncertainty&#x27; from Middle East conflict; markets price no cuts until 2027</li><li>ECB hikes to 2.25% — first increase in nearly 3 years — noting Iran war &#x27;generating inflation pressures&#x27; disproportionately on Europe&#x27;s energy-dependent economy</li><li>UK borrowing hits £23.3bn in May, up ~1/3 year-on-year; public finances described as &#x27;fragile&#x27;</li><li>Expectation: rates on hold through end of 2026; rate cuts possible in 2027 if Iran deal holds and inflation recedes</li></ul>
+        <div class="abody"><p>【三大央行政策路径分化】本周全球三大央行的利率决策清晰地展示了伊朗战争对发达经济体的不对称冲击：①美联储和英国央行选择&#x27;按兵不动&#x27;——虽然通胀仍高于目标（美国4.2%、英国2.8%），但战争结束预期已使油价回落，两家央行选择观望；②欧洲央行意外加息——欧元区对俄罗斯以外的能源进口依赖度高于美英，伊朗战争导致的能源冲击在欧洲的&#x27;二次传导&#x27;更严重（电价、工业用气、化工原料），ECB认为必须提前遏制通胀预期。</p><p>【债市与利率联动】英国5月借款233亿英镑，同比增加近1/3，&#x27;脆弱&#x27;的公共财政意味着英国财政空间有限，无法通过减税或增加支出对冲高利率的紧缩效应。这对持有英镑资产的海外投资者（如妈妈关注的英国理财）意味着：英镑可能因财政担忧而承压，但高利率又提供利差支撑——形成&#x27;英镑区间震荡&#x27;格局。</p><p>【对A股/港股的传导】全球利率见顶对新兴市场有利：①美元不再走强→新兴市场资金外流压力减轻；②美债收益率触顶→全球风险偏好回升→港股/中概股估值修复。但前提是伊朗协议不被破坏、油价不再二次冲高。</p><p>【对创业融资】利率维持3.5-3.75%意味着风险投资的&#x27;无风险利率锚&#x27;仍高——VC的LP（有限合伙人）对回报率要求更高，种子轮/A轮估值被压缩。阳阳如果计划融资，需关注Q4-Q1可能出现的利率拐点带来的估值修复窗口。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c4g5574pwreo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.bbc.com/news/articles/cqx1e8nrwgvo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://finance.yahoo.com/quote/%5EGSPC/history/" target="_blank" rel="noopener">Yahoo Finance<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a13" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">S&amp;P 500 Rallies 1.08% to 7,500.58 on Iran Peace Deal Optimism; Dow, Nasdaq Also Close Higher</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fc3e1224e1abc" onclick="toggleFav(event,'fc3e1224e1abc')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【板块轮动分析】6月18日美股的反弹主要由伊朗和平协议驱动，但板块表现分化明显：科技股（尤其是AI/半导体）经历了周二（6月17日）的大幅回调后企稳——纳斯达克周二跌1.34%后周三仅涨0.3%，说明资金并未大规模回流高估值科技股，而是转向周期和价值板块（道指涨0.7%领跑）。
+
+【SpaceX效应】SpaceX连续第三日上涨，公司近期完成了Starship V3的试飞（5月22日），并在IPO前持续释放利好。SpaceX的IPO（连同OpenAI）被市场视为2026年最重要的科技上市事件，其定价和首日表现将对整个AI/航天板块估值产生示范效应。
+
+【与A股的联动】6月18日上证综指收涨0.4%报4,108点，深证成指涨1.31%报15,881点，连续第三日上涨。A股在端午假期前（6月19-20日休市）出现了&#x27;节前翘尾&#x27;行情。6月19日A股/港股均休市（端午节），但6月18日的美股强势收盘为节后A股（6月23日复市）提供了积极的外部环境。
+
+【前瞻关注】下周（6月23日起）A股复市后，需关注：①沪指能否站稳4,100点上方并挑战4,200阻力位；②深证成指科技板块能否延续反弹；③港股恒生科技指数对美股AI板块的跟涨幅度。</p>
+        <ul class='abul'><li>S&amp;P 500 closes at 7,500.58 (+1.08%) on June 18; Dow adds 350+ points (+0.7%); Nasdaq Composite gains 0.3%</li><li>Markets rally on Iran-US peace deal signing; energy stocks mixed — war premium unwinds but oil majors still supported by elevated crude</li><li>SpaceX shares jump for third consecutive day ahead of highly anticipated IPO</li><li>Previous session (June 17): S&amp;P 500 at 7,420.10 (-1.21%); Nasdaq dropped 354.69 points (-1.34%) on Fed rate-hold uncertainty</li><li>Week-to-date: S&amp;P 500 +1.1%, Dow +2.4%, Nasdaq roughly flat after Tuesday&#x27;s tech selloff</li></ul>
+        <div class="abody"><p>【板块轮动分析】6月18日美股的反弹主要由伊朗和平协议驱动，但板块表现分化明显：科技股（尤其是AI/半导体）经历了周二（6月17日）的大幅回调后企稳——纳斯达克周二跌1.34%后周三仅涨0.3%，说明资金并未大规模回流高估值科技股，而是转向周期和价值板块（道指涨0.7%领跑）。</p><p>【SpaceX效应】SpaceX连续第三日上涨，公司近期完成了Starship V3的试飞（5月22日），并在IPO前持续释放利好。SpaceX的IPO（连同OpenAI）被市场视为2026年最重要的科技上市事件，其定价和首日表现将对整个AI/航天板块估值产生示范效应。</p><p>【与A股的联动】6月18日上证综指收涨0.4%报4,108点，深证成指涨1.31%报15,881点，连续第三日上涨。A股在端午假期前（6月19-20日休市）出现了&#x27;节前翘尾&#x27;行情。6月19日A股/港股均休市（端午节），但6月18日的美股强势收盘为节后A股（6月23日复市）提供了积极的外部环境。</p><p>【前瞻关注】下周（6月23日起）A股复市后，需关注：①沪指能否站稳4,100点上方并挑战4,200阻力位；②深证成指科技板块能否延续反弹；③港股恒生科技指数对美股AI板块的跟涨幅度。</p></div>
+        <div class="sources">来源：<a class="src" href="https://finance.yahoo.com/quote/%5EGSPC/history/" target="_blank" rel="noopener">Yahoo Finance<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://www.wsj.com/livecoverage/stock-market-today-dow-sp-500-nasdaq-06-18-2026" target="_blank" rel="noopener">WSJ<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-18</span></a> <a class="src" href="https://quote.eastmoney.com/zs000001.html" target="_blank" rel="noopener">东方财富<span class="stance" style="background:#5bbf8a">体制外</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a14" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">A股节前翘尾：沪指收涨0.4%报4108点，深成指涨1.31%——端午节休市两日</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f40cb097970e6" onclick="toggleFav(event,'f40cb097970e6')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【事实信号】端午节假期前最后一个交易日（6月18日），A股三大指数集体收涨。上证综指上涨0.4%至4,108.07点，深证成指上涨1.31%至15,880.56点，创业板指上涨0.93%至15,675点。市场成交额维持万亿以上，北向资金净流入约45亿人民币，显示外资对节后行情偏乐观。板块方面，新能源汽车产业链领涨（柳州新能源车生产繁忙），中药创新受政策利好推动，消费电子因AI终端预期而活跃。港股6月18日亦同步收高，恒生指数涨0.7%报约21,800点，恒生科技指数涨1.2%。6月19日港股同样休市（端午节）。
+
+【联动机制分析——外资为何在节前加仓？】北向资金节前净流入45亿元，这一行为可以从多个维度理解：①伊朗和平协议的签署降低了全球地缘政治风险溢价，外资对新兴市场的风险偏好回升；②美联储6月维持利率不变，美元走弱预期增强了人民币资产的吸引力；③A股估值处于相对低位——上证综指4100点对应约12.5倍PE（TTM），低于历史均值14倍，对全球配置型资金具有估值吸引力。
+
+【节后A股走势推演】6月23日复市后，A股面临以下关键变量：①美股在A股休市期间的表现——6月18日S&amp;P500涨1.08%至7500点，若美股在6月19-20日继续走强，将对A股形成正向传导；②端午消费数据的发布——若&#x27;618&#x27;和端午假期消费数据超预期，消费板块可能获得催化；③政策面——李克强总理可能在节后释放更多稳增长信号。
+
+【对投资者的影响】①短期：节前翘尾行情若叠加节后利好，沪指有望挑战4,200-4,300区间——但需警惕4,200点是2026年内多次受阻的阻力位；②中期：二季度GDP数据将于7月中旬公布，若数据好于预期（市场预期5.5%左右），A股有望开启中期反弹；③板块配置：新能源汽车产业链（渗透率破50%+出口高增）和AI应用（&#x27;618&#x27;期间AI终端热销）是最确定的两条主线。
+
+⚠️前瞻推测：若伊朗协议60天窗口期内无重大变数、国内稳增长政策持续发力，上证综指有望在下半年挑战4,500点；但若全球通胀二次冲高或中美贸易摩擦升级，A股可能在4,000-4,200区间震荡整理。</p>
+        <ul class='abul'><li>6月18日上证综指收涨0.4%报4,108点，深证成指涨1.31%报15,881点，连续第三日上涨</li><li>6月19-20日为端午节假期，沪深港通均休市；6月23日复市</li><li>6月18日领涨板块：新能源汽车、中药创新、消费电子</li><li>年中&#x27;618&#x27;促销数据初步显示消费结构升级：健康、智能家居、国潮品类增速领先</li><li>节后关注：沪指4100点能否站稳，深成指能否挑战16,200点前期高点</li></ul>
+        <div class="abody"><p>【事实信号】端午节假期前最后一个交易日（6月18日），A股三大指数集体收涨。上证综指上涨0.4%至4,108.07点，深证成指上涨1.31%至15,880.56点，创业板指上涨0.93%至15,675点。市场成交额维持万亿以上，北向资金净流入约45亿人民币，显示外资对节后行情偏乐观。板块方面，新能源汽车产业链领涨（柳州新能源车生产繁忙），中药创新受政策利好推动，消费电子因AI终端预期而活跃。港股6月18日亦同步收高，恒生指数涨0.7%报约21,800点，恒生科技指数涨1.2%。6月19日港股同样休市（端午节）。</p><p>【联动机制分析——外资为何在节前加仓？】北向资金节前净流入45亿元，这一行为可以从多个维度理解：①伊朗和平协议的签署降低了全球地缘政治风险溢价，外资对新兴市场的风险偏好回升；②美联储6月维持利率不变，美元走弱预期增强了人民币资产的吸引力；③A股估值处于相对低位——上证综指4100点对应约12.5倍PE（TTM），低于历史均值14倍，对全球配置型资金具有估值吸引力。</p><p>【节后A股走势推演】6月23日复市后，A股面临以下关键变量：①美股在A股休市期间的表现——6月18日S&amp;P500涨1.08%至7500点，若美股在6月19-20日继续走强，将对A股形成正向传导；②端午消费数据的发布——若&#x27;618&#x27;和端午假期消费数据超预期，消费板块可能获得催化；③政策面——李克强总理可能在节后释放更多稳增长信号。</p><p>【对投资者的影响】①短期：节前翘尾行情若叠加节后利好，沪指有望挑战4,200-4,300区间——但需警惕4,200点是2026年内多次受阻的阻力位；②中期：二季度GDP数据将于7月中旬公布，若数据好于预期（市场预期5.5%左右），A股有望开启中期反弹；③板块配置：新能源汽车产业链（渗透率破50%+出口高增）和AI应用（&#x27;618&#x27;期间AI终端热销）是最确定的两条主线。</p><p>⚠️前瞻推测：若伊朗协议60天窗口期内无重大变数、国内稳增长政策持续发力，上证综指有望在下半年挑战4,500点；但若全球通胀二次冲高或中美贸易摩擦升级，A股可能在4,000-4,200区间震荡整理。</p></div>
+        <div class="sources">来源：<a class="src" href="https://quote.eastmoney.com/zs000001.html" target="_blank" rel="noopener">东方财富<span class="stance" style="background:#5bbf8a">体制外</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://tradingeconomics.com/china/stock-market" target="_blank" rel="noopener">Trading Economics<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a> <a class="src" href="https://hk.finance.yahoo.com/quote/000001.SS/history/" target="_blank" rel="noopener">Yahoo Finance<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a15" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">Brexit Cost 6% of UK Economy, Bank of England Data Suggests — Analysis Shows Growth Gap vs Hypothetical EU-Membership Path</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f7725893fc632" onclick="toggleFav(event,'f7725893fc632')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【英国脱欧经济损失量化】英国央行的一项新研究首次以公司层面数据量化了脱欧的长期经济代价。研究构建了一个&#x27;合成英国&#x27;反事实模型——假设英国未脱欧、继续保持与欧盟的贸易和投资关系——发现在此情景下英国GDP将比当前实际水平高出约6%。这6%的差距主要来自：①贸易壁垒导致英国出口竞争力下降（对欧盟出口减少约15%）；②外国直接投资(FDI)流入减少（跨国公司选择将欧洲总部设在法兰克福/巴黎/都柏林而非伦敦）；③劳动力市场灵活性下降（欧盟公民不再自由流动）。
+
+【政策含义】英国首相斯塔默面临越来越大的压力。刚赢得补选的Andy Burnham（目前被视为最可能的工党领导挑战者）正在利用脱欧经济代价这一议题攻击现政府。对家庭的影响：脱欧导致的实际收入损失约£1,200/人/年（据NIESR估计），叠加伊朗战争导致的能源和食品价格上涨，英国家庭购买力持续承压。
+
+【对海外理财（妈妈关注）】如果你在考虑英国房产或英镑资产：脱欧对伦敦房地产市场的结构性负面影响仍在——虽经历了调整，但伦敦高端住宅相对巴黎/米兰的折价扩大。英镑长期均衡汇率可能低于脱欧前（当前GBP/USD约1.27，脱欧前为1.40-1.50）。但英国资产也有&#x27;便宜&#x27;的相对优势——如果英国和欧盟重新谈判贸易安排（Burnham的竞选主张），英镑和FTSE都可能迎来重估。</p>
+        <ul class='abul'><li>Bank of England analysis suggests UK economy ~6% smaller than if it had remained in the EU</li><li>Study compares actual UK growth trajectory with synthetic counterfactual based on comparable EU economies</li><li>Findings fuel renewed political debate: Labour&#x27;s Burnham (who just won by-election) calls for &#x27;honest accounting of Brexit&#x27;s costs&#x27;</li><li>UK public finances described as &#x27;fragile&#x27; — May borrowing up ~1/3 year-on-year to £23.3bn</li><li>Timing significant as UK navigates post-Iran-war economic recovery and trade reorientation</li></ul>
+        <div class="abody"><p>【英国脱欧经济损失量化】英国央行的一项新研究首次以公司层面数据量化了脱欧的长期经济代价。研究构建了一个&#x27;合成英国&#x27;反事实模型——假设英国未脱欧、继续保持与欧盟的贸易和投资关系——发现在此情景下英国GDP将比当前实际水平高出约6%。这6%的差距主要来自：①贸易壁垒导致英国出口竞争力下降（对欧盟出口减少约15%）；②外国直接投资(FDI)流入减少（跨国公司选择将欧洲总部设在法兰克福/巴黎/都柏林而非伦敦）；③劳动力市场灵活性下降（欧盟公民不再自由流动）。</p><p>【政策含义】英国首相斯塔默面临越来越大的压力。刚赢得补选的Andy Burnham（目前被视为最可能的工党领导挑战者）正在利用脱欧经济代价这一议题攻击现政府。对家庭的影响：脱欧导致的实际收入损失约£1,200/人/年（据NIESR估计），叠加伊朗战争导致的能源和食品价格上涨，英国家庭购买力持续承压。</p><p>【对海外理财（妈妈关注）】如果你在考虑英国房产或英镑资产：脱欧对伦敦房地产市场的结构性负面影响仍在——虽经历了调整，但伦敦高端住宅相对巴黎/米兰的折价扩大。英镑长期均衡汇率可能低于脱欧前（当前GBP/USD约1.27，脱欧前为1.40-1.50）。但英国资产也有&#x27;便宜&#x27;的相对优势——如果英国和欧盟重新谈判贸易安排（Burnham的竞选主张），英镑和FTSE都可能迎来重估。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/cvg75npqkq4o" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a16" data-lang="zh" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">&#x27;618&#x27;折射消费新变化：健康、智能家居、国潮品类增速领先——消费升级结构性分化加剧</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="f07492108a948" onclick="toggleFav(event,'f07492108a948')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【消费结构性分化】2026年&#x27;618&#x27;购物节的数据清晰地显示了中国消费市场正在发生的结构性转变：总量增速放缓（整体GMV增速估计在5-8%之间），但品质升级和体验消费的增长远超大盘。健康品类（38%）、智能家居（26%）、国潮文创（33%）的高增速表明：中国消费者正在从&#x27;买更多&#x27;转向&#x27;买更好&#x27;。
+
+【新能源汽车加速渗透】&#x27;618&#x27;期间新能源汽车线上订单同比增45%，这个数据与今年以来新能源车渗透率突破50%的趋势一致。消费者通过线上渠道直接下单整车交付的模式正在成熟——特斯拉、蔚来、小鹏、比亚迪都在强化线上直销能力。
+
+【直播电商成为主渠道】直播电商GMV占比首次超过40%，意味着&#x27;看直播下单&#x27;已经从补充渠道升级为主流购物方式。这对创业者（阳阳）的启示：任何面向C端的AI产品，如果忽视短视频/直播的内容分发渠道，将失去最大的流量入口。
+
+【下沉市场崛起】三线及以下城市的消费增速首次反超高线城市，这是中国经济内循环战略下的一个重要信号——低线城市的消费升级正在从单纯的价格敏感转向品质追求。
+
+【对宏观经济和投资】&#x27;618&#x27;数据透露的宏观信号：①消费复苏仍在但更趋理性——&#x27;报复性消费&#x27;让位于&#x27;理性升级&#x27;；②品类分化剧烈——投资者应关注健康/智能/国潮赛道的上市公司；③平台经济竞争格局变化——拼多多/抖音电商份额扩大，传统电商（天猫/京东）承压。</p>
+        <ul class='abul'><li>2026年&#x27;618&#x27;购物节收官：全网交易额同比增速放缓至个位数，但结构性亮点突出</li><li>健康品类增长38%、智能家居增长26%、国潮文创增长33%——体验型和品质型消费成主力</li><li>新能源汽车线上订单同比增45%，反映了新能源车渗透率加速提升</li><li>直播电商占&#x27;618&#x27;总交易额比例首次超过40%，内容驱动消费已成主流</li><li>低线城市（三线及以下）消费增速首次超过高线城市，下沉市场潜力释放</li></ul>
+        <div class="abody"><p>【消费结构性分化】2026年&#x27;618&#x27;购物节的数据清晰地显示了中国消费市场正在发生的结构性转变：总量增速放缓（整体GMV增速估计在5-8%之间），但品质升级和体验消费的增长远超大盘。健康品类（38%）、智能家居（26%）、国潮文创（33%）的高增速表明：中国消费者正在从&#x27;买更多&#x27;转向&#x27;买更好&#x27;。</p><p>【新能源汽车加速渗透】&#x27;618&#x27;期间新能源汽车线上订单同比增45%，这个数据与今年以来新能源车渗透率突破50%的趋势一致。消费者通过线上渠道直接下单整车交付的模式正在成熟——特斯拉、蔚来、小鹏、比亚迪都在强化线上直销能力。</p><p>【直播电商成为主渠道】直播电商GMV占比首次超过40%，意味着&#x27;看直播下单&#x27;已经从补充渠道升级为主流购物方式。这对创业者（阳阳）的启示：任何面向C端的AI产品，如果忽视短视频/直播的内容分发渠道，将失去最大的流量入口。</p><p>【下沉市场崛起】三线及以下城市的消费增速首次反超高线城市，这是中国经济内循环战略下的一个重要信号——低线城市的消费升级正在从单纯的价格敏感转向品质追求。</p><p>【对宏观经济和投资】&#x27;618&#x27;数据透露的宏观信号：①消费复苏仍在但更趋理性——&#x27;报复性消费&#x27;让位于&#x27;理性升级&#x27;；②品类分化剧烈——投资者应关注健康/智能/国潮赛道的上市公司；③平台经济竞争格局变化——拼多多/抖音电商份额扩大，传统电商（天猫/京东）承压。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.news.cn/fortune/20260619/436ce168859c4a7c814b19f1477948e5/c.html" target="_blank" rel="noopener">新华网<span class="stance" style="background:#e07a7a">体制内</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+      <div class="article" id="a17" data-lang="en" style="display:none">
+        <div class="fsbar fsbar-art">字号 <input type="range" min="15" max="34" value="20" class="fsr-art" oninput="fsArt(this.value)"> <b class="fsv-art">20</b>px</div>
+        <div class="atag" style="background:#f2ecfa;color:#9b78c9">财经</div>
+        <h1 class="atitle">ECB Hikes to 2.25% — First Increase in Nearly Three Years — Signals Europe&#x27;s Energy Vulnerability Is Far From Over</h1>
+        <div class="adate">2026-06-19</div>
+        <button class="favbtn" data-fav="fad03dff4bc63" onclick="toggleFav(event,'fad03dff4bc63')"><span class="favbtn-ic">☆</span> <span class="favbtn-tx">收藏</span></button>
+        <p class="alead" >【欧洲央行逆势加息的结构性逻辑】欧洲央行在美联储和英国央行都按兵不动之际选择加息，表面上是&#x27;逆周期&#x27;操作，实际上反映了欧洲经济结构的深层脆弱：①欧洲对进口能源的依赖度（尤其是天然气）远高于美英——即使伊朗和平协议签署，欧洲仍需要时间来重建能源供应多元化；②欧元区劳动力市场紧张程度高于预期——服务业通胀黏性较强；③ECB担心如果现在不遏制通胀预期，未来需要更大力度的紧缩。
+
+【对全球资产配置的影响】ECB加息→欧元走强→美元走弱→利好新兴市场资本流入和大宗商品（以美元计价的黄金、铜等）。但同时，欧元走强会削弱欧洲出口竞争力（尤其是德国汽车和机械出口），进而影响欧洲股市的盈利前景。对于持有欧元资产的家庭——欧元存款和债券收益率上升，但欧洲股市面临逆风。
+
+【与中国的联动】欧元升值意味着人民币对欧元相对贬值——中国对欧出口竞争力增强。但欧洲加息也意味着欧洲需求可能走弱，对中国出口（尤其是机电产品和新能源车）的总量需求不利。</p>
+        <ul class='abul'><li>European Central Bank raises key rate to 2.25% — first hike in nearly three years; cites Iran war generating persistent inflation pressures</li><li>ECB decision diverges sharply from Fed (hold) and BOE (hold) — reflects Europe&#x27;s greater exposure to energy price shocks</li><li>Eurozone inflation at 3.3% (May), up from 2.1% pre-war; energy component remains the primary driver</li><li>ECB President Christine Lagarde warns that &#x27;the path ahead is uncertain&#x27; with Iran deal still fragile</li><li>Euro strengthens against USD on rate differential — EUR/USD rises above 1.12, adding headwinds for European exporters</li></ul>
+        <div class="abody"><p>【欧洲央行逆势加息的结构性逻辑】欧洲央行在美联储和英国央行都按兵不动之际选择加息，表面上是&#x27;逆周期&#x27;操作，实际上反映了欧洲经济结构的深层脆弱：①欧洲对进口能源的依赖度（尤其是天然气）远高于美英——即使伊朗和平协议签署，欧洲仍需要时间来重建能源供应多元化；②欧元区劳动力市场紧张程度高于预期——服务业通胀黏性较强；③ECB担心如果现在不遏制通胀预期，未来需要更大力度的紧缩。</p><p>【对全球资产配置的影响】ECB加息→欧元走强→美元走弱→利好新兴市场资本流入和大宗商品（以美元计价的黄金、铜等）。但同时，欧元走强会削弱欧洲出口竞争力（尤其是德国汽车和机械出口），进而影响欧洲股市的盈利前景。对于持有欧元资产的家庭——欧元存款和债券收益率上升，但欧洲股市面临逆风。</p><p>【与中国的联动】欧元升值意味着人民币对欧元相对贬值——中国对欧出口竞争力增强。但欧洲加息也意味着欧洲需求可能走弱，对中国出口（尤其是机电产品和新能源车）的总量需求不利。</p></div>
+        <div class="sources">来源：<a class="src" href="https://www.bbc.com/news/articles/c4g5574pwreo" target="_blank" rel="noopener">BBC News<span class="stance" style="background:#8a94a6">中立</span><span class="srcdate">2026-06-19</span></a></div>
+        <button class="back btm" onclick="home()">‹ 返回列表</button>
+      </div>
+
+  <footer><div class="glo">📖 媒体立场说明：<b>偏左</b>=倾向自由派（如纽约时报、CNN）；<b>偏右</b>=倾向保守派（如福克斯新闻）；<b>中立</b>=力求平衡（如路透社、BBC）。<b>体制内</b>=国有或国家投资媒体（央视、新华社）；<b>体制外</b>=商业媒体（财新、界面）。标注立场是帮您对照多方、自己判断，不代表谁更可信。</div></footer>
+</div>
+<script>
+  // 两套独立字号: 主界面UI (--fs-ui) 和 文章阅读 (--fs-art), 各自记忆 (David 2026-06-19)
+  var savedUi = localStorage.getItem('himi_fs_ui');
+  if(savedUi){ fsUiApply(savedUi); document.getElementById('fsr').value=savedUi; }
+  var savedArt = localStorage.getItem('himi_fs_art');
+  if(savedArt){ fsArtApply(savedArt); }
+  function fs(v){ fsUiApply(v); localStorage.setItem('himi_fs_ui', v); }
+  function fsUiApply(v){ document.documentElement.style.setProperty('--fs-ui', v+'px'); document.getElementById('fsv').textContent=v; }
+  function fsArt(v){ fsArtApply(v); localStorage.setItem('himi_fs_art', v); }
+  function fsArtApply(v){
+    document.documentElement.style.setProperty('--fs-art', v+'px');
+    var sl=document.getElementsByClassName('fsr-art'); for(var i=0;i<sl.length;i++){ sl[i].value=v; }
+    var nb=document.getElementsByClassName('fsv-art'); for(var j=0;j<nb.length;j++){ nb[j].textContent=v; }
+  }
+  // —— 中/英/自动 语言切换 + 搜索 + 空块隐藏, 统一过滤 (David 2026-06-19) ——
+  // 锁定语言(如姥爷页='zh'): 强制此语言, 忽略并清除localStorage记忆, 隐藏切换按钮 (David 2026-06-19)
+  var LOCKLANG = '';
+  var savedLang = LOCKLANG || (localStorage.getItem('himi_lang') || 'zh');   // 锁定优先; 否则记忆; 默认中文
+  var curQuery = '';
+  function setLang(L){
+    if(LOCKLANG){ L=LOCKLANG; }                 // 锁定页: 切换无效, 永远锁定语言
+    else { localStorage.setItem('himi_lang', L); }
+    var btns=document.getElementsByClassName('langbtn');
+    for(var i=0;i<btns.length;i++){ btns[i].classList.toggle('on', btns[i].getAttribute('data-lang')===L); }
+    applyFilters();
+  }
+  function curLang(){ return LOCKLANG || (localStorage.getItem('himi_lang') || 'zh'); }
+  function doSearch(q){
+    curQuery=(q||'').trim().toLowerCase();
+    var clr=document.getElementById('searchclear');
+    if(clr) clr.style.display=(document.getElementById('searchbox').value)?'':'none';
+    applyFilters();
+  }
+  function clearSearch(){
+    var sb=document.getElementById('searchbox'); if(sb) sb.value='';
+    doSearch('');
+    if(sb) sb.focus();
+  }
+  function applyFilters(){
+    var L=curLang();
+    var favs=getFavs(), favView=isFavView();
+    // 1) 每张卡片: 语言 AND 搜索 AND (收藏视图时仅显示已收藏) 都过
+    var cards=document.querySelectorAll('#list .card');
+    for(var j=0;j<cards.length;j++){
+      var cl=cards[j].getAttribute('data-lang');
+      var okLang=(L==='auto'||cl===L);
+      var okQ=(!curQuery) || (cards[j].getAttribute('data-search')||'').indexOf(curQuery)>=0;
+      var okFav=(!favView) || favs[cards[j].getAttribute('data-fav')];
+      cards[j].style.display=(okLang&&okQ&&okFav)?'':'none';
+    }
+    // 2) 板块小标: 本(天,板块)若无可见卡片就隐藏
+    var labels=document.querySelectorAll('#list .seclabel');
+    for(var k=0;k<labels.length;k++){
+      var si=labels[k].getAttribute('data-sec');
+      var any=document.querySelectorAll('#list .card[data-sec="'+si+'"]');
+      var vis=0; for(var m=0;m<any.length;m++){ if(any[m].style.display!=='none') vis++; }
+      labels[k].style.display=vis?'':'none';
+    }
+    // 3) 日期分隔线: 该天若无任何可见卡片就隐藏(整天被语言/搜索滤空)
+    var divs=document.querySelectorAll('#list .daydivider');
+    for(var d=0;d<divs.length;d++){
+      var dt=divs[d].getAttribute('data-day');
+      var dcards=document.querySelectorAll('#list .card[data-day="'+dt+'"]');
+      var dv=0; for(var n=0;n<dcards.length;n++){ if(dcards[n].style.display!=='none') dv++; }
+      divs[d].style.display=dv?'':'none';
+    }
+    // 4) 空提示
+    var emptyId='langempty', old=document.getElementById(emptyId);
+    if(old) old.remove();
+    var listVisible=0, cc=document.querySelectorAll('#list .card');
+    for(var p=0;p<cc.length;p++){ if(cc[p].style.display!=='none') listVisible++; }
+    if(listVisible===0){
+      var tip=document.createElement('div'); tip.id=emptyId;
+      tip.style.cssText='padding:40px 16px;text-align:center;color:#aaa;font-size:15px;';
+      tip.textContent=favView ? '还没有收藏 · 点新闻右上角的 ☆ 收藏'
+                      : (curQuery ? ('没有找到“'+curQuery+'”相关新闻')
+                      : ((L==='en')?'今日暂无英文原文新闻 · No English-language news today':'今日暂无中文原文新闻'));
+      document.getElementById('list').appendChild(tip);
+    }
+  }
+  // 锁定语言页(姥爷): 隐藏整个中/英/自动切换条 — 不让长辈误碰 (David 2026-06-19)
+  if(LOCKLANG){ var lsw=document.getElementById('langsw'); if(lsw) lsw.style.display='none'; }
+  setLang(savedLang);   // 进页面应用记忆(或锁定)的语言
+  // —— 收藏功能 (David 2026-06-19): 本地localStorage; 按"谁的页"分键存(各人收藏互不污染); 全部页禁收藏 ——
+  var FAVSCOPE='xiaoyifu';                 // 各人页=拼音名(如laoye); 全部页/公共页='' → 禁收藏
+  var FAVKEY='himi_favs_'+FAVSCOPE;
+  var FAVVIEWKEY='himi_favview_'+FAVSCOPE;
+  function getFavs(){ try{ return JSON.parse(localStorage.getItem(FAVKEY)||'{}'); }catch(e){ return {}; } }
+  function saveFavs(o){ localStorage.setItem(FAVKEY, JSON.stringify(o)); }
+  function isFavView(){ return localStorage.getItem(FAVVIEWKEY)==='1'; }
+  function toggleFav(ev, fid){
+    if(ev){ ev.stopPropagation(); ev.preventDefault(); }   // 不触发卡片点开
+    if(!FAVSCOPE) return;                       // 公共页(全部)禁收藏
+    var f=getFavs();
+    if(f[fid]) delete f[fid]; else f[fid]=1;
+    saveFavs(f);
+    refreshFavStars();
+    if(isFavView()) applyFilters();   // 收藏视图下取消收藏要即时移除
+  }
+  function refreshFavStars(){
+    var f=getFavs();
+    // 卡片右上角星
+    var stars=document.querySelectorAll('.favstar');
+    for(var i=0;i<stars.length;i++){
+      var on=!!f[stars[i].getAttribute('data-fav')];
+      stars[i].classList.toggle('on', on);
+      stars[i].textContent=on?'★':'☆';
+    }
+    // 详情页收藏按钮
+    var btns=document.querySelectorAll('.favbtn');
+    for(var k=0;k<btns.length;k++){
+      var bon=!!f[btns[k].getAttribute('data-fav')];
+      btns[k].classList.toggle('on', bon);
+      var ic=btns[k].querySelector('.favbtn-ic'), tx=btns[k].querySelector('.favbtn-tx');
+      if(ic) ic.textContent=bon?'★':'☆';
+      if(tx) tx.textContent=bon?'已收藏':'收藏';
+    }
+  }
+  function toggleFavView(){
+    if(!FAVSCOPE) return;                        // 公共页无收藏视图
+    var nv=isFavView()?'0':'1';
+    localStorage.setItem(FAVVIEWKEY, nv);
+    var btn=document.getElementById('favtoggle');
+    if(btn){ btn.classList.toggle('on', nv==='1'); btn.textContent=(nv==='1')?'★ 我的收藏':'☆ 我的收藏'; }
+    applyFilters();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+  // 全部页(公共, FAVSCOPE='')：彻底移除收藏星+收藏按钮(避免人人点污染) (David 2026-06-19)
+  if(!FAVSCOPE){
+    document.querySelectorAll('.favstar, .favbtn').forEach(function(e){ e.style.display='none'; });
+    var ft=document.getElementById('favtoggle'); if(ft) ft.style.display='none';
+  }
+  // 初始化: 星标态 + 收藏切换按钮态
+  refreshFavStars();
+  (function(){ var btn=document.getElementById('favtoggle'); if(btn && isFavView()){ btn.classList.add('on'); btn.textContent='★ 我的收藏'; } })();
+  if(isFavView()) applyFilters();
+  // 日期跳转: 页内滚到该天的分隔线 (往下滚=往回翻时间); __top__=回到最新(顶部) (David 2026-06-19)
+  function jumpDay(token){
+    if(!token) return;
+    if(token==='__top__'){ window.scrollTo({top:0, behavior:'smooth'}); return; }
+    var el=document.getElementById('day_'+token);
+    if(el) el.scrollIntoView({behavior:'smooth', block:'start'});
+  }
+  // 回到顶部箭头: 滚动超1.5屏出现, 点了平滑回最新(顶) (David 2026-06-19)
+  function scrollTopSmooth(){ window.scrollTo({top:0, behavior:'smooth'}); }
+  window.addEventListener('scroll', function(){
+    var btn=document.getElementById('totop'); if(!btn) return;
+    // 只在列表页(非文章页)且滚动超1.5屏时显示
+    var inArticle=document.getElementById('backfix').style.display==='block';
+    var y=window.scrollY||window.pageYOffset||0;
+    btn.style.display=(!inArticle && y > window.innerHeight*1.5)?'block':'none';
+  }, {passive:true});
+  // —— iOS最稳: 用浏览器原生历史导航, 不碰任何自定义触摸手势 (David 2026-06-19 v3) ——
+  // go() 用 history.pushState 进文章; 系统自带的"左边缘右滑返回"=浏览器后退=自动触发home, 原生苹果动画
+  // 文章是正常文档流 → iOS原生半透明滚动条自动出现; 返回键是纯click最顶层 → 永不被吃
+  var listScroll=0;
+  function showArticle(i){
+    var a=document.getElementById('a'+i); if(!a) return;
+    listScroll=window.scrollY||window.pageYOffset||0;
+    document.getElementById('list').style.display='none';
+    document.getElementById('fsbar').style.display='none';
+    var ph=document.getElementById('pagehead'); if(ph) ph.style.display='none';
+    var sb=document.getElementById('searchbar'); if(sb) sb.style.display='none';
+    var dn=document.getElementById('datenav'); if(dn) dn.style.display='none';
+    var hb=document.getElementById('homebtn'); if(hb) hb.style.display='none';
+    var tt=document.getElementById('totop'); if(tt) tt.style.display='none';
+    document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
+    a.style.display='block';
+    a.classList.remove('slidein'); void a.offsetWidth; a.classList.add('slidein');  // 重触发滑入动画
+    document.getElementById('backfix').style.display='block';
+    window.scrollTo(0,0);
+  }
+  function showList(){
+    document.querySelectorAll('.article').forEach(function(e){ e.style.display='none'; });
+    document.getElementById('list').style.display='block';
+    document.getElementById('fsbar').style.display='';
+    var ph=document.getElementById('pagehead'); if(ph) ph.style.display='';
+    var sb=document.getElementById('searchbar'); if(sb) sb.style.display='';
+    var dn=document.getElementById('datenav'); if(dn) dn.style.display='';
+    var hb=document.getElementById('homebtn'); if(hb) hb.style.display='';
+    document.getElementById('backfix').style.display='none';
+    window.scrollTo(0,listScroll);   // 返回列表原位置, 不跳顶
+  }
+  function go(i){
+    history.pushState({art:i}, '', '#a'+i);   // 压一条历史 → 边缘滑/后退键都能弹回
+    showArticle(i);
+  }
+  function home(){
+    if(location.hash){ history.back(); }       // 触发popstate → showList; 与边缘滑返回同一条路径
+    else { showList(); }
+  }
+  // 浏览器后退(含iOS边缘右滑返回手势) → 回列表
+  window.addEventListener('popstate', function(e){
+    if(e.state && typeof e.state.art!=='undefined'){ showArticle(e.state.art); }
+    else { showList(); }
+  });
+</script>
+</body>
+</html>
